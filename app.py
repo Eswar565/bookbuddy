@@ -450,10 +450,18 @@ def init_db() -> None:
         pass
     count = connection.execute("SELECT COUNT(*) FROM books").fetchone()[0]
     pass
-    if os.environ.get('ADMIN_EMAIL') and os.environ.get('ADMIN_PASSWORD'):
+    admin_email = (os.environ.get('ADMIN_EMAIL') or 'admin@gmail.com').strip().lower()
+    admin_pass = os.environ.get('ADMIN_PASSWORD') or 'admin123'
+    existing_admin = connection.execute('SELECT id FROM admin_users WHERE email=?', (admin_email,)).fetchone()
+    if not existing_admin:
         connection.execute(
-            'INSERT OR IGNORE INTO admin_users(email,name,password_hash) VALUES (?,?,?)',
-            (os.environ['ADMIN_EMAIL'].lower(),'Book Buddy Admin',generate_password_hash(os.environ['ADMIN_PASSWORD'])),
+            'INSERT INTO admin_users(email,name,password_hash) VALUES (?,?,?)',
+            (admin_email, 'Book Buddy Admin', generate_password_hash(admin_pass)),
+        )
+    elif os.environ.get('ADMIN_PASSWORD'):
+        connection.execute(
+            'UPDATE admin_users SET password_hash=? WHERE email=?',
+            (generate_password_hash(os.environ['ADMIN_PASSWORD']), admin_email),
         )
     connection.executemany('INSERT OR IGNORE INTO site_content VALUES (?,?)', [('hero_eyebrow',''),('hero_title',''),('hero_text',''),('about_text',''),('newsletter_title',''),('newsletter_text','')])
     pass
