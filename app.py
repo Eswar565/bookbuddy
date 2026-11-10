@@ -28,7 +28,6 @@ from flask import (
     jsonify,
     redirect,
     render_template,
-    send_from_directory,
     request as flask_request,
     session,
     url_for as flask_url_for,
@@ -38,66 +37,30 @@ from werkzeug.exceptions import NotFound
 from werkzeug.utils import secure_filename
 from PIL import Image, UnidentifiedImageError
 import io
-import mimetypes
-mimetypes.add_type('image/webp', '.webp')
-mimetypes.add_type('image/avif', '.avif')
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.routing import BuildError
 
 
 BASE_DIR = Path(__file__).resolve().parent
-IS_VERCEL = os.environ.get("VERCEL") == "1" or os.environ.get("VERCEL_ENV") is not None
-MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", "/tmp/media" if IS_VERCEL else BASE_DIR / "media")).resolve()
-try:
-    MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
-except OSError:
-    pass
-
-def is_demo_mode() -> bool:
-    return os.environ.get("DEMO_MODE", "0").strip().lower() in ("1", "true", "yes", "on")
-
-def get_database_path() -> Path:
-    db_env = os.environ.get("BOOK_BUDDY_DATABASE") or os.environ.get("BOOK_BUDDY_DB")
-    if db_env:
-        return Path(db_env)
-    if IS_VERCEL:
-        return Path("/tmp/book_buddy.sqlite3")
-    app_env = (os.environ.get("APP_ENV") or "").lower()
-    if app_env == "testing":
-        return BASE_DIR / "instance" / "book_buddy_test.sqlite3"
-    if app_env in ("development", "dev", "local"):
-        dev_db = BASE_DIR / "instance" / "book_buddy_dev.sqlite3"
-        if not dev_db.exists() and (BASE_DIR / "instance" / "book_buddy.sqlite3").exists():
-            import shutil
-            try:
-                shutil.copy2(BASE_DIR / "instance" / "book_buddy.sqlite3", dev_db)
-            except OSError:
-                pass
-        return dev_db
-    return BASE_DIR / "instance" / "book_buddy.sqlite3"
-
-DATABASE_PATH = get_database_path()
+if os.environ.get("VERCEL"):  # read-only filesystem: keep writable data in /tmp
+    _tmp = Path("/tmp/bookbuddy")
+    for _k, _v in (("BOOK_BUDDY_DATABASE", _tmp / "book_buddy.sqlite3"),
+                   ("BOOK_BUDDY_PRIVATE_DIR", _tmp / "private"),
+                   ("BOOK_BUDDY_BACKUP_DIR", _tmp / "backups")):
+        os.environ.setdefault(_k, str(_v))
+    os.environ.setdefault("SECRET_KEY", "change-me-set-SECRET_KEY-in-vercel")
+DATABASE_PATH = Path(os.environ.get("BOOK_BUDDY_DATABASE", BASE_DIR / "instance" / "book_buddy.sqlite3"))
 
 app = Flask(__name__, template_folder=str(BASE_DIR / "templates"), static_folder=str(BASE_DIR / "static"))
-
-secret_key_val = os.environ.get('SECRET_KEY')
-if not secret_key_val:
-    if IS_VERCEL:
-        secret_key_val = "book-buddy-vercel-secret-fallback-key"
-    else:
-        secret_path = DATABASE_PATH.parent / '.session-secret'
-        try:
-            secret_path.parent.mkdir(parents=True, exist_ok=True)
-            if not secret_path.exists():
-                with secret_path.open('x') as secret_file:
-                    secret_file.write(secrets.token_hex(32))
-                secret_path.chmod(0o600)
-            secret_key_val = secret_path.read_text().strip()
-        except OSError:
-            secret_key_val = "book-buddy-ephemeral-secret-fallback-key"
-
+secret_path = DATABASE_PATH.parent / '.session-secret'
+secret_path.parent.mkdir(parents=True, exist_ok=True)
+if not os.environ.get('SECRET_KEY') and not secret_path.exists():
+    try:
+        with secret_path.open('x') as secret_file: secret_file.write(secrets.token_hex(32))
+        secret_path.chmod(0o600)
+    except FileExistsError: pass
 app.config.update(
-    SECRET_KEY=secret_key_val,
+    SECRET_KEY=os.environ.get('SECRET_KEY') or secret_path.read_text().strip(),
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
     SESSION_COOKIE_SECURE=os.environ.get('COOKIE_SECURE','0')=='1',
@@ -107,21 +70,6 @@ app.config.update(
     RAZORPAY_KEY_SECRET=os.environ.get("RAZORPAY_KEY_SECRET", ""),
     GEMINI_API_KEY=os.environ.get("GEMINI_API_KEY", ""),
 )
-
-@app.context_processor
-def global_template_context() -> dict[str, Any]:
-    return {"demo_mode": is_demo_mode()}
-
-@app.after_request
-def apply_demo_headers(response: Response) -> Response:
-    if is_demo_mode():
-        response.headers["X-Robots-Tag"] = "noindex, nofollow"
-    return response
-
-@app.route("/healthz", methods=["GET"])
-@app.route("/healthz/", methods=["GET"])
-def healthz() -> Response:
-    return Response("ok\n", mimetype="text/plain", status=200)
 
 
 @dataclass
@@ -233,12 +181,8 @@ class FormField:
 
 
 def db_connection() -> sqlite3.Connection:
-    target_path = get_database_path()
-    try:
-        target_path.parent.mkdir(parents=True, exist_ok=True)
-    except OSError:
-        pass
-    connection = sqlite3.connect(target_path)
+    DATABASE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    connection = sqlite3.connect(DATABASE_PATH)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
     connection.execute("PRAGMA busy_timeout = 10000")
@@ -260,12 +204,6 @@ def close_db(_: BaseException | None = None) -> None:
 
 def init_db() -> None:
     connection = db_connection()
-    schema_file = BASE_DIR / "schema.sql"
-    if schema_file.exists():
-        try:
-            connection.executescript(schema_file.read_text(encoding="utf-8"))
-        except Exception:
-            pass
     # Remove a broken historical payment trigger before *any* table migrations.
     # The event_registrations table has no payment_status column, and leaving
     # this trigger installed can make unrelated ALTER TABLE statements fail.
@@ -392,17 +330,6 @@ def init_db() -> None:
             price REAL NOT NULL DEFAULT 0,
             FOREIGN KEY(order_id) REFERENCES orders(id)
         );
-        CREATE TABLE IF NOT EXISTS partner_submissions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            full_name TEXT NOT NULL,
-            email TEXT NOT NULL,
-            phone TEXT DEFAULT '',
-            organisation TEXT DEFAULT '',
-            proposal_type TEXT DEFAULT 'Partner',
-            message TEXT NOT NULL,
-            status TEXT DEFAULT 'New',
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP
-        );
         """
     )
     existing_columns = {row[1] for row in connection.execute("PRAGMA table_info(books)").fetchall()}
@@ -412,56 +339,15 @@ def init_db() -> None:
         "image_path": "TEXT NOT NULL DEFAULT ''",
         "stock": "INTEGER NOT NULL DEFAULT 1",
         "product_type": "TEXT NOT NULL DEFAULT 'book'",
-        "is_active": "INTEGER NOT NULL DEFAULT 1",
-        "audience": "TEXT NOT NULL DEFAULT 'all'",
-        "archived": "INTEGER NOT NULL DEFAULT 0",
     }.items():
         if column not in existing_columns:
             connection.execute(f"ALTER TABLE books ADD COLUMN {column} {definition}")
-
-    existing_pub_cols = {row[1] for row in connection.execute("PRAGMA table_info(publications)").fetchall()}
-    for column, definition in {
-        "volume": "TEXT NOT NULL DEFAULT ''",
-        "issue_number": "TEXT NOT NULL DEFAULT ''",
-        "badge_label": "TEXT NOT NULL DEFAULT ''",
-        "episode_label": "TEXT NOT NULL DEFAULT ''",
-        "embed_url": "TEXT NOT NULL DEFAULT ''",
-        "position": "INTEGER NOT NULL DEFAULT 0",
-        "is_paid": "INTEGER NOT NULL DEFAULT 0",
-    }.items():
-        if column not in existing_pub_cols:
-            connection.execute(f"ALTER TABLE publications ADD COLUMN {column} {definition}")
-
-    try:
-        existing_hs_cols = {row[1] for row in connection.execute("PRAGMA table_info(homepage_sections)").fetchall()}
-        if existing_hs_cols:
-            if "button2_label" not in existing_hs_cols:
-                connection.execute("ALTER TABLE homepage_sections ADD COLUMN button2_label TEXT NOT NULL DEFAULT ''")
-            if "button2_url" not in existing_hs_cols:
-                connection.execute("ALTER TABLE homepage_sections ADD COLUMN button2_url TEXT NOT NULL DEFAULT ''")
-    except sqlite3.OperationalError:
-        pass
-
-    try:
-        existing_gallery_cols = {row[1] for row in connection.execute("PRAGMA table_info(gallery_items)").fetchall()}
-        if existing_gallery_cols and "thumbnail_path" not in existing_gallery_cols:
-            connection.execute("ALTER TABLE gallery_items ADD COLUMN thumbnail_path TEXT NOT NULL DEFAULT ''")
-    except sqlite3.OperationalError:
-        pass
     count = connection.execute("SELECT COUNT(*) FROM books").fetchone()[0]
     pass
-    admin_email = (os.environ.get('ADMIN_EMAIL') or 'admin@gmail.com').strip().lower()
-    admin_pass = os.environ.get('ADMIN_PASSWORD') or 'admin123'
-    existing_admin = connection.execute('SELECT id FROM admin_users WHERE email=?', (admin_email,)).fetchone()
-    if not existing_admin:
+    if os.environ.get('ADMIN_EMAIL') and os.environ.get('ADMIN_PASSWORD'):
         connection.execute(
-            'INSERT INTO admin_users(email,name,password_hash) VALUES (?,?,?)',
-            (admin_email, 'Book Buddy Admin', generate_password_hash(admin_pass)),
-        )
-    elif os.environ.get('ADMIN_PASSWORD'):
-        connection.execute(
-            'UPDATE admin_users SET password_hash=? WHERE email=?',
-            (generate_password_hash(os.environ['ADMIN_PASSWORD']), admin_email),
+            'INSERT OR IGNORE INTO admin_users(email,name,password_hash) VALUES (?,?,?)',
+            (os.environ['ADMIN_EMAIL'].lower(),'Book Buddy Admin',generate_password_hash(os.environ['ADMIN_PASSWORD'])),
         )
     connection.executemany('INSERT OR IGNORE INTO site_content VALUES (?,?)', [('hero_eyebrow',''),('hero_title',''),('hero_text',''),('about_text',''),('newsletter_title',''),('newsletter_text','')])
     pass
@@ -607,7 +493,7 @@ def site_context(section: str = "home") -> dict[str, Any]:
     db = get_db()
     items, cart_total, cart_count = cart_snapshot()
     content = {row["content_key"]: row["content_value"] for row in db.execute("SELECT content_key, content_value FROM site_content").fetchall()}
-    all_books = [] if section in {"library", "shop"} else [row_dict(row) for row in db.execute("SELECT * FROM books WHERE (archived=0 OR archived IS NULL OR archived='') AND (is_active=1 OR is_active IS NULL) ORDER BY is_new_arrival DESC, id DESC").fetchall()]
+    all_books = [] if section in {"library", "shop"} else [row_dict(row) for row in db.execute("SELECT * FROM books WHERE archived=0 ORDER BY is_new_arrival DESC, id DESC").fetchall()]
     from accounts import years_old, age_matches
     reader = current_user()
     reader_age = years_old(reader.values.get('dob')) if reader.is_authenticated else None
@@ -618,13 +504,12 @@ def site_context(section: str = "home") -> dict[str, Any]:
     classes = []
     activities = []
     events = [row_dict(row) for row in db.execute("SELECT * FROM events WHERE is_active = 1 ORDER BY event_date, event_time").fetchall()]
-    publications = [row_dict(row) for row in db.execute("SELECT * FROM publications WHERE (is_active = 1 OR is_active IS NULL) ORDER BY published_on DESC, id DESC").fetchall()]
+    publications = [row_dict(row) for row in db.execute("SELECT * FROM publications WHERE is_active = 1 ORDER BY published_on DESC, id DESC").fetchall()]
     calendar_events = {}
     for event in events:
         calendar_events.setdefault(event['event_date'], []).append({**{k:v for k,v in event.items() if k!='join_url'},'url':safe_url_for('event_detail',event_id=event['id'])})
     return {
         "section": section,
-        "demo_mode": is_demo_mode(),
         "brand": {"primary": "#0A2472", "wine": "#0A2472", "gold": "#0A2472", "cream": "#FFFFFF"},
         "logo_url": safe_url_for("static", filename="img/brand/book-buddy-logo.png"),
         "user": current_user(),
@@ -729,8 +614,8 @@ def base_context(template_name: str = "") -> dict[str, Any]:
     now = datetime.now(timezone.utc)
     plans = [
         CompatObject({"id": 1, "plan_type": "2 Months", "tagline": "Summer Special", "solo_price": 800, "family_price": 1200, "total_books": 2, "get_plan_type_display": "2 Months", "get_features_list": ["2 books at a time", "Reading circle access"]}),
-        CompatObject({"id": 2, "plan_type": "3 Months", "tagline": "Regular Explorer", "solo_price": 1100, "family_price": 1600, "total_books": 3, "get_plan_type_display": "3 Months", "get_features_list": ["3 books at a time", "Reading circle access"]}),
-        CompatObject({"id": 3, "plan_type": "9 Months", "tagline": "Academic Year", "solo_price": 2800, "family_price": 4000, "total_books": 9, "get_plan_type_display": "9 Months", "get_features_list": ["9 books at a time", "Full library borrowing access"]}),
+        CompatObject({"id": 2, "plan_type": "3 Months", "tagline": "Regular Explorer", "solo_price": 1100, "family_price": 1600, "total_books": 3, "get_plan_type_display": "3 Months", "get_features_list": ["3 books at a time", "Learning activities"]}),
+        CompatObject({"id": 3, "plan_type": "9 Months", "tagline": "Academic Year", "solo_price": 2800, "family_price": 4000, "total_books": 9, "get_plan_type_display": "9 Months", "get_features_list": ["9 books at a time", "All learning modules"]}),
     ]
     return {
         "template_name": template_name,
@@ -756,15 +641,17 @@ def base_context(template_name: str = "") -> dict[str, Any]:
         "prominent_authors": ["Enid Blyton", "Roald Dahl", "Ruskin Bond", "Sudha Murthy", "G Stilton", "Jeremy Strong", "Jeff Kinney"],
         "plans": plans,
         "site_settings": CompatObject({"enable_memberships": True}),
-        "about": CompatObject({"main_heading": "Our Ikigai", "main_content": "We help children discover the joy of reading, storytelling and creating together.", "quote_text": "At the centre of Book Buddy is meaningful exploration through stories and community."}),
+        "about": CompatObject({"main_heading": "Our Ikigai", "main_content": "We help children discover the joy of reading, learning and creating together.", "quote_text": "At the centre of Book Buddy is meaningful learning through stories and community."}),
         "editions": [],
         "magazines": [],
         "podcasts": [],
         "workshops": [],
         "projects": [],
+        "interns": [],
         "modules": [],
         "all_programs": [],
         "programs": [],
+        "program": CompatObject({"id": 1, "title": "Book Buddy Internship"}),
         "all_contests": [],
         "completed_contests": [],
         "live_contests": [],
@@ -829,10 +716,7 @@ def paged_books(*, collection_filter: bool = True) -> dict[str, Any]:
         requested_page = int(flask_request.args.get("page", "1"))
     except (TypeError, ValueError):
         requested_page = 1
-    filters: list[str] = [
-        "(archived = 0 OR archived IS NULL OR archived = '')",
-        "(is_active = 1 OR is_active IS NULL)"
-    ]
+    filters: list[str] = ["archived=0"]
     params: list[Any] = []
     if search:
         filters.append("(LOWER(title) LIKE ? OR LOWER(author) LIKE ? OR LOWER(description) LIKE ?)")
@@ -844,17 +728,13 @@ def paged_books(*, collection_filter: bool = True) -> dict[str, Any]:
         filters.append("collection = ?")
         params.append(collection)
     chosen={k:flask_request.args.get(k,'').strip()[:120] for k in ['language','age_group','author','product_type','availability','new','sort','audience']}
-    aud = chosen.get('audience', '').strip().lower()
-    if aud and aud not in {'', 'all'}:
-        filters.append("(audience = ? OR audience = 'all' OR audience IS NULL OR audience = '')")
-        params.append(aud)
+    if chosen['audience'] in {'adult','kids'}:
+        filters.append("audience IN (?, 'all')");params.append(chosen['audience'])
     for key in ['language','age_group','author','product_type']:
         if chosen[key]:
             filters.append('LOWER('+key+') = LOWER(?)');params.append(chosen[key])
-    if chosen['availability']=='available':
-        filters.append("((SELECT COUNT(*) FROM copies17 c WHERE c.book_id=books.id AND c.status='Available') > (SELECT COUNT(*) FROM lending_loans l WHERE l.book_id=books.id AND l.status='Requested') OR (stock > 0 AND (SELECT COUNT(*) FROM copies17 WHERE book_id=books.id) = 0))")
-    elif chosen['availability']=='waitlist':
-        filters.append("((SELECT COUNT(*) FROM copies17 c WHERE c.book_id=books.id AND c.status='Available') <= (SELECT COUNT(*) FROM lending_loans l WHERE l.book_id=books.id AND l.status='Requested') AND (stock <= 0 OR (SELECT COUNT(*) FROM copies17 WHERE book_id=books.id) > 0))")
+    if chosen['availability']=='available':filters.append("(SELECT COUNT(*) FROM copies17 c WHERE c.book_id=books.id AND c.status='Available') > (SELECT COUNT(*) FROM lending_loans l WHERE l.book_id=books.id AND l.status='Requested')")
+    elif chosen['availability']=='waitlist':filters.append("(SELECT COUNT(*) FROM copies17 c WHERE c.book_id=books.id AND c.status='Available') <= (SELECT COUNT(*) FROM lending_loans l WHERE l.book_id=books.id AND l.status='Requested')")
     if chosen['new']=='1':filters.append('is_new_arrival=1')
     ordering={'newest':'is_new_arrival DESC, id DESC','title':'title COLLATE NOCASE ASC,id','author':'author COLLATE NOCASE ASC,id','price-low':'price ASC,id','price-high':'price DESC,id'}.get(chosen['sort'],'is_new_arrival DESC, id DESC')
     # Age-aware recommendations: valid age bands come from catalogue metadata.
@@ -877,7 +757,7 @@ def paged_books(*, collection_filter: bool = True) -> dict[str, Any]:
     collections = [row[0] for row in db.execute(
         "SELECT DISTINCT collection FROM books WHERE collection IS NOT NULL AND TRIM(collection) <> '' ORDER BY collection"
     ).fetchall()] if collection_filter else []
-    options={key:[r[0] for r in db.execute('SELECT DISTINCT '+key+' FROM books WHERE (archived=0 OR archived IS NULL OR archived=\'\') AND (is_active=1 OR is_active IS NULL) AND TRIM('+key+")<>'' ORDER BY "+key)] for key in ['language','age_group','author','product_type']}
+    options={key:[r[0] for r in db.execute('SELECT DISTINCT '+key+' FROM books WHERE archived=0 AND TRIM('+key+")<>'' ORDER BY "+key)] for key in ['language','age_group','author','product_type']}
     from urllib.parse import urlencode
     def catalogue_url(**changes):
         args=dict(flask_request.args);args.update(changes)
@@ -906,7 +786,7 @@ def modern_library() -> Response:
 
 @app.get("/library/<int:book_id>/", endpoint="book_detail")
 def book_detail(book_id: int) -> Response:
-    book = get_db().execute("SELECT * FROM books WHERE id = ? AND (archived=0 OR archived IS NULL OR archived='') AND (is_active=1 OR is_active IS NULL)", (book_id,)).fetchone()
+    book = get_db().execute("SELECT * FROM books WHERE id = ? AND archived=0", (book_id,)).fetchone()
     if not book:
         return render_site("error", error_code=404, error_heading="Page not found", error_message="This page may have moved or is no longer published."), 404
     from accounts import age_matches, years_old
@@ -987,11 +867,6 @@ def podcasts_page() -> Response:
 @app.get("/news/", endpoint="news_page")
 def news_page() -> Response:
     return redirect(flask_url_for("publications_page", kind="news"))
-
-
-@app.get("/how-to-borrow/", endpoint="how_to_borrow_page")
-def how_to_borrow_page() -> Response:
-    return render_site("accounts/how_to_borrow", "library", active="how-to-borrow")
 
 
 @app.get("/shop/", endpoint="shop")
@@ -1171,11 +1046,8 @@ def save_admin_upload(field: str, category: str, kind: str = "image") -> str:
     raw = f.read(10 * 1024 * 1024 + 1)
     if not raw or len(raw) > 10 * 1024 * 1024:
         raise ValueError("Upload must be smaller than 10 MB")
-    dest = MEDIA_ROOT / 'admin' / category
-    try:
-        dest.mkdir(parents=True, exist_ok=True)
-    except OSError:
-        pass
+    dest = BASE_DIR / 'media' / 'admin' / category
+    dest.mkdir(parents=True, exist_ok=True)
     key = secrets.token_hex(15)
     if kind == 'pdf':
         if not raw.startswith(b'%PDF-') or not f.filename.lower().endswith('.pdf'):
@@ -1276,9 +1148,9 @@ def admin_create_publication() -> Response:
             flash('Upload the PDF or use an existing local /media/ file path.', 'danger')
             return redirect(flask_url_for('admin_dashboard') + '#publications')
         get_db().execute(
-            """INSERT INTO publications (title, kind, description, edition, file_path, cover_path, published_on, is_active, is_paid)
-            VALUES (?, ?, ?, ?, ?, ?, ?, 1, 0)""",
-            (title, flask_request.form.get("kind", "magazine") or "magazine", flask_request.form.get("description", ""), flask_request.form.get("edition", ""), file_path, cover_path, flask_request.form.get("published_on") or date.today().isoformat()),
+            """INSERT INTO publications (title, kind, description, edition, file_path, cover_path, published_on)
+            VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (title, flask_request.form.get("kind", "magazine"), flask_request.form.get("description", ""), flask_request.form.get("edition", ""), file_path, cover_path, flask_request.form.get("published_on") or date.today().isoformat()),
         )
         get_db().commit()
         flash(f"{title} was added to publications.", "success")
@@ -1310,47 +1182,14 @@ def dynamic_page(template_name: str) -> Response:
         template_name = template_name[:-5]
     if template_name in {"static", "media", "favicon.ico"}:
         raise NotFound()
-    if template_name in {"how-to-borrow", "how_to_borrow"}:
-        return how_to_borrow_page()
-    if template_name in {"work-with-us", "work_with_us"}:
-        return work_with_us()
     return render_page(template_name)
-
-
-@app.route("/work-with-us/", methods=["GET", "POST"], endpoint="work_with_us")
-def work_with_us() -> Response:
-    if flask_request.method == "POST":
-        full_name = flask_request.form.get("full_name", "").strip()
-        email = flask_request.form.get("email", "").strip()
-        phone = flask_request.form.get("phone", "").strip()
-        org = flask_request.form.get("organisation", "").strip()
-        proposal_type = flask_request.form.get("proposal_type", "Partner").strip()
-        message = flask_request.form.get("message", "").strip()
-        if not full_name or "@" not in email or not message:
-            flash("Please complete all required fields.", "danger")
-            return redirect(flask_url_for("work_with_us"))
-        db = get_db()
-        db.execute(
-            """INSERT INTO partner_submissions (full_name, email, phone, organisation, proposal_type, message, status)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            (full_name, email, phone, org, proposal_type, message, "New")
-        )
-        db.execute(
-            """INSERT INTO contact_submissions (full_name, email, subject, phone, message)
-               VALUES (?, ?, ?, ?, ?)""",
-            (full_name, email, f"Partner: {proposal_type} ({org})", phone, message)
-        )
-        db.commit()
-        flash("Thank you for your proposal! Our partnerships team will review it and get in touch with you shortly.", "success")
-        return redirect(flask_url_for("work_with_us"))
-    return render_site("work_with_us", "work-with-us")
 
 
 @app.route("/media/<path:filename>", endpoint="media")
 def media(filename: str) -> Response:
     from flask import send_from_directory
 
-    return send_from_directory(MEDIA_ROOT, filename)
+    return send_from_directory(BASE_DIR / "media", filename)
 
 
 @app.post("/save-subscriber-email/", endpoint="save_subscriber")
@@ -1514,8 +1353,6 @@ def payment_success() -> Response:
 
 @app.get("/robots.txt")
 def robots_txt() -> Response:
-    if is_demo_mode():
-        return Response("User-agent: *\nDisallow: /\n", mimetype="text/plain")
     return Response("User-agent: *\nAllow: /\nSitemap: /sitemap.xml\n", mimetype="text/plain")
 
 
@@ -1558,6 +1395,11 @@ def admin_save_book() -> Response:
     return jsonify(status="success", message="Book editor endpoint is available.")
 
 
+@app.get("/users/internship-dashboard/", endpoint="users_internship_dashboard")
+def users_internship_dashboard() -> Response:
+    return render_page("internship_dashboard")
+
+
 @app.post("/users/membership/activate-trial/", endpoint="users_activate_free_trial")
 def users_activate_free_trial() -> Response:
     return jsonify(status="success", message="Trial activation recorded.")
@@ -1578,7 +1420,7 @@ def not_found(_: NotFound) -> Response:
     if flask_request.path.startswith("/static/") and Path(flask_request.path).suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"}:
         from flask import send_file
 
-        return send_file(BASE_DIR / "static" / "img" / "art" / "placeholder.png", mimetype="image/png")
+        return send_file(BASE_DIR / "static" / "img" / "placeholder.svg", mimetype="image/svg+xml")
     try:
         return render_site("error", error_code=404, error_heading="Page not found", error_message="This page may have moved or is no longer published."), 404
     except Exception:
@@ -1641,18 +1483,16 @@ from flask import abort as _library_abort, request as _library_request
 _LIBRARY_RETIRED_PREFIXES = (
     '/skills/', '/admin/skills/', '/admin/skills23/', '/admin/skill', '/worksheets/', '/english/',
     '/maths/', '/financial-literacy/', '/ba/', '/banking/', '/soft-skills/',
-    '/college-project/', '/college-projects/', '/college-project', '/college-projects',
-    '/ai-solutions/', '/ai-solutions', '/coding-kids/', '/coding-kids', '/game-hub/', '/game-hub',
-    '/practice/', '/internship/', '/users/internship-dashboard',
+    '/college-project/', '/ai-solutions/', '/coding-kids/', '/practice/',
     '/classes/', '/activities/', '/kids-activities/', '/schedule/',
     '/admin/classes/', '/admin/activities/', '/admin/classes17/', '/admin/learning-center/', '/admin/import/learning',
     '/admin/import/worksheet', '/admin/import/skills', '/admin/learning/',
     '/members/calendar/', '/members/classes/', '/members/practice/', '/members/worksheets/', '/admin/worksheets/', '/admin/practice/', '/admin/ba-', '/workshop/',
     '/legacy/english/', '/legacy/maths/', '/legacy/ba/', '/legacy/skills/',
-    '/legacy/practice/', '/legacy/classes/', '/admin/about-sync/', '/plans-legacy/',
+    '/legacy/practice/', '/legacy/classes/', '/admin/about-sync/', '/admin/import/', '/plans-legacy/',
 )
 _LIBRARY_RETIRED_KINDS = {'classes','activities','learning','learning-submissions','skills-sections','schedules','worksheet-items'}
-_LIBRARY_KEPT_PAGES = {'home','about','library','events','reading-circles','contests','publications','newspaper','magazine','podcasts','news','gallery','membership-options','how-to-borrow','contact','work-with-us'}
+_LIBRARY_KEPT_PAGES = {'home','about','library','events','reading-circles','contests','publications','podcasts','gallery','membership-options','how-to-borrow','contact'}
 @app.before_request
 def library_only_routes():
     path=_library_request.path.lower()
@@ -1678,17 +1518,10 @@ def library_only_routes():
 app.before_request_funcs[None].remove(library_only_routes)
 app.before_request_funcs[None].insert(0,library_only_routes)
 
-@app.get('/calendar/')
-@app.get('/calendar')
-def bookbuddy_calendar_alias():
-    return redirect('/events/', code=301)
-
 # Browser favicon request.
 @app.get('/favicon.ico')
 def bookbuddy_favicon():
-    resp = send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/x-icon', max_age=86400)
-    resp.headers['Cache-Control'] = 'public, max-age=86400'
-    return resp
+    return app.send_static_file('favicon.ico')
 
 
 # Per-publication free/paid access, installed after legacy hooks.
