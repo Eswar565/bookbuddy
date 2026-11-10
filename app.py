@@ -46,8 +46,12 @@ from werkzeug.routing import BuildError
 
 
 BASE_DIR = Path(__file__).resolve().parent
-MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", BASE_DIR / "media")).resolve()
-MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+IS_VERCEL = os.environ.get("VERCEL") == "1" or os.environ.get("VERCEL_ENV") is not None
+MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", "/tmp/media" if IS_VERCEL else BASE_DIR / "media")).resolve()
+try:
+    MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+except OSError:
+    pass
 
 def is_demo_mode() -> bool:
     return os.environ.get("DEMO_MODE", "0").strip().lower() in ("1", "true", "yes", "on")
@@ -56,6 +60,8 @@ def get_database_path() -> Path:
     db_env = os.environ.get("BOOK_BUDDY_DATABASE") or os.environ.get("BOOK_BUDDY_DB")
     if db_env:
         return Path(db_env)
+    if IS_VERCEL:
+        return Path("/tmp/book_buddy.sqlite3")
     app_env = (os.environ.get("APP_ENV") or "").lower()
     if app_env == "testing":
         return BASE_DIR / "instance" / "book_buddy_test.sqlite3"
@@ -63,22 +69,35 @@ def get_database_path() -> Path:
         dev_db = BASE_DIR / "instance" / "book_buddy_dev.sqlite3"
         if not dev_db.exists() and (BASE_DIR / "instance" / "book_buddy.sqlite3").exists():
             import shutil
-            shutil.copy2(BASE_DIR / "instance" / "book_buddy.sqlite3", dev_db)
+            try:
+                shutil.copy2(BASE_DIR / "instance" / "book_buddy.sqlite3", dev_db)
+            except OSError:
+                pass
         return dev_db
     return BASE_DIR / "instance" / "book_buddy.sqlite3"
 
 DATABASE_PATH = get_database_path()
 
 app = Flask(__name__, template_folder=str(BASE_DIR / "templates"), static_folder=str(BASE_DIR / "static"))
-secret_path = DATABASE_PATH.parent / '.session-secret'
-secret_path.parent.mkdir(parents=True, exist_ok=True)
-if not os.environ.get('SECRET_KEY') and not secret_path.exists():
-    try:
-        with secret_path.open('x') as secret_file: secret_file.write(secrets.token_hex(32))
-        secret_path.chmod(0o600)
-    except FileExistsError: pass
+
+secret_key_val = os.environ.get('SECRET_KEY')
+if not secret_key_val:
+    if IS_VERCEL:
+        secret_key_val = "book-buddy-vercel-secret-fallback-key"
+    else:
+        secret_path = DATABASE_PATH.parent / '.session-secret'
+        try:
+            secret_path.parent.mkdir(parents=True, exist_ok=True)
+            if not secret_path.exists():
+                with secret_path.open('x') as secret_file:
+                    secret_file.write(secrets.token_hex(32))
+                secret_path.chmod(0o600)
+            secret_key_val = secret_path.read_text().strip()
+        except OSError:
+            secret_key_val = "book-buddy-ephemeral-secret-fallback-key"
+
 app.config.update(
-    SECRET_KEY=os.environ.get('SECRET_KEY') or secret_path.read_text().strip(),
+    SECRET_KEY=secret_key_val,
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
     SESSION_COOKIE_SECURE=os.environ.get('COOKIE_SECURE','0')=='1',
@@ -215,7 +234,10 @@ class FormField:
 
 def db_connection() -> sqlite3.Connection:
     target_path = get_database_path()
-    target_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
     connection = sqlite3.connect(target_path)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
@@ -238,6 +260,12 @@ def close_db(_: BaseException | None = None) -> None:
 
 def init_db() -> None:
     connection = db_connection()
+    schema_file = BASE_DIR / "schema.sql"
+    if schema_file.exists():
+        try:
+            connection.executescript(schema_file.read_text(encoding="utf-8"))
+        except Exception:
+            pass
     # Remove a broken historical payment trigger before *any* table migrations.
     # The event_registrations table has no payment_status column, and leaving
     # this trigger installed can make unrelated ALTER TABLE statements fail.
@@ -364,6 +392,17 @@ def init_db() -> None:
             price REAL NOT NULL DEFAULT 0,
             FOREIGN KEY(order_id) REFERENCES orders(id)
         );
+        CREATE TABLE IF NOT EXISTS partner_submissions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            full_name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            phone TEXT DEFAULT '',
+            organisation TEXT DEFAULT '',
+            proposal_type TEXT DEFAULT 'Partner',
+            message TEXT NOT NULL,
+            status TEXT DEFAULT 'New',
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        );
         """
     )
     existing_columns = {row[1] for row in connection.execute("PRAGMA table_info(books)").fetchall()}
@@ -379,6 +418,36 @@ def init_db() -> None:
     }.items():
         if column not in existing_columns:
             connection.execute(f"ALTER TABLE books ADD COLUMN {column} {definition}")
+
+    existing_pub_cols = {row[1] for row in connection.execute("PRAGMA table_info(publications)").fetchall()}
+    for column, definition in {
+        "volume": "TEXT NOT NULL DEFAULT ''",
+        "issue_number": "TEXT NOT NULL DEFAULT ''",
+        "badge_label": "TEXT NOT NULL DEFAULT ''",
+        "episode_label": "TEXT NOT NULL DEFAULT ''",
+        "embed_url": "TEXT NOT NULL DEFAULT ''",
+        "position": "INTEGER NOT NULL DEFAULT 0",
+        "is_paid": "INTEGER NOT NULL DEFAULT 0",
+    }.items():
+        if column not in existing_pub_cols:
+            connection.execute(f"ALTER TABLE publications ADD COLUMN {column} {definition}")
+
+    try:
+        existing_hs_cols = {row[1] for row in connection.execute("PRAGMA table_info(homepage_sections)").fetchall()}
+        if existing_hs_cols:
+            if "button2_label" not in existing_hs_cols:
+                connection.execute("ALTER TABLE homepage_sections ADD COLUMN button2_label TEXT NOT NULL DEFAULT ''")
+            if "button2_url" not in existing_hs_cols:
+                connection.execute("ALTER TABLE homepage_sections ADD COLUMN button2_url TEXT NOT NULL DEFAULT ''")
+    except sqlite3.OperationalError:
+        pass
+
+    try:
+        existing_gallery_cols = {row[1] for row in connection.execute("PRAGMA table_info(gallery_items)").fetchall()}
+        if existing_gallery_cols and "thumbnail_path" not in existing_gallery_cols:
+            connection.execute("ALTER TABLE gallery_items ADD COLUMN thumbnail_path TEXT NOT NULL DEFAULT ''")
+    except sqlite3.OperationalError:
+        pass
     count = connection.execute("SELECT COUNT(*) FROM books").fetchone()[0]
     pass
     if os.environ.get('ADMIN_EMAIL') and os.environ.get('ADMIN_PASSWORD'):
@@ -1095,7 +1164,10 @@ def save_admin_upload(field: str, category: str, kind: str = "image") -> str:
     if not raw or len(raw) > 10 * 1024 * 1024:
         raise ValueError("Upload must be smaller than 10 MB")
     dest = MEDIA_ROOT / 'admin' / category
-    dest.mkdir(parents=True, exist_ok=True)
+    try:
+        dest.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
     key = secrets.token_hex(15)
     if kind == 'pdf':
         if not raw.startswith(b'%PDF-') or not f.filename.lower().endswith('.pdf'):

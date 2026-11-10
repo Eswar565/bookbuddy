@@ -1,0 +1,16 @@
+.env
+instance/
+media/
+backups/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+tests/
+tools/
+*.bak
+*.sqlite3
+*.sqlite3-journal
+*.db
+*.zip
+scratch_*.py

@@ -5,12 +5,16 @@ from pathlib import Path
 from PIL import Image
 
 BASE_DIR = Path(__file__).resolve().parent
-MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", BASE_DIR / "media")).resolve()
+IS_VERCEL = os.environ.get("VERCEL") == "1" or os.environ.get("VERCEL_ENV") is not None
+MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", "/tmp/media" if IS_VERCEL else BASE_DIR / "media")).resolve()
 THUMBNAIL_DIR = os.path.join(str(MEDIA_ROOT), "thumbnails", "gallery")
 UPLOAD_DIR = os.path.join(str(MEDIA_ROOT), "admin", "gallery")
 
-os.makedirs(THUMBNAIL_DIR, exist_ok=True)
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+try:
+    os.makedirs(THUMBNAIL_DIR, exist_ok=True)
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+except OSError:
+    pass
 
 
 def resolve_disk_path(image_path: str) -> str:

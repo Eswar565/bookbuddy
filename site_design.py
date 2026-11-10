@@ -19,8 +19,13 @@ def install_site_design(app,db):
             for key,title,kicker,desc,img,alt,label,url,pos in defaults:
                 db().execute('INSERT OR IGNORE INTO homepage_sections(section_key,title,kicker,description,image_path,image_alt,button_label,url,position) VALUES(?,?,?,?,?,?,?,?,?)',(key,title,kicker,desc,img,alt,label,url,pos))
             db().execute("INSERT INTO schema_updates(version) VALUES('homepage-admin-v5')")
-        if 'highlight' not in {r[1] for r in db().execute('PRAGMA table_info(homepage_sections)')}:
+        have_hs = {r[1] for r in db().execute('PRAGMA table_info(homepage_sections)')}
+        if 'highlight' not in have_hs:
             db().execute("ALTER TABLE homepage_sections ADD COLUMN highlight TEXT NOT NULL DEFAULT ''")
+        if 'button2_label' not in have_hs:
+            db().execute("ALTER TABLE homepage_sections ADD COLUMN button2_label TEXT NOT NULL DEFAULT ''")
+        if 'button2_url' not in have_hs:
+            db().execute("ALTER TABLE homepage_sections ADD COLUMN button2_url TEXT NOT NULL DEFAULT ''")
         if not db().execute("SELECT 1 FROM schema_updates WHERE version='official-brand-v7'").fetchone():
             for key,value in {
                 'contact_phone':'+91 9080759312',

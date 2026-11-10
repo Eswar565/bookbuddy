@@ -36,8 +36,13 @@ def install_media_access(app, db, render, root):
     def can_read(publication):return not publication['is_paid'] or entitled()
 
     import os
-    media_root = Path(os.environ.get("MEDIA_ROOT", Path(root) / "media")).resolve()
-    media_root.mkdir(parents=True, exist_ok=True)
+    is_vercel = os.environ.get("VERCEL") == "1" or os.environ.get("VERCEL_ENV") is not None
+    default_media_root = Path("/tmp/media") if is_vercel else Path(root) / "media"
+    media_root = Path(os.environ.get("MEDIA_ROOT", default_media_root)).resolve()
+    try:
+        media_root.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
 
     def local_file(value):
         parsed=urlsplit(value or '')

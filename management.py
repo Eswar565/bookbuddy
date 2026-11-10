@@ -157,7 +157,11 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
     @app.route('/admin/media/',methods=['GET','POST'])
     @guard
     def workspace_media():
-        folder=base_dir/'static'/'uploads'; folder.mkdir(exist_ok=True)
+        folder=base_dir/'static'/'uploads'
+        try:
+            folder.mkdir(exist_ok=True)
+        except OSError:
+            pass
         if request.method=='POST':
             upload=request.files.get('file')
             if not upload or not upload.filename: abort(400,'Choose a file.')

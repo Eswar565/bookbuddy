@@ -50,8 +50,13 @@ def textfield(name,limit=200,required=False):
 
 def install_release17(app,db,render,admin,root):
     if os.environ.get('BOOK_BUDDY_MULTITENANT')=='1':raise RuntimeError('This release supports one organization per installation. Shared database multi-tenancy is disabled.')
-    private=Path(os.environ.get('BOOK_BUDDY_PRIVATE_DIR',root/'instance'/'private')).resolve()
-    private.mkdir(parents=True,exist_ok=True)
+    is_vercel = os.environ.get('VERCEL') == '1' or os.environ.get('VERCEL_ENV') is not None
+    default_private = Path('/tmp/private') if is_vercel else root/'instance'/'private'
+    private=Path(os.environ.get('BOOK_BUDDY_PRIVATE_DIR', default_private)).resolve()
+    try:
+        private.mkdir(parents=True,exist_ok=True)
+    except OSError:
+        pass
     app.config['PRIVATE_DIR17']=private
     app.config['PUBLIC_ENDPOINTS17']={'home_calendar10','reset_finish17','membership_webhook17','razorpay_webhook_v9','save_subscriber','capture_lead','contact_submit','healthz16','account_reset_password','account_reset_password_short'}
     with app.app_context():
@@ -701,7 +706,12 @@ def install_release17(app,db,render,admin,root):
 
     @app.cli.command('backup')
     def backup17():
-        destination=Path(os.environ.get('BOOK_BUDDY_BACKUP_DIR',root/'instance'/'backups'));destination.mkdir(parents=True,exist_ok=True)
+        default_backup = Path('/tmp/backups') if is_vercel else root/'instance'/'backups'
+        destination=Path(os.environ.get('BOOK_BUDDY_BACKUP_DIR', default_backup))
+        try:
+            destination.mkdir(parents=True,exist_ok=True)
+        except OSError:
+            pass
         path=destination/('bookbuddy-'+datetime.now().strftime('%Y%m%d-%H%M%S')+'.sqlite3')
         with sqlite3.connect(path) as output:db().backup(output)
         path.chmod(0o600);print('Database backup created:',path)

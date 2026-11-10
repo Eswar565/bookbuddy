@@ -57,17 +57,44 @@ def validate_admin_record(kind,v,db):
 
 def install_release9(app,db,render,admin,root):
     with app.app_context():
-        changes={'publications':{'cover_path':"TEXT DEFAULT ''",'embed_url':"TEXT DEFAULT ''"},'events':{'agenda':"TEXT DEFAULT ''",'booking_closes':"TEXT DEFAULT ''",'join_url':"TEXT DEFAULT ''"}}
+        changes = {
+            'publications': {
+                'cover_path': "TEXT DEFAULT ''",
+                'embed_url': "TEXT DEFAULT ''",
+                'volume': "TEXT DEFAULT ''",
+                'issue_number': "TEXT DEFAULT ''",
+                'badge_label': "TEXT DEFAULT ''",
+                'episode_label': "TEXT DEFAULT ''",
+                'position': "INTEGER DEFAULT 0",
+            },
+            'events': {
+                'agenda': "TEXT DEFAULT ''",
+                'booking_closes': "TEXT DEFAULT ''",
+                'join_url': "TEXT DEFAULT ''",
+            },
+            'gallery_items': {
+                'thumbnail_path': "TEXT DEFAULT ''",
+            },
+        }
         for table,fields in changes.items():
             have={x[1] for x in db().execute('PRAGMA table_info('+table+')')}
             for name,definition in fields.items():
-                if name not in have:db().execute(f'ALTER TABLE {table} ADD COLUMN {name} {definition}')
+                if name not in have:
+                    try:
+                        db().execute(f'ALTER TABLE {table} ADD COLUMN {name} {definition}')
+                    except Exception:
+                        pass
         db().executescript('''CREATE TABLE IF NOT EXISTS content_visibility(id INTEGER PRIMARY KEY,section_key TEXT UNIQUE NOT NULL,title TEXT NOT NULL,is_active INTEGER DEFAULT 1);
         CREATE TABLE IF NOT EXISTS page_heroes(id INTEGER PRIMARY KEY,slug TEXT UNIQUE NOT NULL,title TEXT NOT NULL,eyebrow TEXT DEFAULT '',description TEXT DEFAULT '',image_path TEXT DEFAULT '',is_active INTEGER DEFAULT 1);
-        CREATE TABLE IF NOT EXISTS gallery_items(id INTEGER PRIMARY KEY,title TEXT NOT NULL,description TEXT DEFAULT '',image_path TEXT NOT NULL,alt_text TEXT DEFAULT '',page_slug TEXT DEFAULT 'home',position INTEGER DEFAULT 0,is_active INTEGER DEFAULT 1);
+        CREATE TABLE IF NOT EXISTS gallery_items(id INTEGER PRIMARY KEY,title TEXT NOT NULL,description TEXT DEFAULT '',image_path TEXT NOT NULL,thumbnail_path TEXT DEFAULT '',alt_text TEXT DEFAULT '',page_slug TEXT DEFAULT 'home',position INTEGER DEFAULT 0,is_active INTEGER DEFAULT 1);
         CREATE TABLE IF NOT EXISTS event_coupons(id INTEGER PRIMARY KEY,code TEXT UNIQUE COLLATE NOCASE NOT NULL,event_id INTEGER DEFAULT 0,discount_type TEXT DEFAULT 'percent',value REAL DEFAULT 0,min_amount REAL DEFAULT 0,max_uses INTEGER DEFAULT 0,expires_on TEXT DEFAULT '',is_active INTEGER DEFAULT 1);
         ''')
-        pass
+        try:
+            gallery_cols = {x[1] for x in db().execute('PRAGMA table_info(gallery_items)')}
+            if 'thumbnail_path' not in gallery_cols:
+                db().execute("ALTER TABLE gallery_items ADD COLUMN thumbnail_path TEXT DEFAULT ''")
+        except Exception:
+            pass
         db().commit()
     MODELS.update({'visibility':('Home section visibility','content_visibility','section_key title is_active'),'heroes':('Page heroes','page_heroes','slug title eyebrow description image_path is_active'),'gallery':('Gallery','gallery_items','image_path alt_text position is_active'),'coupons':('Event coupons','event_coupons','code event_id discount_type value min_amount max_uses expires_on is_active')})
     MODELS['events']=('Events','events','title category description agenda event_date event_time booking_closes location join_url image_path fee capacity is_online is_active')
