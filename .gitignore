@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.env
+instance/
+media/
+backups/
+*.sqlite3
+*.sqlite3-journal
+*.bak
+*.db
+*.zip
+scratch_*.py
+

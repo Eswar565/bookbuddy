@@ -1,0 +1,81 @@
+{% extends 'site/base.html' %}
+
+{% block title %}The Podcast Archive · Book Buddy Podcasts{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/bb-media.css?v=1">
+{% endblock %}
+
+{% block body %}
+<main class="bb-media-page">
+  <div class="bb-media-container">
+    <!-- Header with Pill, Heading with accent word, and Subtitle -->
+    <header class="bb-media-header">
+      <div class="bb-media-header-left">
+        <span class="bb-media-pill">{{ media_settings.podcast_pill or 'Media & Audio' }}</span>
+        {% set full_heading = media_settings.podcast_heading or 'The Podcast Archive' %}
+        {% set accent_word = media_settings.podcast_accent or 'Podcast' %}
+        <h1 class="bb-media-title">
+          {% if accent_word and accent_word in full_heading %}
+            {{ full_heading|replace(accent_word, '<span class="bb-accent">' ~ accent_word ~ '</span>')|safe }}
+          {% else %}
+            The <span class="bb-accent">Podcast</span> Archive
+          {% endif %}
+        </h1>
+      </div>
+      <p class="bb-media-subtitle">{{ media_settings.podcast_subtitle or 'Exploring the world of stories and learning.' }}</p>
+    </header>
+
+    <!-- 3-Column Podcasts Grid -->
+    {% if publications %}
+    <div class="bb-podcasts-grid" role="region" aria-label="Podcast episodes">
+      {% for item in publications %}
+      <article class="bb-podcast-card" id="episode-{{ item.id }}">
+        <!-- Header row -->
+        <div class="bb-podcast-header">
+          <span class="bb-podcast-label">
+            {{ item.episode_label or ('EPISODE ' ~ '%02d' % (loop.revindex)) }}
+          </span>
+          <button type="button" class="bb-share-icon-btn" data-bb-share data-share-title="{{ item.title }}" data-share-url="{{ request.host_url ~ 'podcasts/#episode-' ~ item.id }}" aria-label="Share episode">
+            <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-share"/></svg>
+          </button>
+        </div>
+
+        <!-- Episode title -->
+        <h2 class="bb-podcast-title">{{ item.title }}</h2>
+
+        <!-- Spotify Player or Fallback -->
+        {% set embed = item.embed_url|spotify_embed_filter if item.embed_url else '' %}
+        {% if embed %}
+        <div class="bb-podcast-player-wrap">
+          <iframe 
+            src="{{ embed }}" 
+            title="{{ item.title }} - Spotify Player"
+            loading="lazy" 
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            style="width:100%; height:232px; border:none; border-radius:12px;">
+          </iframe>
+        </div>
+        {% else %}
+        <div class="bb-podcast-fallback-card">
+          <p style="font-size:13px; color:#64748b; margin:0;">{{ item.description|truncate(120) if item.description else 'Listen to this episode directly on Spotify.' }}</p>
+          <a href="{{ item.file_path or 'https://open.spotify.com' }}" target="_blank" rel="noopener noreferrer" class="bb-btn-primary-maroon" style="padding:8px 16px; font-size:13px;">
+            Open on Spotify &rarr;
+          </a>
+        </div>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="background:#fff; border:1px solid rgba(6,20,70,0.08); border-radius:14px; padding:48px; text-align:center;">
+      <h3 style="font-family:'Hind',sans-serif; color:#061446; margin:0 0 8px;">No podcast episodes published yet</h3>
+      <p style="color:#64748b; margin:0;">Check back soon for new episodes of our community podcast!</p>
+    </div>
+    {% endif %}
+  </div>
+</main>
+
+<script src="/static/js/bb-media.js?v=1" defer></script>
+{% endblock %}
+

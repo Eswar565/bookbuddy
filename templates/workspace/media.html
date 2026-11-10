@@ -1,0 +1,37 @@
+{% extends 'workspace/base.html' %}
+{% block content %}
+<form class="panel edit-grid" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="{{ workspace_token() }}">
+  <div class="wide">
+    <label>Upload image, PDF or audio (up to 16 MB)
+      <input type="file" name="file" accept=".png,.jpg,.jpeg,.webp,.gif,.avif,.pdf,.mp3" required>
+    </label>
+  </div>
+  <div>
+    <label>Title (optional)
+      <input type="text" name="title" placeholder="e.g. Community Photo / Monthly Issue">
+    </label>
+  </div>
+  <div>
+    <label>Publish category
+      <select name="kind">
+        <option value="gallery">Gallery photo (/gallery/)</option>
+        <option value="magazine">Magazine (/publications/?kind=magazine)</option>
+        <option value="news">Newspaper (/publications/?kind=news)</option>
+        <option value="podcast">Podcast (/podcasts/)</option>
+      </select>
+    </label>
+  </div>
+  <div class="wide">
+    <button type="submit" class="button">Upload &amp; publish media</button>
+  </div>
+</form>
+<section class="panel">
+  <h2>Uploaded files</h2>
+  {% for file in files %}
+  <p><a href="/static/uploads/{{ file }}" target="_blank" rel="noopener">/static/uploads/{{ file }}</a></p>
+  {% else %}
+  <p>No uploaded files yet.</p>
+  {% endfor %}
+</section>
+{% endblock %}

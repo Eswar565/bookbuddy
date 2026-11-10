@@ -1,0 +1,99 @@
+{% extends 'site/base.html' %}
+
+{% block title %}The Magazine Archive · Book Buddy Magazine{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/bb-media.css?v=1">
+{% endblock %}
+
+{% block body %}
+<main class="bb-media-page">
+  <div class="bb-media-container">
+    <!-- Header with Pill, Heading with accent word, and Subtitle -->
+    <header class="bb-media-header">
+      <div class="bb-media-header-left">
+        <span class="bb-media-pill">{{ media_settings.magazine_pill or 'Publication & Media' }}</span>
+        {% set full_heading = media_settings.magazine_heading or 'The Magazine Archive' %}
+        {% set accent_word = media_settings.magazine_accent or 'Magazine' %}
+        <h1 class="bb-media-title">
+          {% if accent_word and accent_word in full_heading %}
+            {{ full_heading|replace(accent_word, '<span class="bb-accent">' ~ accent_word ~ '</span>')|safe }}
+          {% else %}
+            The <span class="bb-accent">Magazine</span> Archive
+          {% endif %}
+        </h1>
+      </div>
+      <p class="bb-media-subtitle">{{ media_settings.magazine_subtitle or 'Celebrating creativity and community through every page.' }}</p>
+    </header>
+
+    <!-- 2-Column Magazine Grid -->
+    {% if publications %}
+    <div class="bb-magazine-grid" role="region" aria-label="Magazine editions">
+      {% for item in publications %}
+      <article class="bb-magazine-card" id="mag-{{ item.id }}">
+        <!-- Card Header Row -->
+        <div class="bb-magazine-card-header">
+          <h2 class="bb-magazine-card-title">{{ item.edition or item.title }}</h2>
+          <div class="bb-magazine-card-badges">
+            {% if item.badge_label %}
+            <span class="bb-mag-badge">{{ item.badge_label }}</span>
+            {% endif %}
+            <button type="button" class="bb-share-icon-btn" data-bb-share data-share-title="{{ item.title }}" data-share-url="{{ request.host_url ~ 'magazine/#mag-' ~ item.id }}" aria-label="Share {{ item.title }}">
+              <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-share"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Cover Preview Area (sized to cover, dark background) -->
+        <div class="bb-magazine-preview-area">
+          {% set target_link = item.file_path or item.cover_path %}
+          <a href="{{ target_link if target_link.startswith(('http', '/')) else '/' ~ target_link }}" target="_blank" rel="noopener noreferrer" class="bb-magazine-cover-link" aria-label="Read {{ item.title }}">
+            {% if item.cover_path %}
+            <img class="bb-magazine-cover-img" src="{{ item.cover_path if item.cover_path.startswith(('http', '/')) else '/' ~ item.cover_path }}" alt="{{ item.title }} cover" loading="lazy">
+            {% else %}
+            <img class="bb-magazine-cover-img" src="/static/img/art/06-magazine.png" alt="Book Buddy Magazine Cover" width="1240" height="840" loading="lazy">
+            {% endif %}
+          </a>
+        </div>
+
+        <!-- Card Bottom Action -->
+        <div class="bb-magazine-actions">
+          <span style="font-size:13px; color:#64748b; font-weight:600;">{{ item.title }}</span>
+          {% if item.file_path %}
+          <a href="{{ item.file_path if item.file_path.startswith(('http', '/')) else '/' ~ item.file_path }}" target="_blank" rel="noopener noreferrer" class="bb-btn-primary-maroon" style="padding: 8px 16px; font-size: 13px;">
+            Open Edition &rarr;
+          </a>
+          {% elif item.embed_url %}
+          <a href="{{ item.embed_url }}" target="_blank" rel="noopener noreferrer" class="bb-btn-primary-maroon" style="padding: 8px 16px; font-size: 13px;">
+            Read Interactive &rarr;
+          </a>
+          {% else %}
+          <a href="{{ item.cover_path if item.cover_path.startswith(('http', '/')) else '/' ~ item.cover_path }}" target="_blank" rel="noopener noreferrer" class="bb-btn-primary-maroon" style="padding: 8px 16px; font-size: 13px;">
+            View Cover &rarr;
+          </a>
+          {% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="background:#fff; border:1px solid rgba(6,20,70,0.08); border-radius:14px; padding:48px; text-align:center;">
+      <h3 style="font-family:'Hind',sans-serif; color:#061446; margin:0 0 8px;">No magazine editions published yet</h3>
+      <p style="color:#64748b; margin:0;">Check back soon for new issues of our community magazine!</p>
+    </div>
+    {% endif %}
+
+    <!-- Magazine CTA Box -->
+    <section class="bb-magazine-cta" aria-labelledby="bb-cta-heading">
+      <h2 id="bb-cta-heading" class="bb-magazine-cta-title">{{ media_settings.magazine_cta_heading or 'Have something amazing to share?' }}</h2>
+      <p class="bb-magazine-cta-desc">{{ media_settings.magazine_cta_text or 'We are always looking for creative stories, artwork, and articles from our young readers. Submit your contribution for a chance to be featured in our next magazine!' }}</p>
+      <a href="/submit-contribution/" class="bb-btn-primary-maroon" style="padding: 12px 28px; font-size: 15px;">
+        {{ media_settings.magazine_cta_btn or 'Submit Your Work' }}
+      </a>
+    </section>
+  </div>
+</main>
+
+<script src="/static/js/bb-media.js?v=1" defer></script>
+{% endblock %}
+

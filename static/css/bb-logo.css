@@ -1,0 +1,49 @@
+/* ==========================================================================
+   Book Buddy Admin Sidebar Logo & Wordmark Styles
+   ========================================================================== */
+
+.sidebar .wordmark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: 16px auto 14px;
+  padding: 14px;
+  box-sizing: border-box;
+  border: 0;
+  background: transparent;
+  pointer-events: none;
+  user-select: none;
+  cursor: default;
+}
+
+.sidebar .wordmark:hover,
+.sidebar .wordmark:focus,
+.sidebar .wordmark:active {
+  background: transparent !important;
+  color: inherit !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.sidebar .wordmark img {
+  display: block;
+  width: 169px;
+  max-width: 170px;
+  height: auto;
+  aspect-ratio: 169/42;
+  margin: 0;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.sidebar .sidebar-divider {
+  display: block;
+  height: 1px;
+  background: rgba(235, 221, 214, 0.2);
+  margin: 0 12px 14px;
+  border: 0;
+}
+

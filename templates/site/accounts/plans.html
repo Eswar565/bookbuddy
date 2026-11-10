@@ -1,0 +1,27 @@
+{% extends 'site/base.html' %}
+{% block title %}Membership Plans | Book Buddy{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/library-edition.css?v=1">{% endblock %}
+{% block body %}
+<main class="s29-membership" id="membership-plans">
+<header class="s29-membership-heading"><p class="s29-kicker">BOOK BUDDY</p><h2>Membership Plans</h2></header>
+<div class="s29-plans-grid">
+{% for plan in plans %}
+<article class="s29-plan-card">
+<div class="s29-plan-top"><span class="s29-plan-kind">{{ plan.kind }}</span><h2>{{ plan.name }}</h2><p>{{ plan.description }}</p></div>
+<div class="s29-plan-price"><strong>₹{{ '%.2f'|format(plan.amount) }}</strong><span>/ {{ plan.months }} {{ 'month' if plan.months==1 else 'months' }}</span></div>
+<dl class="s29-plan-details">
+<div><dt>Membership duration</dt><dd>{{ plan.months }} {{ "month" if plan.months==1 else "months" }}</dd></div>
+<div><dt>Books at a time</dt><dd>{{ plan.book_limit }}</dd></div>
+{% if plan.loan_days is defined %}<div><dt>Borrowing period</dt><dd>{{ plan.loan_days }} days / book</dd></div>{% endif %}
+{% if plan.renewal_limit is defined %}<div><dt>Renewals</dt><dd>{{ plan.renewal_limit }}</dd></div>{% endif %}
+
+</dl>
+<div class="s29-plan-action">
+{% if user.is_authenticated %}<form method="post" action="{{ url_for('request_plan16', plan_id=plan.id) }}"><button type="submit">{{ 'Choose this plan' }}</button></form>
+{% else %}<a href="{{ url_for('account_signup') }}">Sign up to choose plan</a>{% endif %}
+</div>
+</article>
+{% else %}<p class="s29-no-plans">There are currently no active membership plans.</p>{% endfor %}
+</div>
+</main>
+{% endblock %}

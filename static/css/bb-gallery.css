@@ -1,0 +1,260 @@
+/* ============================================================
+   Book Buddy: Rebuilt Public Gallery Stylesheet
+   Design tokens: Navy (#061446), Maroon (#740f28), Lavender tint (#eef2fb)
+   ============================================================ */
+
+.bb-gallery-page {
+  background: linear-gradient(180deg, #f4f6fb 0%, #ffffff 360px);
+  min-height: 80vh;
+  padding: clamp(32px, 4.5vw, 56px) var(--gutter, 16px) clamp(48px, 6vw, 80px);
+}
+
+.bb-gallery-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* Header with pill and heading */
+.bb-gallery-header {
+  text-align: center;
+  margin-bottom: clamp(24px, 3.5vw, 36px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.bb-gallery-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef2fb;
+  color: var(--navy, #061446);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 6px 18px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+
+.bb-gallery-heading {
+  font-family: var(--font-heading, 'Hind', sans-serif) !important;
+  font-size: clamp(28px, 3.4vw, 42px);
+  font-weight: 700 !important;
+  color: var(--navy, #061446) !important;
+  line-height: 1.25;
+  margin: 0;
+  max-width: 820px;
+}
+
+/* One white container card holding the photo grid */
+.bb-gallery-card {
+  background: #ffffff;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 14px;
+  padding: clamp(16px, 2.5vw, 28px);
+  box-shadow: 0 4px 20px rgba(6, 20, 70, 0.04);
+}
+
+/* Photo Grid: 4 cols at 1200px+, 3 cols at 900-1199px, 2 cols below 900px */
+.bb-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 1199px) {
+  .bb-gallery-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 899px) {
+  .bb-gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 9px;
+  }
+}
+
+/* Individual photo tile (Aspect Ratio 16/10, Object-fit: cover) */
+.bb-gallery-tile {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 3px;
+  background: #f1f3f8;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  outline-offset: 2px;
+}
+
+.bb-gallery-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.bb-gallery-tile:hover img,
+.bb-gallery-tile:focus-visible img {
+  transform: scale(1.025);
+  filter: brightness(1.03);
+}
+
+.bb-gallery-tile:focus-visible {
+  outline: 2px solid var(--navy, #061446);
+}
+
+/* Empty gallery state */
+.bb-gallery-empty {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--ink-muted, #556277);
+}
+
+.bb-gallery-empty p {
+  margin: 0;
+  font-size: 16px;
+}
+
+/* ============================================================
+   Accessible Lightbox Dialog
+   ============================================================ */
+.bb-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(6, 18, 50, 0.94);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  padding: 16px;
+}
+
+.bb-lightbox.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.bb-lightbox-dialog {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 94vw;
+  max-height: 94vh;
+}
+
+.bb-lightbox-media {
+  max-width: 90vw;
+  max-height: 82vh;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Lightbox Controls: tap targets >= 44x44px */
+.bb-lightbox-close,
+.bb-lightbox-prev,
+.bb-lightbox-next {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  z-index: 10;
+  padding: 0;
+}
+
+.bb-lightbox-close:hover,
+.bb-lightbox-prev:hover,
+.bb-lightbox-next:hover {
+  background: rgba(255, 255, 255, 0.28);
+  transform: scale(1.05);
+}
+
+.bb-lightbox-close:focus-visible,
+.bb-lightbox-prev:focus-visible,
+.bb-lightbox-next:focus-visible {
+  outline: 2px solid #ffffff;
+}
+
+.bb-lightbox-close {
+  top: -20px;
+  right: -20px;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.bb-lightbox-prev {
+  left: -24px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.bb-lightbox-next {
+  right: -24px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.bb-lightbox-prev:hover {
+  transform: translateY(-50%) scale(1.05);
+}
+
+.bb-lightbox-next:hover {
+  transform: translateY(-50%) scale(1.05);
+}
+
+/* Counter indicator */
+.bb-lightbox-counter {
+  margin-top: 14px;
+  color: rgba(255, 255, 255, 0.85);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px 14px;
+  border-radius: 9999px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .bb-lightbox-close {
+    top: 8px;
+    right: 8px;
+  }
+  .bb-lightbox-prev {
+    left: 8px;
+  }
+  .bb-lightbox-next {
+    right: 8px;
+  }
+  .bb-lightbox-media {
+    max-height: 75vh;
+  }
+}
+

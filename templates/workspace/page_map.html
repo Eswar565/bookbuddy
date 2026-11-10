@@ -1,0 +1,9 @@
+{% extends 'workspace/base.html' %}
+{% block content %}
+<div class="s33-top-actions"><p>Each public route is linked to the admin module that actually controls its content. Dedicated pages are not generic CMS pages.</p><a class="button secondary" href="/admin/about-editor/">Edit About page</a></div>
+<section class="panel"><h2>Public page <svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg> Admin editor</h2><div class="s33-table-wrap"><table class="s33-map-table"><thead><tr><th>Public page</th><th>Content source</th><th>Admin action</th></tr></thead><tbody>{% for page in pages %}
+<tr><td><strong>{{ page.label }}</strong><a href="{{ page.url }}" target="_blank" rel="noopener">{{ page.url }} <svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-external-link"/></svg></a>{% if not page.enabled %}<small>Unpublished in CMS</small>{% endif %}</td><td>{{ page.desc }}<small>{{ page.source }}</small>{% if page.cms_shadow %}<small>This URL has a CMS record; the dedicated feature route takes precedence.</small>{% endif %}</td><td><a class="button secondary" href="{{ page.edit }}">Open editor</a></td></tr>
+{% endfor %}</tbody></table></div></section>
+<p class="hint">A route inventory is a navigation guide, not a guarantee that external integrations or membership-restricted actions are available. Test changes using the public preview.</p>
+<link rel="stylesheet" href="/static/css/about-editor.css?v=1">
+{% endblock %}

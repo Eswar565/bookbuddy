@@ -1,0 +1,107 @@
+/* BookBuddy v32: admin contrast and clean borders.
+   Loaded LAST in workspace/base.html. Scope everything to the admin workspace.
+   The older generic text-colour declaration must never override the selected
+   nav tab, filled button, or selected item foreground. */
+:root { --bb32-brand:#7A1636; --bb32-hover:#4A0F24; --bb32-ink:#2A1A20; --bb32-line:#EBDDD6; --bb32-wash:#edf3ff; }
+
+/* Tab labels, counts, and icons all need a light colour ON dark blue.
+   Qualified selectors deliberately outrank earlier :has() and :not() rules. */
+body:has(.workspace) .workspace .admin-content nav.s28-admin-tabs.s27-skill-switch > a.is-active,
+body:has(.workspace) .workspace .admin-content nav.s28-admin-tabs.s27-skill-switch > a[aria-current="page"],
+body:has(.workspace) .workspace .admin-content .s27-skill-switch > a.is-active,
+body:has(.workspace) .workspace .admin-content .s27-skill-switch > a[aria-current="page"] {
+  background-color:var(--bb32-brand)!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  border:1px solid var(--bb32-brand)!important;
+  text-shadow:none!important;
+  opacity:1!important;
+}
+body:has(.workspace) .workspace .admin-content .s27-skill-switch > a:is(.is-active,[aria-current="page"]) :is(small,span,b,strong,i,svg),
+body:has(.workspace) .workspace .admin-content .s28-admin-tabs > a:is(.is-active,[aria-current="page"]) :is(small,span,b,strong,i,svg) {
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  opacity:1!important;
+  fill:currentColor!important;
+}
+body:has(.workspace) .workspace .admin-content .s27-skill-switch > a:not(.is-active):not([aria-current="page"]) {
+  background:#fff!important;
+  border:1px solid var(--bb32-line)!important;
+  color:var(--bb32-brand)!important;
+  -webkit-text-fill-color:var(--bb32-brand)!important;
+}
+body:has(.workspace) .workspace .admin-content .s27-skill-switch > a:not(.is-active):not([aria-current="page"]):hover {
+  background:var(--bb32-wash)!important;
+  border-color:#8da5d2!important;
+}
+
+/* General action buttons in the admin: keep label AND any inner icons visible. */
+body:has(.workspace) .workspace .admin-content :is(a.s26-btn:not(.s26-outline):not(.secondary),a.bb30-btn:not(.bb30-secondary),button.s26-btn:not(.s26-outline):not(.secondary),button.bb30-btn:not(.bb30-secondary),button[type="submit"]:not(.secondary):not(.s26-outline),input[type="submit"],a.button:not(.secondary),button.button:not(.secondary)) {
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  background:var(--bb32-brand)!important;
+  border-color:var(--bb32-brand)!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+body:has(.workspace) .workspace .admin-content :is(a.s26-btn:not(.s26-outline):not(.secondary),a.bb30-btn:not(.bb30-secondary),button.s26-btn:not(.s26-outline):not(.secondary),button.bb30-btn:not(.bb30-secondary),button[type="submit"]:not(.secondary):not(.s26-outline),input[type="submit"],a.button:not(.secondary),button.button:not(.secondary)):is(:hover,:focus-visible) {
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  background:var(--bb32-hover)!important;
+  border-color:var(--bb32-hover)!important;
+  filter:none!important;
+}
+body:has(.workspace) .workspace .admin-content :is(a.s26-btn:not(.s26-outline):not(.secondary),a.bb30-btn:not(.bb30-secondary),button.s26-btn:not(.s26-outline):not(.secondary),button.bb30-btn:not(.bb30-secondary),button[type="submit"]:not(.secondary):not(.s26-outline),input[type="submit"],a.button:not(.secondary),button.button:not(.secondary)) :is(small,span,b,strong,i,svg) {
+  color:inherit!important;
+  -webkit-text-fill-color:inherit!important;
+  fill:currentColor!important;
+  opacity:1!important;
+}
+/* Outline / secondary actions are dark text on white. */
+body:has(.workspace) .workspace .admin-content :is(a.s26-outline,a.bb30-secondary,button.s26-outline,button.bb30-secondary,a.button.secondary,button.button.secondary) {
+  background:#fff!important;color:var(--bb32-brand)!important;
+  -webkit-text-fill-color:var(--bb32-brand)!important;
+  border:1px solid #92a7c8!important;
+}
+body:has(.workspace) .workspace .admin-content :is(a.s26-outline,a.bb30-secondary,button.s26-outline,button.bb30-secondary,a.button.secondary,button.button.secondary):is(:hover,:focus-visible) {
+  background:var(--bb32-wash)!important;color:var(--bb32-brand)!important;
+  -webkit-text-fill-color:var(--bb32-brand)!important;
+}
+
+/* Remove the decorative thick vertical line on selected sidebar items.
+   Retain a balanced outline on cards; input focus outlines remain intact. */
+body:has(.workspace) .workspace .sidebar :is(a.selected,a[aria-current="page"],summary) {
+  border:0!important;
+  border-left:0!important;
+  border-inline-start:0!important;
+  box-shadow:none!important;
+}
+body:has(.workspace) .workspace .sidebar :is(a.selected,a[aria-current="page"]) {
+  background:var(--bb32-wash)!important;
+  color:var(--bb32-brand)!important;
+  -webkit-text-fill-color:var(--bb32-brand)!important;
+}
+body:has(.workspace) .workspace .admin-content :is(.notice,.notification-toast) {
+  border:1px solid var(--bb32-line)!important;
+  border-inline-start:1px solid var(--bb32-line)!important;
+}
+body:has(.workspace) .workspace .admin-content :is(.s26-panel,.panel,.admin-card,.stat,.metric,.summary-card) {
+  border-inline-start-width:1px!important;
+  border-inline-start-color:var(--bb32-line)!important;
+}
+body:has(.workspace) .workspace .sidebar { border-right:0!important; }
+@media (prefers-reduced-motion:reduce) {
+  body:has(.workspace) .workspace .admin-content :is(a,button) { transition:none!important; }
+}
+/* Destructive actions remain explicitly distinct from ordinary navy actions. */
+body:has(.workspace) .workspace .admin-content :is(button.danger,button.s26-danger,a.s26-danger,form[data-delete] button) {
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  background:#a1283d!important;
+  border-color:#a1283d!important;
+}
+body:has(.workspace) .workspace .admin-content :is(button.danger,button.s26-danger,a.s26-danger,form[data-delete] button):hover {
+  color:#fff!important;
+  background:#78182c!important;
+  border-color:#78182c!important;
+}

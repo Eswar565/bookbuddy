@@ -1,0 +1,13 @@
+{% extends 'workspace/base.html' %}{% block extra_css %}<link rel="stylesheet" href="/static/css/library-edition.css?v=1">{% endblock %}
+{% block content %}
+<div class="s29-center"><header class="s29-admin-hero"><div><span class="s29-kicker">LIBRARY OPERATIONS</span><h2>Books, borrowing and memberships</h2><p>Manage the entire lending journey here: catalogue, stock, requests, issues, returns, fines, and plan approvals.</p></div><a href="/library/" target="_blank" rel="noopener" class="s29-alt-action">View library <svg class="icon" aria-hidden="true"><use href="#i-external-link"></use></svg></a></header>
+<section class="s29-center-metrics"><div><strong>{{ counts29.books }}</strong><span>Book records</span></div><div><strong>{{ counts29.lending_loans }}</strong><span>Loan requests & records</span></div><div><strong>{{ counts29.lending_subscriptions }}</strong><span>Subscription records</span></div><div><strong>{{ counts29.lending_plans }}</strong><span>Available plan configurations</span></div></section>
+<div class="s29-center-grid">
+{% for icon,title,desc,links in [
+('i-book','Catalogue & books','Add and edit books, descriptions, covers and categories.', [('Open book catalogue editor','/admin/manage/books/'),('Import books','/admin/import/books/')]),
+('i-boxes','Copies and inventory','Manage physical copies, branches and fines.',[('Manage inventory','/admin/library17/')]),
+('i-exchange','Lending desk','Approve requests, issue books and process returns.',[('Open borrowing desk','/admin/lending/')]),
+('i-id-card','Member subscriptions','Review membership applications and guardians.',[('Membership approvals','/admin/membership-desk/'),('Member records','/admin/manage/members/')]),
+('i-tag','Plan management','Edit lending plans and membership prices.',[('Manage lending plans','/admin/lending-plans/'),('Plans and promotions','/admin/plans17/')])
+] %}<section class="s29-center-card"><div class="s29-center-icon"><svg class="icon" aria-hidden="true"><use href="#{{ icon }}"></use></svg></div><h3>{{ title }}</h3><p>{{ desc }}</p><div>{% for label,url in links %}<a href="{{ url }}">{{ label }} <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"></use></svg></a>{% endfor %}</div></section>{% endfor %}
+</div></div>{% endblock %}

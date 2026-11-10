@@ -1,0 +1,130 @@
+{% extends 'site/base.html' %}
+{% block title %}Become a Partner · Collaborate with Book Buddy{% endblock %}
+
+{% block body %}
+<main class="section" style="padding: 60px 0; background: var(--tint-light, #fdfbf7);">
+  <div class="bb8-container" style="max-width: 1040px; margin: 0 auto; padding: 0 20px;">
+    
+    <div style="text-align: center; max-width: 760px; margin: 0 auto 48px;">
+      <span class="bb8-eyebrow" style="color: var(--maroon); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 13px;">PARTNERSHIP &amp; COLLABORATION</span>
+      <h1 style="font-family: var(--font-heading); font-size: clamp(30px, 3.5vw, 42px); color: var(--navy); margin: 8px 0 16px; font-weight: 700;">
+        Partner with Book Buddy
+      </h1>
+      <p style="font-size: 16px; line-height: 1.6; color: var(--ink-muted);">
+        We collaborate with schools, educators, publishers, reading advocates, and community venues to bring the joy of reading and thoughtful discussion to every learner.
+      </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px; align-items: start;">
+      <!-- Left Form Card -->
+      <section style="background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-md, 12px); padding: clamp(24px, 4vw, 36px); box-shadow: var(--shadow-sm);">
+        <h2 style="font-family: var(--font-heading); font-size: 22px; color: var(--navy); margin: 0 0 20px; font-weight: 700;">
+          Tell us about your proposal
+        </h2>
+        
+        <form method="post" action="/work-with-us/" style="display: flex; flex-direction: column; gap: 16px;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          
+          <div>
+            <label style="display: block; font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 6px;" for="partner-name">
+              Full Name <span style="color: var(--maroon);">*</span>
+            </label>
+            <input id="partner-name" name="full_name" required maxlength="150" placeholder="Your name"
+                   style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid var(--border-dark, #d1d5db); border-radius: 10px; font-size: 15px;">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <label style="display: block; font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 6px;" for="partner-email">
+                Email Address <span style="color: var(--maroon);">*</span>
+              </label>
+              <input id="partner-email" name="email" type="email" required maxlength="150" placeholder="you@organisation.com"
+                     style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid var(--border-dark, #d1d5db); border-radius: 10px; font-size: 15px;">
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 6px;" for="partner-phone">
+                Phone Number
+              </label>
+              <input id="partner-phone" name="phone" type="tel" maxlength="40" placeholder="+91 90000 00000"
+                     style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid var(--border-dark, #d1d5db); border-radius: 10px; font-size: 15px;">
+            </div>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 6px;" for="partner-org">
+              Organisation / School / Initiative
+            </label>
+            <input id="partner-org" name="organisation" maxlength="150" placeholder="e.g. Oakridge High, Reading Club Madurai"
+                   style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid var(--border-dark, #d1d5db); border-radius: 10px; font-size: 15px;">
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 6px;" for="partner-type">
+              Partnership Interest
+            </label>
+            <select id="partner-type" name="proposal_type"
+                    style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid var(--border-dark, #d1d5db); border-radius: 10px; font-size: 15px; background: #fff;">
+              <option value="Reading Circle Partner">Host / Co-organise Reading Circles</option>
+              <option value="School Library Outreach">School Library Outreach &amp; Curation</option>
+              <option value="Book Box Donation &amp; Sponsorship">Book Bundle Sponsorship &amp; Donations</option>
+              <option value="Author &amp; Storyteller Collaboration">Author, Storyteller or Illustrator Session</option>
+              <option value="Venue &amp; Community Partner">Venue &amp; Community Space Partner</option>
+              <option value="Other">Other Collaboration</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 6px;" for="partner-msg">
+              Your Message or Proposal <span style="color: var(--maroon);">*</span>
+            </label>
+            <textarea id="partner-msg" name="message" rows="5" required maxlength="5000" placeholder="Please share a brief note on how we can work together..."
+                      style="width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid var(--border-dark, #d1d5db); border-radius: 10px; font-size: 15px; font-family: inherit;"></textarea>
+          </div>
+
+          <div>
+            <button type="submit" class="bb8-btn-primary" style="display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; padding: 12px 28px; font-size: 15px; border-radius: 8px;">
+              Submit Partnership Proposal
+              <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Right Aside Details -->
+      <aside style="display: flex; flex-direction: column; gap: 24px;">
+        <div style="background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-md, 12px); padding: 28px; box-shadow: var(--shadow-sm);">
+          <h3 style="font-family: var(--font-heading); font-size: 18px; color: var(--navy); margin: 0 0 12px; font-weight: 700;">
+            Why Partner with Us?
+          </h3>
+          <ul style="padding-left: 20px; margin: 0; color: var(--ink-muted); line-height: 1.7; font-size: 14.5px;">
+            <li>Curated multilingual reading catalogues for ages 4 to adult.</li>
+            <li>Pomodoro-style reading circles and interactive narrative games.</li>
+            <li>Direct connection with families, young readers, and educators.</li>
+            <li>Community newspaper and podcast highlighting student stories.</li>
+          </ul>
+        </div>
+
+        <div style="background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-md, 12px); padding: 28px; box-shadow: var(--shadow-sm);">
+          <h3 style="font-family: var(--font-heading); font-size: 18px; color: var(--navy); margin: 0 0 16px; font-weight: 700;">
+            Contact the Partnerships Desk
+          </h3>
+          <p style="margin: 0 0 10px; font-size: 14.5px; color: var(--ink-muted);">
+            <strong>Phone:</strong><br>
+            <a href="tel:{{ content.contact_phone }}" style="color: var(--maroon); text-decoration: none;">{{ content.contact_phone }}</a>
+          </p>
+          <p style="margin: 0 0 10px; font-size: 14.5px; color: var(--ink-muted);">
+            <strong>Email:</strong><br>
+            <a href="mailto:{{ content.contact_email }}" style="color: var(--maroon); text-decoration: none;">{{ content.contact_email }}</a>
+          </p>
+          <p style="margin: 0; font-size: 14.5px; color: var(--ink-muted);">
+            <strong>Address:</strong><br>
+            <span>{{ content.contact_address }}</span>
+          </p>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+{% endblock %}
+

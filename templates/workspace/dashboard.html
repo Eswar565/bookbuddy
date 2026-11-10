@@ -1,0 +1,17 @@
+{% extends 'workspace/base.html' %}
+{% block content %}
+<section class="welcome s29-dashboard-welcome"><h2>Your library administration workspace</h2><p>Choose a dedicated area below. Manage the book collection, members, reading events, media, and website pages from one place.</p></section>
+<div class="stats">{% for key in ['books','events','publications','members','enquiries','partners'] %}{% if key in counts %}<a href="/admin/manage/{{ key }}/"><strong>{{ counts[key] }}</strong><span>{{ models[key][0] }}</span></a>{% endif %}{% endfor %}</div>
+<div class="s29-center-grid s29-dashboard-centers">
+{% for icon,title,description,url,link in [
+('i-book-open','Library','Books, stock, requests, lending, returns and memberships.','/admin/library-center/','Manage the library'),
+('i-calendar','Events','Reading circles, contests, upcoming events and registrations.','/admin/manage/events/','Manage events'),
+('i-newspaper','Media','Newspapers, magazines, podcasts and gallery.','/admin/manage/publications/','Manage media'),
+('i-users','Users & enquiries','Members, approvals, partner proposals and reader enquiries.','/admin/manage/members/','Manage users'),
+('i-sliders','Website controls','Homepage content &amp; images, navigation &amp; footer links, and site settings.','/admin/manage/home-sections/','Website controls')
+] %}<section class="s29-center-card"><div class="s29-center-icon"><svg class="icon" aria-hidden="true"><use href="#{{ icon }}"></use></svg></div><h3>{{ title }}</h3><p>{{ description }}</p><div><a href="{{ url }}">{{ link }} <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"></use></svg></a></div></section>{% endfor %}
+</div>
+<section class="panel"><div class="toolbar"><h2>Website pages</h2><a class="button secondary" href="/admin/page-map/">Open page map</a></div><div class="s29-dashboard-links"><a href="/admin/manage/home-sections/">Homepage content &amp; images</a><a href="/admin/manage/navigation/">Navigation &amp; footer links</a><a href="/admin/manage/partners/">Partner enquiries</a><a href="/admin/settings/">Site settings</a><a href="/admin/about-editor/">About</a><a href="/admin/manage/books/">Library</a><a href="/admin/manage/events/">Events</a><a href="/admin/manage/publications/">Publications</a><a href="/admin/manage/gallery/">Gallery</a><a href="/admin/manage/enquiries/">Contact</a><a href="/admin/manage/members/">Users</a></div></section>
+<section class="panel"><div class="toolbar"><h2>Latest notifications</h2><a class="button secondary" href="/admin/notifications/">View all · {{ admin_notification_count }} unread</a></div>{% for item in admin_latest_notifications[:5] %}<p><a href="{{ item.url }}"><strong>{{ item.title }}</strong></a> · {{ item.body }} <small>{{ item.created_at }} UTC</small></p>{% else %}<p>New enquiries, event registrations, borrowing requests and membership updates will appear here.</p>{% endfor %}</section>
+<section class="panel"><h2>Recent changes</h2>{% for item in recent %}<p>{{ item.action }} <small>{{ item.created_at }}</small></p>{% else %}<p>No changes recorded yet.</p>{% endfor %}</section>
+{% endblock %}

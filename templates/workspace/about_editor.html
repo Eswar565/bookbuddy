@@ -1,0 +1,139 @@
+{% extends 'workspace/base.html' %}
+{% block content %}
+<div class="s33-top-actions">
+  <p>Edits here are published to <a href="/about/" target="_blank" rel="noopener">the public About page <svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-external-link"/></svg></a>. Unlike the generic CMS editor, these fields control the live library story and YouTube section.</p>
+  <a class="button secondary" href="/admin/page-map/">Website page map</a>
+</div>
+<form method="post" action="/admin/about-editor/" class="s33-about-form" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="{{ workspace_token() }}">
+  <section class="panel s33-admin-panel">
+    <h2>About page &amp; the Book Buddy library story</h2>
+    <div class="s33-fields">
+      <label>Page heading <input name="about_heading" required maxlength="200" value="{{ settings.get('about_heading') or 'About Book Buddy' }}"></label>
+      <label>Library story section heading <input name="about_philosophy_subheading" maxlength="500" value="{{ settings.get('about_philosophy_subheading') or 'Book Buddy exists to build readers—and through them, thinkers.' }}"></label>
+      <label>Library image URL <input id="about-ikigai-url" name="about_ikigai_url" maxlength="1000" value="{{ settings.get('about_ikigai_url') or '/static/img/art/11-about-library.png' }}"></label>
+      <div class="admin13-upload" style="margin: 6px 0 14px 0;">
+        <label for="asset-about-ikigai">Upload new library image from computer</label>
+        <input id="asset-about-ikigai" name="asset_about_ikigai_url" type="file" accept=".png,.jpg,.jpeg,.webp,.svg,image/*">
+        <small style="display:block;margin-top:6px;">Upload replaces the path shown above. Presets: <button type="button" class="button button-small" onclick="document.getElementById('about-ikigai-url').value='/static/img/art/11-about-library.png'">About Library PNG</button> <button type="button" class="button button-small" onclick="document.getElementById('about-ikigai-url').value='/static/img/art/02-book-shelves.png'">Book Shelves PNG</button> <button type="button" class="button button-small" onclick="document.getElementById('about-ikigai-url').value='/static/img/brand/bookbuddy-official-logo.png'">Official Logo</button></small>
+      </div>
+      <label>Lead paragraph <textarea name="about_philosophy_intro" rows="3">{{ settings.get('about_philosophy_intro','') }}</textarea></label>
+      <label>Complete library story text <small>Separate paragraphs with a blank line. Your entire text is displayed without shortening.</small>
+        <textarea name="about_philosophy_body" rows="15" placeholder="Add the complete Book Buddy library story here. Write about your library and its reading community.">{{ settings.get('about_philosophy_body','') }}</textarea>
+      </label>
+    </div>
+    <p class="hint">Your saved About text is displayed on the public website.</p>
+  </section>
+  <section class="panel s33-admin-panel">
+    <h2>YouTube &amp; media</h2>
+    <label>Video section heading <input name="about_video_heading" maxlength="300" value="{{ settings.get('about_video_heading') or 'Library Highlights & Guides' }}"></label>
+    <label>Video section introduction <textarea name="about_video_intro" rows="2">{{ settings.get('about_video_intro') or 'Watch our latest updates, educational content, and community moments.' }}</textarea></label>
+    <div class="s33-video-grid">{% for n in range(1,9) %}{% set video=videos[n-1] if videos|length >= n else {} %}
+      <fieldset><legend>Video {{ n }}</legend>
+        <label>Title <input name="video_title_{{ n }}" maxlength="160" value="{{ video.get('title','') }}"></label>
+        <label>YouTube / Vimeo URL <input name="video_url_{{ n }}" type="url" value="{{ video.get('url','') }}"></label>
+        <label>Description <textarea name="video_description_{{ n }}" rows="2">{{ video.get('description','') }}</textarea></label>
+      </fieldset>
+    {% endfor %}</div>
+    <p class="hint">Only approved HTTPS YouTube and Vimeo links can be embedded. Clear a video's title and URL to remove it.</p>
+  </section>
+  <div class="s33-save-bar"><button type="submit" class="button">Publish About page</button><a class="button secondary" href="/about/" target="_blank" rel="noopener">Preview live About page</a></div>
+</form>
+
+<!-- Gallery Photos Section on About Page -->
+<section class="panel s33-admin-panel" id="gallery" style="margin-top: 32px; scroll-margin-top: 80px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+    <div>
+      <h2 style="margin:0;">Gallery photos</h2>
+      <p class="hint" style="margin:4px 0 0 0;">Manage photographs displayed in the Gallery section of the About page. Titles and descriptions are hidden on the public site.</p>
+    </div>
+    <a class="button secondary" href="/about/#gallery" target="_blank" rel="noopener">View gallery on About page <svg class="bb-icon" style="width:14px;height:14px;"><use href="#i-external-link"/></svg></a>
+  </div>
+
+  <!-- Settings form for pill and heading -->
+  <form method="post" action="/admin/about-editor/#gallery" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:24px;">
+    <input type="hidden" name="csrf_token" value="{{ workspace_token() }}">
+    <input type="hidden" name="gallery_action" value="save_settings">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px; align-items:end;">
+      <div>
+        <label for="gallery_pill" style="display:block; font-weight:600; font-size:13px; margin-bottom:6px;">Eyebrow pill label</label>
+        <input type="text" id="gallery_pill" name="gallery_pill" value="{{ gallery_settings.gallery_pill or 'Our Gallery' }}" style="width:100%;" required>
+      </div>
+      <div>
+        <label for="gallery_heading" style="display:block; font-weight:600; font-size:13px; margin-bottom:6px;">Section heading</label>
+        <input type="text" id="gallery_heading" name="gallery_heading" value="{{ gallery_settings.gallery_heading or 'Capturing Moments, Creating Memories' }}" style="width:100%;" required>
+      </div>
+      <div>
+        <button type="submit" class="button secondary" style="width:100%;">Save gallery text</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Multi-photo upload -->
+  <form method="post" action="/admin/about-editor/#gallery" enctype="multipart/form-data" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:24px;">
+    <input type="hidden" name="csrf_token" value="{{ workspace_token() }}">
+    <input type="hidden" name="gallery_action" value="upload">
+    <h3 style="margin:0 0 8px 0; font-size:15px;">Add photos to gallery</h3>
+    <p class="hint" style="margin:0 0 12px 0;">Select one or multiple images (JPG, PNG, WebP · max 15MB each). WebP thumbnails (~800px) are generated automatically.</p>
+    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+      <input type="file" name="photos" multiple accept=".jpg,.jpeg,.png,.webp,image/*" required style="flex:1; min-width:240px;">
+      <button type="submit" class="button"><svg class="bb-icon" style="width:14px;height:14px;margin-right:6px;"><use href="#i-upload"/></svg> Upload photos</button>
+    </div>
+  </form>
+
+  <!-- Gallery Photos Grid -->
+  <h3 style="margin:0 0 12px 0; font-size:15px;">Current photos ({{ gallery_items|length }})</h3>
+  {% if gallery_items %}
+  <form method="post" action="/admin/about-editor/#gallery">
+    <input type="hidden" name="csrf_token" value="{{ workspace_token() }}">
+    <input type="hidden" name="gallery_action" value="reorder">
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px; margin-bottom:20px;">
+      {% for item in gallery_items %}
+      <div style="background:#fff; border:1px solid {% if not item.file_exists %}#f87171{% elif not item.is_active %}#cbd5e1{% else %}#e2e8f0{% endif %}; border-radius:8px; overflow:hidden; display:flex; flex-direction:column; position:relative;">
+        <!-- 16:10 thumbnail preview -->
+        <div style="position:relative; width:100%; aspect-ratio:16/10; background:#f1f5f9; overflow:hidden;">
+          {% if item.file_exists %}
+          <img src="{{ item.thumbnail_path or item.image_path }}" alt="{{ item.alt_text or 'Photo' }}" style="width:100%; height:100%; object-fit:cover;">
+          {% else %}
+          <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; background:#fee2e2; color:#991b1b; padding:12px; text-align:center;">
+            <strong style="font-size:13px;">⚠️ File missing</strong>
+            <small style="word-break:break-all; font-size:10px; margin-top:4px;">{{ item.image_path }}</small>
+          </div>
+          {% endif %}
+          {% if not item.is_active %}
+          <span style="position:absolute; top:8px; left:8px; background:rgba(15,23,42,0.8); color:#fff; font-size:11px; padding:2px 8px; border-radius:4px; font-weight:600;">Hidden</span>
+          {% endif %}
+          {% if item.is_test_data %}
+          <span style="position:absolute; top:8px; right:8px; background:rgba(217,119,6,0.9); color:#fff; font-size:11px; padding:2px 8px; border-radius:4px; font-weight:600;">Test data ({{ item.title }})</span>
+          {% endif %}
+        </div>
+        <!-- Card controls -->
+        <div style="padding:12px; display:flex; flex-direction:column; gap:8px; flex:1;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label style="font-size:12px; font-weight:600; color:#64748b;">
+              Order: <input type="number" name="pos_{{ item.id }}" value="{{ item.position }}" style="width:60px; padding:2px 6px; font-size:12px;" min="0">
+            </label>
+            <span style="font-size:11px; color:#94a3b8;">ID #{{ item.id }}</span>
+          </div>
+          <!-- Alt text input -->
+          <div>
+            <input type="text" id="alt_{{ item.id }}" value="{{ item.alt_text or '' }}" placeholder="Alt text for screen readers" style="width:100%; font-size:12px; padding:4px 8px;">
+          </div>
+          <div style="display:flex; gap:6px; margin-top:auto; padding-top:8px; border-top:1px solid #f1f5f9;">
+            <button type="button" class="button button-small secondary" onclick="var form = document.createElement('form'); form.method='POST'; form.action='/admin/about-editor/#gallery'; form.innerHTML='<input type=hidden name=csrf_token value=\'{{ workspace_token() }}\'><input type=hidden name=gallery_action value=update_alt><input type=hidden name=item_id value=\'{{ item.id }}\'><input type=hidden name=alt_text value=\'' + encodeURIComponent(document.getElementById('alt_{{ item.id }}').value) + '\'>'; document.body.appendChild(form); form.submit();" style="flex:1;">Save alt</button>
+            <button type="button" class="button button-small secondary" onclick="var form = document.createElement('form'); form.method='POST'; form.action='/admin/about-editor/#gallery'; form.innerHTML='<input type=hidden name=csrf_token value=\'{{ workspace_token() }}\'><input type=hidden name=gallery_action value=toggle><input type=hidden name=item_id value=\'{{ item.id }}\'>'; document.body.appendChild(form); form.submit();">{{ 'Hide' if item.is_active else 'Show' }}</button>
+            <button type="button" class="button button-small danger" onclick="if(confirm('Delete photo #{{ item.id }} from gallery?')) { var form = document.createElement('form'); form.method='POST'; form.action='/admin/about-editor/#gallery'; form.innerHTML='<input type=hidden name=csrf_token value=\'{{ workspace_token() }}\'><input type=hidden name=gallery_action value=delete><input type=hidden name=item_id value=\'{{ item.id }}\'>'; document.body.appendChild(form); form.submit(); }">Delete</button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <button type="submit" class="button secondary"><svg class="bb-icon" style="width:14px;height:14px;margin-right:6px;"><use href="#i-check"/></svg> Update photo order</button>
+  </form>
+  {% else %}
+  <p class="hint">No gallery photos added yet. Use the upload box above to add photographs.</p>
+  {% endif %}
+</section>
+
+<link rel="stylesheet" href="/static/css/about-editor.css?v=2">
+{% endblock %}

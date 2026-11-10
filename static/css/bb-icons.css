@@ -1,0 +1,191 @@
+/* Book Buddy inline SVG icon system */
+.bb-icon,
+svg.icon {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* Button icons: 16px, vertically centered with the label, 8px gap, button text color (currentColor) */
+.button .bb-icon,
+.btn .bb-icon,
+button .bb-icon,
+a.button .bb-icon,
+.button svg.icon,
+.btn svg.icon,
+button svg.icon,
+a.button svg.icon {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  vertical-align: middle;
+  margin-left: 8px;
+  flex-shrink: 0;
+  transition: transform 0.18s ease-in-out;
+}
+
+/* Align button children inline-flex */
+.button,
+.btn,
+a.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Small hover nudge on buttons */
+.button:hover .bb-icon,
+.btn:hover .bb-icon,
+button:hover .bb-icon,
+a.button:hover .bb-icon,
+.button:hover svg.icon,
+.btn:hover svg.icon,
+button:hover svg.icon,
+a.button:hover svg.icon {
+  transform: translateX(3px);
+}
+
+/* ============================================================
+   Admin Sidebar Chevron & Submenu Icon System
+   ============================================================ */
+
+/* Hide native details marker and disable CSS pseudo glyphs */
+.sidebar details > summary,
+.s29-sidebar details > summary {
+  list-style: none !important;
+  cursor: pointer;
+}
+
+.sidebar details > summary::-webkit-details-marker,
+.s29-sidebar details > summary::-webkit-details-marker {
+  display: none !important;
+}
+
+.sidebar summary::after,
+.sidebar summary::before,
+.s29-sidebar summary::after,
+.s29-sidebar summary::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Ensure summary row displays icon, label and chevron neatly */
+body.folio-admin .sidebar summary,
+aside#admin-sidebar summary {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Chevron icon at the right of each <summary> */
+.sidebar summary .bb-chevron,
+.s29-sidebar summary .bb-chevron {
+  margin-left: auto !important;
+  width: 16px !important;
+  height: 16px !important;
+  opacity: 0.75;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  stroke: currentColor !important;
+  color: inherit !important;
+}
+
+.sidebar details[open] > summary .bb-chevron,
+.s29-sidebar details[open] > summary .bb-chevron {
+  transform: rotate(180deg) !important;
+}
+
+/* Submenu links inside .s29-submenu */
+body.folio-admin .sidebar .s29-submenu a,
+aside#admin-sidebar .s29-submenu a {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+  padding: 8px 12px 8px 16px !important;
+  font-size: calc(13px * var(--bb-scale))!important;
+  line-height: 1.35 !important;
+  color: rgba(255, 252, 247, 0.88) !important;
+  text-decoration: none !important;
+  border-radius: 8px !important;
+  margin: 2px 0 !important;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+body.folio-admin .sidebar .s29-submenu a .bb-icon,
+aside#admin-sidebar .s29-submenu a .bb-icon {
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0 !important;
+  margin-top: 1px !important;
+  opacity: 0.75;
+  color: inherit !important;
+  stroke: currentColor !important;
+  transition: opacity 0.15s ease;
+}
+
+body.folio-admin .sidebar .s29-submenu a span,
+aside#admin-sidebar .s29-submenu a span {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+body.folio-admin .sidebar .s29-submenu a:hover,
+aside#admin-sidebar .s29-submenu a:hover {
+  background: rgba(255, 252, 247, 0.12) !important;
+  color: #FFFFFF !important;
+}
+
+body.folio-admin .sidebar .s29-submenu a:hover .bb-icon,
+aside#admin-sidebar .s29-submenu a:hover .bb-icon {
+  opacity: 1 !important;
+}
+
+/* ============================================================
+   Selected / Active Sidebar Item Contrast (White Pill on Navy)
+   ============================================================ */
+html body.folio-admin .sidebar a.selected,
+html body.folio-admin .sidebar a[aria-current="page"],
+html body.folio-admin aside#admin-sidebar a.selected,
+html body.folio-admin aside#admin-sidebar a[aria-current="page"],
+.workspace .sidebar a.selected,
+.workspace .sidebar a[aria-current="page"] {
+  background: #ffffff !important;
+  color: #061446 !important;
+  -webkit-text-fill-color: #061446 !important;
+  font-weight: 700 !important;
+  border-radius: 9999px !important;
+  border: none !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+}
+
+html body.folio-admin .sidebar a.selected .bb-icon,
+html body.folio-admin .sidebar a.selected svg,
+html body.folio-admin .sidebar a.selected svg.icon,
+html body.folio-admin .sidebar a[aria-current="page"] .bb-icon,
+html body.folio-admin .sidebar a[aria-current="page"] svg,
+html body.folio-admin aside#admin-sidebar a.selected .bb-icon,
+html body.folio-admin aside#admin-sidebar a.selected svg,
+html body.folio-admin aside#admin-sidebar a[aria-current="page"] .bb-icon,
+html body.folio-admin aside#admin-sidebar a[aria-current="page"] svg,
+.workspace .sidebar a.selected .bb-icon,
+.workspace .sidebar a.selected svg,
+.workspace .sidebar a[aria-current="page"] .bb-icon,
+.workspace .sidebar a[aria-current="page"] svg {
+  stroke: #740f28 !important;
+  color: #740f28 !important;
+  fill: currentColor !important;
+  opacity: 1 !important;
+}
+

@@ -1,0 +1,136 @@
+{
+  "summary": {
+    "total_checked": 18162,
+    "failures": 0
+  },
+  "pages": {
+    "/ (1920px)": {
+      "elements_checked": 174,
+      "failures": []
+    },
+    "/about/ (1920px)": {
+      "elements_checked": 60,
+      "failures": []
+    },
+    "/library/ (1920px)": {
+      "elements_checked": 99,
+      "failures": []
+    },
+    "/membership/ (1920px)": {
+      "elements_checked": 3487,
+      "failures": []
+    },
+    "/how-to-borrow/ (1920px)": {
+      "elements_checked": 53,
+      "failures": []
+    },
+    "/visit-us/ (1920px)": {
+      "elements_checked": 43,
+      "failures": []
+    },
+    "/reading-circles/ (1920px)": {
+      "elements_checked": 50,
+      "failures": []
+    },
+    "/contests/ (1920px)": {
+      "elements_checked": 45,
+      "failures": []
+    },
+    "/events/ (1920px)": {
+      "elements_checked": 1898,
+      "failures": []
+    },
+    "/publications/?kind=news (1920px)": {
+      "elements_checked": 57,
+      "failures": []
+    },
+    "/podcasts/ (1920px)": {
+      "elements_checked": 57,
+      "failures": []
+    },
+    "/gallery/ (1920px)": {
+      "elements_checked": 50,
+      "failures": []
+    },
+    "/contact/ (1920px)": {
+      "elements_checked": 57,
+      "failures": []
+    },
+    "/accounts/login/ (1920px)": {
+      "elements_checked": 51,
+      "failures": []
+    },
+    "/accounts/signup/ (1920px)": {
+      "elements_checked": 66,
+      "failures": []
+    },
+    "/work-with-us/ (1920px)": {
+      "elements_checked": 45,
+      "failures": []
+    },
+    "/ (390px)": {
+      "elements_checked": 166,
+      "failures": []
+    },
+    "/about/ (390px)": {
+      "elements_checked": 52,
+      "failures": []
+    },
+    "/library/ (390px)": {
+      "elements_checked": 91,
+      "failures": []
+    },
+    "/membership/ (390px)": {
+      "elements_checked": 3479,
+      "failures": []
+    },
+    "/how-to-borrow/ (390px)": {
+      "elements_checked": 45,
+      "failures": []
+    },
+    "/visit-us/ (390px)": {
+      "elements_checked": 35,
+      "failures": []
+    },
+    "/reading-circles/ (390px)": {
+      "elements_checked": 42,
+      "failures": []
+    },
+    "/contests/ (390px)": {
+      "elements_checked": 37,
+      "failures": []
+    },
+    "/events/ (390px)": {
+      "elements_checked": 1890,
+      "failures": []
+    },
+    "/publications/?kind=news (390px)": {
+      "elements_checked": 49,
+      "failures": []
+    },
+    "/podcasts/ (390px)": {
+      "elements_checked": 49,
+      "failures": []
+    },
+    "/gallery/ (390px)": {
+      "elements_checked": 42,
+      "failures": []
+    },
+    "/contact/ (390px)": {
+      "elements_checked": 49,
+      "failures": []
+    },
+    "/accounts/login/ (390px)": {
+      "elements_checked": 43,
+      "failures": []
+    },
+    "/accounts/signup/ (390px)": {
+      "elements_checked": 58,
+      "failures": []
+    },
+    "/work-with-us/ (390px)": {
+      "elements_checked": 37,
+      "failures": []
+    }
+  }
+}

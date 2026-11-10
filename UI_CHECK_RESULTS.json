@@ -1,0 +1,266 @@
+[
+  {
+    "role": "guest",
+    "url": "/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "guest",
+    "url": "/about/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "guest",
+    "url": "/library/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "guest",
+    "url": "/events/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "guest",
+    "url": "/reading-circles/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "guest",
+    "url": "/contests/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "guest",
+    "url": "/publications/?kind=news",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "guest",
+    "url": "/publications/?kind=magazine",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "guest",
+    "url": "/podcasts/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "guest",
+    "url": "/gallery/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "guest",
+    "url": "/contact/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "guest",
+    "url": "/membership-options/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "guest",
+    "url": "/accounts/login/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "guest",
+    "url": "/accounts/signup/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "guest",
+    "url": "/admin/login/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "member",
+    "url": "/members/dashboard/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "member",
+    "url": "/members/library/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "member",
+    "url": "/members/notifications/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "member",
+    "url": "/members/support/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "member",
+    "url": "/users/profile/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "member",
+    "url": "/library/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "member",
+    "url": "/events/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "member",
+    "url": "/membership-options/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/dashboard/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/manage/home-sections/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/manage/home-sections/0/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/library-center/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/manage/books/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/library17/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/lending/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/membership-desk/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/plans17/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/manage/events/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/events/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/manage/publications/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/manage/gallery/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/manage/members/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/support17/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/staff17/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/about-editor/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/notifications/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/settings/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/reports17/",
+    "status": 200,
+    "redirected": false
+  },
+  {
+    "role": "admin",
+    "url": "/admin/password/",
+    "status": 200,
+    "redirected": false
+  }
+]

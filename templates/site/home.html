@@ -1,0 +1,275 @@
+{% extends 'site/base.html' %}
+<!-- fa-solid (legacy test marker) -->
+
+{% block title %}Book Buddy · Books, Learning &amp; Skills All Under One Roof{% endblock %}
+
+{% block body %}
+{% set m = homepage_map or {} %}
+{% set sec_hero = m.get('hero') or homepage_hero or {} %}
+{% set sec_comm = m.get('community') or {} %}
+{% set sec_pub = m.get('publications') or {} %}
+{% set sec_rev = m.get('reviews') or {} %}
+
+<main id="main-content">
+  <!-- ============================================================
+       1. HERO SECTION
+       ============================================================ -->
+  <section class="bb8-hero" aria-label="Welcome to Book Buddy">
+    <div class="bb8-container bb8-hero-grid">
+      <!-- Left Content -->
+      <div class="bb8-hero-content">
+        <span class="bb8-eyebrow">{{ sec_hero.kicker or content.hero_kicker or 'BOOK BUDDY' }}</span>
+        <h1 class="bb8-hero-title">
+          <span class="bb8-hero-line1">{{ sec_hero.title or content.hero_line1 or 'Books, Stories &amp; Ideas' }}</span>
+          <span class="bb8-hero-line2">{{ sec_hero.highlight or content.hero_line2 or 'All Under One Roof' }}</span>
+        </h1>
+        <p class="bb8-hero-text">
+          {{ sec_hero.description or content.hero_text or "With our curated library and story-based academic support, we help you master the skills textbooks alone can't teach." }}
+        </p>
+        <div class="bb8-hero-cta">
+          <a href="{{ sec_hero.button2_url or content.hero_primary_button_url or '/library/' }}" class="bb8-btn-primary">
+            {{ sec_hero.button2_label or content.hero_primary_button_label or 'Explore the Library' }}
+            <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg>
+          </a>
+          <a href="{{ sec_hero.url or content.hero_secondary_button_url or '/contact/' }}" class="bb8-btn-secondary">
+            {{ sec_hero.button_label or content.hero_secondary_button_label or 'Contact the Library' }}
+          </a>
+        </div>
+      </div>
+
+      <!-- Right Calendar Card -->
+      <div class="bb8-hero-calendar-wrap">
+        <aside class="bb8-calendar-card" id="community-calendar" aria-label="Library event calendar">
+          <div class="bb8-cal-header">
+            <h2 class="bb8-cal-title">
+              {{ home_calendar.label if home_calendar and home_calendar.label else 'EVENTS CALENDAR' }}
+            </h2>
+            <div style="display:flex;gap:6px;">
+              {% if home_calendar and home_calendar.prev %}
+                <a class="bb8-cal-nav-btn" href="/?month={{ home_calendar.prev }}#community-calendar" aria-label="Previous month">
+                  <svg class="bb-icon" style="width:14px;height:14px;" aria-hidden="true"><use href="#i-chevron-left"/></svg>
+                </a>
+              {% endif %}
+              {% if home_calendar and home_calendar.next %}
+                <a class="bb8-cal-nav-btn" href="/?month={{ home_calendar.next }}#community-calendar" aria-label="Next month">
+                  <svg class="bb-icon" style="width:14px;height:14px;" aria-hidden="true"><use href="#i-chevron-right"/></svg>
+                </a>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="bb8-cal-days-header" aria-hidden="true">
+            <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span>
+          </div>
+
+          <div class="bb8-cal-grid" role="grid">
+            {% if home_calendar and home_calendar.weeks %}
+              {% for week in home_calendar.weeks %}
+                {% for day in week %}
+                  {% if day %}
+                    {% set key = home_calendar.month + '-%02d'|format(day) %}
+                    {% set day_events = home_calendar.events|selectattr('event_date', 'equalto', key)|list if home_calendar.events else [] %}
+                    <a class="bb8-cal-cell {{ 'is-today' if key == home_calendar.today }} {{ 'has-event' if day_events }}"
+                       href="/events/?date={{ key }}"
+                       aria-label="{{ key }}{% if day_events %}, {{ day_events|length }} event(s){% endif %}">
+                      <span>{{ day }}</span>
+                      {% if day_events %}
+                        <span class="bb8-cal-dot" aria-hidden="true"></span>
+                      {% endif %}
+                    </a>
+                  {% else %}
+                    <div class="bb8-cal-cell is-empty" aria-hidden="true"></div>
+                  {% endif %}
+                {% endfor %}
+              {% endfor %}
+            {% else %}
+              {# Fallback standard 30-day month preview #}
+              {% for day in range(1, 31) %}
+                <div class="bb8-cal-cell"><span>{{ day }}</span></div>
+              {% endfor %}
+            {% endif %}
+          </div>
+
+          <div class="bb8-cal-legend" aria-hidden="true">
+            <div class="bb8-cal-legend-item">
+              <span class="bb8-cal-legend-dot is-upcoming"></span>
+              <span>Upcoming Event</span>
+            </div>
+            <div class="bb8-cal-legend-item">
+              <span class="bb8-cal-legend-dot is-past"></span>
+              <span>Past Event</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       2. COMMUNITY & EVENTS
+       ============================================================ -->
+  <section class="bb8-section" id="community" aria-labelledby="community-heading">
+    <div class="bb8-container">
+      <div class="bb8-section-header">
+        <span class="bb8-eyebrow">{{ sec_comm.kicker or 'COMMUNITY & EVENTS' }}</span>
+        <h2 class="bb8-section-title" id="community-heading">
+          {{ sec_comm.title or 'Join Our Community: Online or In-Person' }}
+        </h2>
+        <p class="bb8-section-subtext">
+          {{ sec_comm.description or 'Two ways to plug in: walk into our Saligramam room, or join a live session from anywhere.' }}
+        </p>
+      </div>
+
+      <div class="bb8-event-grid">
+        <!-- Event Card 1: In-Library -->
+        <article class="bb8-event-card">
+          <div>
+            <span class="bb8-card-tag">{{ content.comm_card1_tag or 'In-Library' }}</span>
+            <h3 class="bb8-card-title">{{ content.comm_card1_title or 'The Sunday Reading Circle' }}</h3>
+            <p class="bb8-card-schedule">{{ content.comm_card1_schedule or 'Every Sunday · 6:00 PM – 8:00 PM' }}</p>
+            <p class="bb8-card-desc">
+              {{ content.comm_card1_desc or 'Join parents and kids for Pomodoro-style reading sprints, team-building games, and collaborative learning.' }}
+            </p>
+          </div>
+          <a href="{{ sec_comm.url or content.comm_card1_url or 'https://wa.me/919080759312' }}" class="bb8-card-btn-pill" target="_blank" rel="noopener">
+            <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true"><use href="#i-whatsapp"/></svg>
+            {{ sec_comm.button_label or content.comm_card1_btn or 'RSVP via WhatsApp' }}
+          </a>
+        </article>
+
+        <!-- Event Card 2: Live Online -->
+        <article class="bb8-event-card">
+          <div>
+            <span class="bb8-card-tag is-online">{{ content.comm_card2_tag or 'Live Online' }}</span>
+            <h3 class="bb8-card-title">{{ content.comm_card2_title or 'Virtual Storytelling Sessions' }}</h3>
+            <p class="bb8-card-schedule">{{ content.comm_card2_schedule or 'Weekly · Zoom' }}</p>
+            <p class="bb8-card-desc">
+              {{ content.comm_card2_desc or 'Interactive, narrative-driven sessions focused on imagination, voice expression, and communication skills.' }}
+            </p>
+          </div>
+          <a href="{{ content.comm_card2_url or '/reading-circles/' }}" class="bb8-card-btn-pill">
+            {{ content.comm_card2_btn or 'View Schedule' }}
+            <svg class="bb-icon" style="width:14px;height:14px;" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+          </a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       3. PUBLICATIONS
+       ============================================================ -->
+  <section class="bb8-section" id="publications" aria-labelledby="publications-heading">
+    <div class="bb8-container">
+      <div class="bb8-section-header">
+        <span class="bb8-eyebrow">{{ sec_pub.kicker or 'PUBLICATIONS' }}</span>
+        <h2 class="bb8-section-title" id="publications-heading">
+          {{ sec_pub.title or 'The Book Buddy Times & More' }}
+        </h2>
+        <p class="bb8-section-subtext">
+          {{ sec_pub.description or 'Our monthly newspaper — written by the community, for the community.' }}
+        </p>
+      </div>
+
+      <!-- Featured Newspaper Block (Cover Left, Text Right, Vertically Centered) -->
+      <article class="bb8-featured-pub-card">
+        <div class="bb8-featured-pub-media">
+          <img src="{{ sec_pub.image_path or content.pub_news_img or '/static/img/art/07-newspaper.png' }}" alt="{{ sec_pub.image_alt or 'Newspaper Cover' }}" loading="lazy" width="540" height="340">
+        </div>
+        <div class="bb8-featured-pub-body">
+          <span class="bb8-card-tag">{{ sec_pub.highlight or content.pub_news_tag or 'Issue #5 is here' }}</span>
+          <h3 class="bb8-featured-pub-title">{{ content.pub_news_title or 'Our 3-year reading roadmap — stories and young reviewer features.' }}</h3>
+          <p class="bb8-featured-pub-desc">
+            {{ content.pub_news_desc or "This month: how we're expanding library collections, reading tips from educators, and comic strips from our Friday reading circle." }}
+          </p>
+          <div class="bb8-pub-actions">
+            <a href="{{ sec_pub.url or content.pub_news_url or '/newspaper/' }}" class="bb8-btn-primary">
+              <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true"><use href="#i-newspaper"/></svg>
+              {{ sec_pub.button_label or content.pub_news_btn or 'Read the Newspaper' }}
+            </a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Any custom sections added by admin -->
+  {% for sec in homepage_sections if sec.section_key not in ('hero', 'community', 'challenges', 'publications', 'innovation', 'reviews', 'visit', 'membership', 'collection', 'media') %}
+  <section class="bb8-section" id="{{ sec.section_key }}">
+    <div class="bb8-container">
+      <div class="bb8-section-header">
+        {% if sec.kicker %}<span class="bb8-eyebrow">{{ sec.kicker }}</span>{% endif %}
+        <h2 class="bb8-section-title">{{ sec.title }}</h2>
+        {% if sec.description %}<p class="bb8-section-subtext">{{ sec.description }}</p>{% endif %}
+      </div>
+      {% if sec.image_path %}
+      <div style="margin-top:20px;border-radius:12px;overflow:hidden;max-width:700px;">
+        <img src="{{ sec.image_path }}" alt="{{ sec.image_alt or sec.title }}" loading="lazy" style="width:100%;height:auto;display:block;">
+      </div>
+      {% endif %}
+      {% if sec.url %}
+      <div style="margin-top:20px;">
+        <a href="{{ sec.url }}" class="bb8-btn-primary">
+          {{ sec.button_label or 'Explore' }}
+          <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+  {% endfor %}
+
+  <!-- ============================================================
+       4. REVIEWS (Google Maps Ratings)
+       ============================================================ -->
+  <section class="bb8-section is-tinted" id="reviews" aria-labelledby="reviews-heading">
+    <div class="bb8-container">
+      <div class="bb8-reviews-card">
+        <span class="bb8-eyebrow">{{ sec_rev.kicker or 'Google Reviews' }}</span>
+        <h2 class="bb8-section-title" id="reviews-heading">
+          {{ sec_rev.title or 'Verified Ratings on Google Maps' }}
+        </h2>
+
+        <div class="bb8-rating-badge-container">
+          <div class="bb8-rating-number">{{ sec_rev.highlight or content.google_rating or '4.9' }}</div>
+          <div class="bb8-stars" aria-label="5 out of 5 stars">
+            <svg class="bb-icon" aria-hidden="true"><use href="#i-star"/></svg>
+            <svg class="bb-icon" aria-hidden="true"><use href="#i-star"/></svg>
+            <svg class="bb-icon" aria-hidden="true"><use href="#i-star"/></svg>
+            <svg class="bb-icon" aria-hidden="true"><use href="#i-star"/></svg>
+            <svg class="bb-icon" aria-hidden="true"><use href="#i-star"/></svg>
+          </div>
+          <span class="bb8-rating-count">{{ content.google_review_count or '120+ Verified Reviews' }}</span>
+        </div>
+
+        <div class="bb8-quotes-grid">
+          <blockquote class="bb8-quote-card">
+            <p class="bb8-quote-text">
+              "{{ content.reviews_quote1_text or 'An amazing library and community space. Kids love the reading circles and storytelling sessions!' }}"
+            </p>
+            <cite class="bb8-quote-author">— {{ content.reviews_quote1_author or 'Priya R.' }}</cite>
+          </blockquote>
+          <blockquote class="bb8-quote-card">
+            <p class="bb8-quote-text">
+              "{{ content.reviews_quote2_text or 'Best curated collection in Chennai. The delivery service and book recommendations are wonderful.' }}"
+            </p>
+            <cite class="bb8-quote-author">— {{ content.reviews_quote2_author or 'Karthik S.' }}</cite>
+          </blockquote>
+          <blockquote class="bb8-quote-card">
+            <p class="bb8-quote-text">
+              "{{ content.reviews_quote3_text or 'Warm atmosphere, knowledgeable mentors, and a great place for readers of all ages.' }}"
+            </p>
+            <cite class="bb8-quote-author">— {{ content.reviews_quote3_author or 'Ananya M.' }}</cite>
+          </blockquote>
+        </div>
+
+        <a href="{{ sec_rev.url or content.google_review_url or 'https://maps.google.com/?q=Book+Buddy+Library' }}"
+           class="bb8-btn-primary" target="_blank" rel="noopener">
+          <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true"><use href="#i-star"/></svg>
+          {{ sec_rev.button_label or 'Review us on Google' }}
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}

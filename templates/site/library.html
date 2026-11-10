@@ -1,0 +1,37 @@
+{% extends 'site/base.html' %}
+{% block title %}Library Catalogue · Book Buddy{% endblock %}
+{% block body %}
+<main class="section bb-catalogue-page">
+  <div class="container bb-catalogue-container">
+    <div class="bb-catalogue-heading">
+      <div>
+        <p class="bb-catalogue-eyebrow">THE BOOK BUDDY LIBRARY</p>
+        <h2>Discover your next read</h2>
+        <p>Browse the collection, find a favourite, and discover something new.</p>
+      </div>
+      <a class="bb-catalogue-basket" href="/members/dashboard/">My borrowed books</a>
+    </div>
+    <nav class="catalogue-quick" aria-label="Reader and language filters"><div><strong>Readers</strong>{% for value,label in [('', 'All'),('adult','Adults'),('kids','Kids')] %}<a href="{{ catalogue_url(audience=value,page=1) }}" {% if filters23.audience==value %}aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}</div><div><strong>Language</strong>{% for value,label in [('', 'All'),('Tamil','Tamil'),('English','English'),('Hindi','Hindi')] %}<a href="{{ catalogue_url(language=value,page=1) }}" {% if filters23.language|lower==value|lower %}aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}</div></nav>
+    <div class="catalogue-layout"><aside class="catalogue-sidebar"><details open><summary><svg class="icon" aria-hidden="true"><use href="#i-sliders"></use></svg> Refine your search</summary><form action="/library/" method="get"><label for="catalogue-search">Title, author or topic</label><input id="catalogue-search" type="search" name="q" value="{{ query }}" placeholder="Search books"><label for="reader-audience">Readers</label><select id="reader-audience" name="audience">{% for value,label in [('', 'All readers'),('adult','Adults'),('kids','Kids')] %}<option value="{{ value }}" {{ 'selected' if filters23.audience==value }}>{{ label }}</option>{% endfor %}</select><label for="book-collection">Collection</label><select id="book-collection" name="collection"><option value="">All collections</option>{% for c in collections %}<option {{ 'selected' if c==selected_collection }}>{{ c }}</option>{% endfor %}</select>{% for key,label in [('language','Language'),('age_group','Age range'),('author','Author'),('product_type','Format')] %}<label for="filter-{{ key }}">{{ label }}</label><select id="filter-{{ key }}" name="{{ key }}"><option value="">All</option>{% for value in filter_options[key] %}<option {{ 'selected' if value==filters23[key] }}>{{ value }}</option>{% endfor %}</select>{% endfor %}<label for="book-stock">Availability</label><select id="book-stock" name="availability"><option value="">All books</option><option value="available" {{ 'selected' if filters23.availability=='available' }}>Available</option><option value="waitlist" {{ 'selected' if filters23.availability=='waitlist' }}>Waitlist</option></select><label for="book-sort">Sort by</label><select id="book-sort" name="sort">{% for value,label in [('newest','Newest first'),('title','Title A–Z'),('author','Author A–Z')] %}<option value="{{ value }}" {{ 'selected' if filters23.sort==value }}>{{ label }}</option>{% endfor %}</select><label><input type="checkbox" name="new" value="1" {{ 'checked' if filters23.new=='1' }}> New arrivals only</label><button type="submit">Apply filters</button><a href="/library/">Reset filters</a></form></details></aside><section class="catalogue-main" aria-label="Search results">
+    <div class="bb-catalogue-results" role="status">
+      <span>{{ catalogue_count }} {{ 'book' if catalogue_count == 1 else 'books' }} found</span>
+      {% if catalogue_pages > 1 %}<span>Page {{ catalogue_page }} of {{ catalogue_pages }}</span>{% endif %}
+    </div>
+    {% if books %}
+      <div class="bb-book-grid" aria-label="Library books">
+        {% for book in books %}{% include 'site/_compact_book_card.html' %}{% endfor %}
+      </div>
+    {% else %}
+      <div class="bb-catalogue-empty"><h2>No matching books</h2><p>Try another title, author or collection.</p><a href="{{ url_for('modern_library') }}">View all books</a></div>
+    {% endif %}
+    {% if catalogue_pages > 1 %}
+      <nav class="bb-catalogue-pages" aria-label="Catalogue pagination">
+        {% if catalogue_page > 1 %}<a href="{{ catalogue_url(page=catalogue_page-1) }}"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg> Previous</a>{% else %}<span class="bb-page-disabled"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg> Previous</span>{% endif %}
+        <span>Page {{ catalogue_page }} / {{ catalogue_pages }}</span>
+        {% if catalogue_page < catalogue_pages %}<a href="{{ catalogue_url(page=catalogue_page+1) }}">Next <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"></use></svg></a>{% else %}<span class="bb-page-disabled">Next <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"></use></svg></span>{% endif %}
+      </nav>
+    {% endif %}
+    </section></div>
+  </div>
+</main>
+{% endblock %}

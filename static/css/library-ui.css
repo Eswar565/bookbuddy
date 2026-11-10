@@ -1,0 +1,22 @@
+/* BookBuddy v31: same original navy/white theme across public pages.
+   Final cascade overrides incompatible earlier maroon/teal hover rules. */
+:root{--bb31-primary:#7A1636;--bb31-primary-hover:#4A0F24;--bb31-primary-soft:#F4E4DB;--bb31-focus:#4f76cf;--bb31-line:#d8e2f0;--bb31-ink:#1e2f42}
+body.bookbuddy-modern :is(.bb24-home,.bb24-about,.s26-shell,.bb17-shell,.bb18-content){--primary:#7A1636;--primaryColor:#7A1636;--secondaryColor:#7A1636;--accent:#7A1636}
+/* Site button components, including the two large homepage calls-to-action. */
+body.bookbuddy-modern :is(.bb24-button:not(.bb24-button-outline),.bb17-btn:not(.secondary),.bb16-btn.bb16-primary,.bb-book-action,.bb-catalogue-search button,.s26-btn:not(.s26-outline):not(.s26-danger),.button-primary,.s29-plan-action button,.s29-plan-action a){background:var(--bb31-primary)!important;border-color:var(--bb31-primary)!important;color:#fff!important;text-decoration:none!important;box-shadow:none!important;opacity:1!important}
+body.bookbuddy-modern :is(.bb24-button:not(.bb24-button-outline),.bb17-btn:not(.secondary),.bb16-btn.bb16-primary,.bb-book-action,.bb-catalogue-search button,.s26-btn:not(.s26-outline):not(.s26-danger),.button-primary,.s29-plan-action button,.s29-plan-action a):hover:not(:disabled){background:var(--bb31-primary-hover)!important;border-color:var(--bb31-primary-hover)!important;color:#fff!important;filter:none!important;box-shadow:0 7px 18px #7A163621!important}
+body.bookbuddy-modern :is(.bb24-button-outline,.s26-btn.s26-outline,.bb17-btn.secondary,.button-secondary,.button-outline){background:#fff!important;color:var(--bb31-primary)!important;border-color:#9aafd1!important;box-shadow:none!important;text-decoration:none!important}
+body.bookbuddy-modern :is(.bb24-button-outline,.s26-btn.s26-outline,.bb17-btn.secondary,.button-secondary,.button-outline):hover:not(:disabled){background:var(--bb31-primary-soft)!important;color:var(--bb31-primary-hover)!important;border-color:var(--bb31-primary)!important;filter:none!important}
+body.bookbuddy-modern :is(.bb24-card-link,.bb24-inline-link,.bb24-media-card a,.bb24-video-body a,.bb24-readmore summary,.bb24-follow,.s26-hint summary,.s26-localnav a){color:var(--bb31-primary)!important}
+body.bookbuddy-modern :is(.bb24-card-link,.bb24-inline-link,.bb24-media-card a,.bb24-video-body a,.bb24-follow):hover{color:var(--bb31-primary-hover)!important;text-decoration:underline;text-underline-offset:3px}
+body.bookbuddy-modern :is(.bb24-eyebrow,.bb24-card-time,.bb24-expert-role,.s26-eyebrow){color:var(--bb31-primary)!important}
+body.bookbuddy-modern .bb24-tag-solid{background:var(--bb31-primary)!important;border-color:var(--bb31-primary)!important;color:#fff!important}
+body.bookbuddy-modern .bb24-card-icon{color:var(--bb31-primary)!important}
+body.bookbuddy-modern :is(.bb24-home,.bb24-about) :is(h1,h2,h3){color:var(--bb31-primary)!important}
+body.bookbuddy-modern .s26-chip{color:var(--bb31-primary)!important;background:var(--bb31-primary-soft)!important}
+body.bookbuddy-modern .s27-skill-switch a:is(.is-active,[aria-current='page']){background:var(--bb31-primary)!important;border-color:var(--bb31-primary)!important;color:#fff!important}
+body.bookbuddy-modern .s27-skill-switch a:is(.is-active,[aria-current='page']) :is(small,span,i){color:#fff!important;opacity:1!important}
+body.bookbuddy-modern .s27-skill-switch a:not(.is-active):hover{background:var(--bb31-primary-soft)!important;color:var(--bb31-primary)!important}
+/* Keep the homepage calendar's date buttons neutral (do not paint the entire calendar navy). */
+body.bookbuddy-modern :is(a,button,input,select,textarea,summary):focus-visible{outline:3px solid var(--bb31-focus)!important;outline-offset:3px!important}
+@media(prefers-reduced-motion:reduce){body.bookbuddy-modern :is(button,a){transition:none!important}}

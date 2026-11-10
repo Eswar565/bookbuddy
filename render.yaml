@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: book-buddy-demo
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 2 --timeout 120
+    healthCheckPath: /healthz
+    envVars:
+      - key: DEMO_MODE
+        value: "1"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: "1"
+      - key: ADMIN_EMAIL
+        value: admin@example.com
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: BOOK_BUDDY_DATABASE
+        value: /var/data/book_buddy.sqlite3
+      - key: MEDIA_ROOT
+        value: /var/data/media
+      - key: RAZORPAY_KEY_ID
+        value: ""
+      - key: RAZORPAY_KEY_SECRET
+        value: ""
+      - key: GEMINI_API_KEY
+        value: ""
+    disk:
+      name: bookbuddy-data
+      mountPath: /var/data
+      sizeGB: 1
+

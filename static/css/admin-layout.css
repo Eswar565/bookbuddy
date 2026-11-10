@@ -1,0 +1,74 @@
+/* Book Buddy v14 admin: neutral cards, accessible Inter font, one-brand-blue only. */
+:root{--primaryColor:#7A1636;--secondaryColor:#7A1636;--primary:#7A1636;--accent:#7A1636;--ink:#182b43;--line:#e4eaf2;--muted:#516175}
+html{overflow-x:clip}
+body{font-family:'Inter',system-ui,-apple-system,'Segoe UI',Arial,sans-serif!important;font-size:calc(15px * var(--bb-scale))!important;line-height:1.7!important;background:#f6f8fc!important;color:#1b2b42!important}
+body :is(h1,h2,h3,h4,h5,h6){font-family:'Inter',system-ui,sans-serif!important;letter-spacing:-.025em!important;font-weight:700!important;color:#182c48!important;line-height:1.3!important}
+body :is(p,small,span,label,th,td,a,button,input,textarea,select,summary){font-family:'Inter',system-ui,sans-serif}
+.sidebar{border:0!important;border-right:1px solid #e8edf4!important;background:#fff!important}
+.sidebar details{border:0!important}
+.sidebar :is(a,summary){border:0!important;border-left:0!important;border-radius:9px!important}
+.sidebar a.selected,.sidebar details a.selected{background:#F4E4DB!important;color:#7A1636!important;border:0!important;box-shadow:none!important}
+.sidebar a:hover,.sidebar details a:hover,.sidebar summary:hover{background:#FBF4EA!important;color:#7A1636!important;text-decoration:none!important}
+.admin-content{background:#f6f8fc!important}
+.admin-content .eyebrow,.admin-content .section-kicker{color:#7A1636!important}
+.admin-content>header{border:0!important}
+.admin-content>header h1{font-size:clamp(1.65rem,2.5vw,2.2rem)!important}
+.admin-content .stats{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin:24px 0}
+.admin-content .stats>a{
+  display:flex;flex-direction:column;justify-content:center;min-height:132px;
+  padding:24px!important;border:0!important;border-top:0!important;border-left:0!important;
+  border-right:0!important;border-bottom:0!important;border-radius:15px!important;
+  background:#fff!important;box-shadow:0 5px 24px rgba(122, 22, 54,.055)!important;
+  text-decoration:none!important;color:#1c2b40!important;
+}
+.admin-content .stats>a::before,.admin-content .stats>a::after{content:none!important;display:none!important}
+.admin-content .stats strong{color:#7A1636!important;font-size:clamp(1.7rem,3vw,2.3rem)!important;font-weight:700!important;line-height:1.3}
+.admin-content .stats span{font-size:.9rem;color:#58687c}
+.admin-content .stats>a:hover{background:#f9fbff!important;box-shadow:0 8px 26px rgba(122, 22, 54,.085)!important}
+.admin-content :is(.welcome,.panel,.card,.admin-card,.metric,.summary-card,.settings-section,.media-card){
+ border:0!important;border-top:0!important;border-left:0!important;border-radius:15px!important;
+ background:#fff!important;box-shadow:0 5px 24px rgba(122, 22, 54,.035)!important;
+}
+.admin-content .areas a{border:0!important;background:#f5f8fe!important;box-shadow:none!important;border-radius:12px!important;color:#193858!important;min-width:0}
+.admin-content .areas a:hover{background:#F4E4DB!important;color:#7A1636!important}
+.admin-content :is(.notice,.notification-toast){border:0!important;background:#F4E4DB!important;color:#213a65!important;box-shadow:0 7px 24px rgba(122, 22, 54,.055)!important}
+.sidebar .notification-badge,.notification-badge{color:white!important;background:#7A1636!important}
+.admin-content button,.admin-content .button,.admin-content input[type=submit]{background:#7A1636!important;color:#fff!important;border:1px solid #7A1636!important;font-weight:600!important}
+.admin-content button:hover,.admin-content .button:hover,.admin-content input[type=submit]:hover{background:#071a53!important;color:#fff!important;border-color:#071a53!important}
+.admin-content .secondary,.admin-content .button.secondary,.admin-content .button-outline{background:#fff!important;color:#7A1636!important;border:1px solid #EBDDD6!important}
+.admin-content .secondary:hover,.admin-content .button.secondary:hover,.admin-content .button-outline:hover{background:#F4E4DB!important;color:#7A1636!important}
+.admin-content a{color:#7A1636!important}
+.admin-content a:hover{color:#06184d!important}
+.admin-content input:focus,.admin-content textarea:focus,.admin-content select:focus{border-color:#7A1636!important;outline:2px solid #7A1636!important;outline-offset:2px;box-shadow:0 0 0 3px rgba(122, 22, 54,.07)!important}
+body :is(a,button,input,select,textarea,summary):focus-visible{outline:3px solid #7A1636!important;outline-offset:3px}
+.admin-content :is(input,select,textarea){font-size:calc(14px * var(--bb-scale))!important;min-height:44px}
+.admin-content table{width:100%;min-width:0}
+.admin-content :is(th,td){overflow-wrap:anywhere;line-height:1.6;font-size:calc(13px * var(--bb-scale))}
+.admin-content table th{background:#f6f8fc!important;color:#34435a!important}
+.admin-content .table-scroll{max-width:100%;overflow:auto}
+.admin-content .toolbar{min-width:0}
+.admin-content .admin-header-actions{min-width:0}
+.admin-content .admin-header-actions a{border:1px solid #e4eaf2!important;background:#fff!important}
+@media(max-width:1150px){.admin-content .stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:850px){
+  .workspace{display:block!important;min-width:0}
+  .workspace .sidebar{display:none;position:fixed;top:0;bottom:0;left:0;z-index:102;width:min(290px,85vw);height:100dvh;overflow-y:auto;box-shadow:10px 0 28px #071a5326!important}
+  .workspace.menu-open .sidebar{display:block!important}
+  .admin-content{width:100%!important;padding:22px 18px!important;min-width:0}
+  .admin-content>header{flex-direction:column;align-items:start}
+  .admin-content .areas{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:540px){
+  .admin-content{padding:16px!important}
+  .admin-content .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .admin-content .stats>a{min-height:100px;padding:15px!important}
+  .admin-content .stats strong{font-size:1.8rem!important}
+  .admin-content .stats span{font-size:.78rem}
+  .admin-content .areas{grid-template-columns:1fr}
+  .admin-content :is(.panel,.welcome,.card){padding:20px!important}
+  .admin-content .toolbar form{width:100%;min-width:0}
+  .admin-content .toolbar :is(input,select){min-width:0}
+  .admin-content table{min-width:590px}
+  .admin-content .edit-grid{grid-template-columns:1fr}
+  .admin-content .edit-grid .wide{grid-column:1}
+}

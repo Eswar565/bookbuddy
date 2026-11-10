@@ -1,0 +1,64 @@
+{% extends 'workspace/base.html' %}
+{% block content %}
+<section class="bb16-work-notice">
+  <div class="bb34-heading"><div><h2>Borrowing &amp; returns</h2>
+    <p>Review book requests, issue available copies, record returns, and quickly find members who need attention.</p></div>
+    <div class="bb16-work-links"><a href="/admin/membership-desk/">Membership approvals</a><a href="/admin/manage/books/">Manage books</a></div>
+  </div>
+</section>
+<nav class="bb16-admin-filters bb34-status-tabs" aria-label="Borrowing status">
+{% for value,label in [('', 'All'),('Requested','Requests'),('Issued','Issued'),('Overdue','Overdue'),('Return requested','Return requests'),('Returned','Returned'),('Lost','Lost'),('Damaged','Damaged'),('Rejected','Rejected'),('Cancelled','Cancelled')] %}
+<a class="{{ 'active' if value==status else '' }}" {% if value==status %}aria-current="page"{% endif %} href="{{ url_for('admin_lending16', status=value, q=filters.q, from_date=filters.from_date, to_date=filters.to_date, attention=filters.attention, sort=filters.sort, per_page=filters.per_page) }}">
+  <span class="bb34-tab-name">{{ label }}</span> <span class="bb34-tab-count">{{ counts.get(value,0) if value else overall }}</span>
+</a>
+{% endfor %}
+</nav>
+<section class="bb34-filter-panel" aria-label="Filter borrowing records">
+  <div class="bb34-filter-head"><div><h2>Find borrowing records</h2><p>Search and combine filters to narrow the desk list.</p></div><a class="bb34-reset" href="{{ url_for('admin_lending16') }}">Clear all filters</a></div>
+  <form method="get" action="{{ url_for('admin_lending16') }}" class="bb34-filter-grid" role="search">
+    <input type="hidden" name="status" value="{{ status }}">
+    <label class="bb34-search">Search member, book or loan ID <input type="search" name="q" value="{{ filters.q }}" placeholder="Name, email, phone, title or loan #" maxlength="100"></label>
+    <label>Needs attention <select name="attention">
+      <option value="all" {{ 'selected' if filters.attention=='all' }}>Any</option>
+      <option value="overdue" {{ 'selected' if filters.attention=='overdue' }}>Overdue books</option>
+      <option value="due_soon" {{ 'selected' if filters.attention=='due_soon' }}>Due in 7 days</option>
+      <option value="return_requested" {{ 'selected' if filters.attention=='return_requested' }}>Return requested</option>
+    </select></label>
+    <label>Requested from <input type="date" name="from_date" value="{{ filters.from_date }}"></label>
+    <label>Requested to <input type="date" name="to_date" value="{{ filters.to_date }}"></label>
+    <label>Sort by <select name="sort">
+      {% for value,text in [('newest','Newest first'),('oldest','Oldest first'),('member','Member A–Z'),('book','Book A–Z'),('due','Earliest due date'),('status','Status')] %}
+      <option value="{{ value }}" {{ 'selected' if filters.sort==value }}>{{ text }}</option>{% endfor %}
+    </select></label>
+    <label>Rows per page <select name="per_page">{% for n in [25,50,100] %}<option value="{{ n }}" {{ 'selected' if filters.per_page==n }}>{{ n }}</option>{% endfor %}</select></label>
+    <div class="bb34-filter-actions"><button type="submit" class="bb34-primary"><svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-filter"/></svg> Apply filters</button><a class="bb34-export" href="{{ url_for('admin_lending16', status=status, q=filters.q, from_date=filters.from_date, to_date=filters.to_date, attention=filters.attention, sort=filters.sort, export='csv') }}"><svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-file-csv"/></svg> Export filtered CSV</a></div>
+  </form>
+</section>
+<div class="bb34-result-header" role="status" aria-live="polite">
+  <strong>{{ total }} matching record{{ '' if total==1 else 's' }}</strong>
+  <span>{% if total %}Showing {{ (filters.page-1)*filters.per_page+1 }}–{{ [(filters.page*filters.per_page),total]|min }}{% else %}Try clearing one or more filters{% endif %}</span>
+</div>
+<div class="bb16-table-wrap bb34-table-wrap"><table class="bb16-table"><thead><tr><th scope="col">Member</th><th scope="col">Book</th><th scope="col">Status &amp; dates</th><th scope="col">Desk action</th></tr></thead>
+<tbody>{% for r in rows %}<tr>
+<td><strong>{{ r.member_name }}</strong><small>{{ r.email }}</small><small>{{ r.phone }}</small></td>
+<td><strong>{{ r.title }}</strong><small>Request #{{ r.id }} · {{ r.plan_name or 'Standard account borrowing' }}</small></td>
+<td><span class="bb16-status">{{ 'Overdue' if r.status=='Issued' and r.due_date and r.due_date < today else r.status }}</span>
+<small>Requested {{ (r.requested_at or '')[:10] }}</small>
+{% if r.return_requested_at and r.status=='Issued' %}<strong class="bb18-return-label">Return requested {{ r.return_requested_at }}</strong>{% endif %}
+<small>Issued: {{ r.issued_at or '—' }}</small><small>Due: {{ r.due_date or '—' }}</small><small>Returned: {{ r.returned_at or '—' }}</small></td>
+<td>{% if r.status in ['Requested','Issued'] %}
+<form method="post" action="{{ url_for('admin_loan_status16',loan_id=r.id) }}" class="bb16-desk-form">
+<label>Desk note <input name="admin_note" maxlength="600" placeholder="Optional note"></label>
+{% if r.status=='Requested' %}<label>Due date <input name="due_date" type="date" min="{{ today }}"></label>
+<button type="submit" name="action" value="issue">Issue book</button><button type="submit" name="action" value="reject" class="bb16-muted">Reject</button>
+{% else %}<button type="submit" name="action" value="return">Mark returned</button>
+<label>Replacement charge (₹)<input name="replacement_amount" type="number" min="0" step="0.01" value="0"></label>
+<button type="submit" name="action" value="lost">Mark lost</button><button type="submit" name="action" value="damaged">Mark damaged</button>{% endif %}
+</form>{% else %}<span class="bb34-muted">No further action</span>{% endif %}</td>
+</tr>{% else %}<tr><td colspan="4" class="bb34-empty">No borrowing records match these filters. <a href="{{ url_for('admin_lending16') }}">Show all records</a></td></tr>{% endfor %}</tbody></table></div>
+{% if pages>1 %}<nav class="bb34-pagination" aria-label="Borrowing results pages">
+  {% if filters.page>1 %}<a href="{{ url_for('admin_lending16', status=status,q=filters.q,attention=filters.attention,from_date=filters.from_date,to_date=filters.to_date,sort=filters.sort,per_page=filters.per_page,page=filters.page-1) }}"><svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-arrow-left"/></svg> Previous</a>{% endif %}
+  <span>Page {{ filters.page }} of {{ pages }}</span>
+  {% if filters.page<pages %}<a href="{{ url_for('admin_lending16', status=status,q=filters.q,attention=filters.attention,from_date=filters.from_date,to_date=filters.to_date,sort=filters.sort,per_page=filters.per_page,page=filters.page+1) }}">Next <svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></a>{% endif %}
+</nav>{% endif %}
+{% endblock %}

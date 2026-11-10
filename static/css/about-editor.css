@@ -1,0 +1,24 @@
+/* Scoped v33 administrative content-publishing controls. */
+.s33-top-actions{display:flex;gap:1rem;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:0 0 1.25rem}
+.s33-top-actions p{margin:0;flex:1;min-width:15rem;line-height:1.6}
+.s33-about-form{display:grid;gap:1.25rem}
+.s33-admin-panel{max-width:100%;overflow:hidden}
+.s33-admin-panel h2{margin:0 0 1rem}
+.s33-fields{display:grid;gap:1rem}
+.s33-admin-panel label{display:grid;gap:.4rem;margin:.5rem 0 1rem;color:#172b50;font-weight:650}
+.s33-admin-panel label small,.s33-admin-panel .hint{color:#52617a;font-weight:400}
+.s33-admin-panel input,.s33-admin-panel textarea{width:100%;max-width:100%;box-sizing:border-box;border:1px solid #c4cee0;border-radius:10px;color:#152440;background:#fff;padding:.75rem;font:inherit}
+.s33-admin-panel input:focus,.s33-admin-panel textarea:focus{outline:2px solid #244a9b;outline-offset:1px}
+.s33-video-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:1rem}
+.s33-video-grid fieldset{min-width:0;padding:1rem;border:1px solid #dce2ee;border-radius:12px}
+.s33-video-grid legend{font-weight:700;color:#14276a}
+.s33-save-bar{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;padding:1rem;border:1px solid #dce2ee;border-radius:12px;background:#f8faff}
+.s33-save-bar .button,.s33-save-bar button,.s33-map-table .button{background:#10276c!important;border:1px solid #10276c!important;color:#fff!important;text-decoration:none;padding:.75rem 1.1rem;border-radius:9px;cursor:pointer}
+.s33-save-bar .button.secondary,.s33-map-table .button.secondary{background:#fff!important;color:#10276c!important}
+.s33-save-bar .button:hover,.s33-map-table .button:hover{background:#254e9f!important;color:#fff!important}
+.s33-table-wrap{width:100%;overflow-x:auto}
+.s33-map-table{width:100%;border-collapse:collapse;text-align:left}
+.s33-map-table th,.s33-map-table td{padding:1rem;border-bottom:1px solid #dce2ee;vertical-align:middle}
+.s33-map-table th{background:#f3f6fc;color:#14276a}
+.s33-map-table td:first-child a,.s33-map-table small{display:block;margin-top:.35rem}
+.s33-map-table small{color:#52617a}

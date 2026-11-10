@@ -1,0 +1,375 @@
+{% extends 'workspace/base.html' %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/bb-gallery.css?v=1">
+<style>
+.gm-panel {
+  background: var(--white, #fff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.gm-panel h2 {
+  font-family: var(--font-heading, inherit);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--navy, #061446);
+  margin: 0 0 16px 0;
+}
+.gm-settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  gap: 16px;
+  align-items: flex-end;
+}
+@media (max-width: 900px) {
+  .gm-settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.gm-settings-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--ink, #1f2937);
+  font-size: 14px;
+}
+.gm-settings-grid input {
+  padding: 10px 14px;
+  border: 1px solid var(--border, #cbd5e1);
+  border-radius: 8px;
+  font-size: 15px;
+}
+.gm-upload-box {
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 28px;
+  text-align: center;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.gm-upload-box:hover {
+  border-color: var(--navy, #061446);
+  background: #f1f5f9;
+}
+.gm-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+.gm-item-card {
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  transition: transform 0.15s ease;
+}
+.gm-item-card.is-missing {
+  border-color: #ef4444;
+}
+.gm-item-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: #f1f5f9;
+  overflow: hidden;
+}
+.gm-item-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.gm-missing-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 12px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+.gm-badge-stack {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.gm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.gm-badge-active { background: #dcfce7; color: #166534; }
+.gm-badge-hidden { background: #f1f5f9; color: #64748b; }
+.gm-badge-missing { background: #fee2e2; color: #991b1b; }
+.gm-badge-test { background: #fef3c7; color: #92400e; }
+.gm-item-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-grow: 1;
+}
+.gm-item-meta {
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  justify-content: space-between;
+}
+.gm-item-alt-form {
+  display: flex;
+  gap: 6px;
+}
+.gm-item-alt-form input {
+  flex-grow: 1;
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+}
+.gm-item-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid #f1f5f9;
+}
+.gm-preview-container {
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 14px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="toolbar" style="margin-bottom:20px;">
+  <div>
+    <h1 style="font-size:24px;font-weight:700;color:var(--navy);margin:0 0 4px 0;">Gallery Manager</h1>
+    <p style="margin:0;color:#64748b;font-size:14px;">Manage photo records, multi-upload, drag &amp; reorder, and page settings.</p>
+  </div>
+  <div style="display:flex;gap:10px;">
+    <a class="button secondary" href="/gallery/" target="_blank" rel="noopener">
+      <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true"><use href="#i-external-link"/></svg>
+      Open live Gallery page
+    </a>
+  </div>
+</div>
+
+<!-- PANEL 1: Gallery Page Settings -->
+<section class="gm-panel">
+  <h2>1. Gallery Page Settings</h2>
+  <form method="post" action="">
+    <input type="hidden" name="csrf_token" value="{{ workspace_token() }}">
+    <input type="hidden" name="admin_action" value="save_settings">
+    <div class="gm-settings-grid">
+      <label>
+        Pill label (top badge)
+        <input name="gallery_pill" value="{{ settings.gallery_pill }}" placeholder="Our Gallery" maxlength="100" required>
+      </label>
+      <label>
+        Section heading
+        <input name="gallery_heading" value="{{ settings.gallery_heading }}" placeholder="Capturing Moments, Creating Memories" maxlength="250" required>
+      </label>
+      <button type="submit" class="button">Save page settings</button>
+    </div>
+  </form>
+</section>
+
+<!-- PANEL 2: Multi-Photo Upload -->
+<section class="gm-panel">
+  <h2>2. Multi-Photo Upload</h2>
+  <form method="post" action="" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ workspace_token() }}">
+    <input type="hidden" name="admin_action" value="upload">
+    <div class="gm-upload-box">
+      <svg class="bb-icon" style="width:36px;height:36px;color:var(--navy);" aria-hidden="true"><use href="#i-image"/></svg>
+      <div>
+        <strong style="font-size:16px;color:var(--navy);">Choose multiple photos to upload</strong>
+        <p style="margin:4px 0 0 0;font-size:13px;color:#64748b;">Supports JPG, PNG, and WebP (up to 15MB each). WebP thumbnails are automatically generated.</p>
+      </div>
+      <input type="file" name="photos" multiple accept=".jpg,.jpeg,.png,.webp,image/*" required style="margin-top:8px;">
+      <button type="submit" class="button" style="margin-top:8px;">
+        <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true"><use href="#i-upload"/></svg>
+        Upload Selected Photos
+      </button>
+    </div>
+  </form>
+</section>
+
+<!-- PANEL 3: Photo Collection & Reorder Grid -->
+<section class="gm-panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:12px;">
+    <div>
+      <h2 style="margin:0;">3. Photo Collection ({{ items|length }} records)</h2>
+      <p style="margin:4px 0 0 0;font-size:13px;color:#64748b;">Thumbnail grid matching public 16:10 aspect ratio. Drag or edit position numbers to reorder.</p>
+    </div>
+  </div>
+
+  {% if items %}
+  <form method="post" action="" id="gm-reorder-form">
+    <input type="hidden" name="csrf_token" value="{{ workspace_token() }}">
+    <input type="hidden" name="admin_action" value="reorder">
+    
+    <div class="gm-cards-grid">
+      {% for item in items %}
+      <div class="gm-item-card {{ 'is-missing' if not item.file_exists }}" data-id="{{ item.id }}">
+        <div class="gm-item-preview">
+          {% if item.file_exists %}
+            <img src="{{ item.thumbnail_path or item.image_path }}" alt="{{ item.alt_text or 'Gallery preview' }}" loading="lazy">
+          {% else %}
+            <div class="gm-missing-placeholder">
+              <svg class="bb-icon" style="width:24px;height:24px;margin-bottom:4px;" aria-hidden="true"><use href="#i-alert"/></svg>
+              <span>File Missing on Disk</span>
+              <small style="margin-top:2px;font-weight:normal;opacity:0.85;">{{ item.image_path|truncate(25) }}</small>
+            </div>
+          {% endif %}
+          
+          <div class="gm-badge-stack">
+            <span class="gm-badge {{ 'gm-badge-active' if item.is_active else 'gm-badge-hidden' }}">
+              {{ 'Active' if item.is_active else 'Hidden' }}
+            </span>
+            {% if not item.file_exists %}
+              <span class="gm-badge gm-badge-missing">⚠️ Missing File</span>
+            {% endif %}
+            {% if item.is_test_data %}
+              <span class="gm-badge gm-badge-test" title="{{ item.test_hint }}">🧪 Test data?</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="gm-item-body">
+          <div class="gm-item-meta">
+            <span><strong>ID:</strong> #{{ item.id }}</span>
+            <label style="display:inline-flex;align-items:center;gap:4px;font-weight:600;">
+              Pos:
+              <input type="number" name="pos_{{ item.id }}" value="{{ item.position }}" style="width:60px;padding:2px 6px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px;">
+            </label>
+          </div>
+
+          <!-- Alt text quick edit -->
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#475569;display:block;margin-bottom:4px;">Alt Text (screen readers):</label>
+            <div class="gm-item-alt-form">
+              <input type="text" id="alt-input-{{ item.id }}" value="{{ item.alt_text }}" placeholder="Book Buddy gallery photo {{ item.id }}" maxlength="200">
+              <button type="button" class="button secondary button-small" onclick="saveAlt({{ item.id }})" title="Save alt text">Save</button>
+            </div>
+          </div>
+
+          <div class="gm-item-actions">
+            <!-- Toggle Active -->
+            <button type="button" class="button secondary button-small" onclick="toggleActive({{ item.id }})" style="flex:1;">
+              {{ 'Hide' if item.is_active else 'Publish' }}
+            </button>
+            <!-- Delete -->
+            <button type="button" class="button button-small danger" onclick="deleteItem({{ item.id }})" title="Delete record">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;">
+      <button type="submit" class="button">
+        <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true"><use href="#i-check"/></svg>
+        Save Position Order
+      </button>
+    </div>
+  </form>
+  {% else %}
+  <p style="color:#64748b;text-align:center;padding:32px;">No gallery records found. Use the upload box above to add photos.</p>
+  {% endif %}
+</section>
+
+<!-- PANEL 4: Live Preview Matching Public Page -->
+<section class="gm-panel">
+  <h2>4. Live Preview (Matches Public Page)</h2>
+  <p style="margin:0 0 12px 0;font-size:13px;color:#64748b;">Live rendering of how visitors see the gallery with current active photos and settings.</p>
+  
+  <div class="gm-preview-container">
+    <main class="bb-gallery-page" style="padding:24px 16px;">
+      <div class="bb-gallery-container">
+        <header class="bb-gallery-header">
+          <span class="bb-gallery-pill">{{ settings.gallery_pill }}</span>
+          <h2 class="bb-gallery-heading">{{ settings.gallery_heading }}</h2>
+        </header>
+        <div class="bb-gallery-card">
+          {% set active_items = items|selectattr('is_active')|selectattr('file_exists')|list %}
+          {% if active_items %}
+          <div class="bb-gallery-grid">
+            {% for item in active_items %}
+            <div class="bb-gallery-tile" style="cursor:default;">
+              <img src="{{ item.thumbnail_path or item.image_path }}" alt="{{ item.alt_text or 'Gallery photo' }}" loading="lazy">
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="bb-gallery-empty">
+            <p>No active photos to display in preview.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </main>
+  </div>
+</section>
+
+<!-- Action handler helper forms -->
+<form id="action-form" method="post" action="" style="display:none;">
+  <input type="hidden" name="csrf_token" value="{{ workspace_token() }}">
+  <input type="hidden" name="admin_action" id="action-type">
+  <input type="hidden" name="item_id" id="action-item-id">
+  <input type="hidden" name="alt_text" id="action-alt-text">
+</form>
+
+<script>
+function toggleActive(id) {
+  document.getElementById('action-type').value = 'toggle';
+  document.getElementById('action-item-id').value = id;
+  document.getElementById('action-form').submit();
+}
+
+function deleteItem(id) {
+  if (confirm('Are you sure you want to delete gallery record #' + id + '?')) {
+    document.getElementById('action-type').value = 'delete';
+    document.getElementById('action-item-id').value = id;
+    document.getElementById('action-form').submit();
+  }
+}
+
+function saveAlt(id) {
+  const altVal = document.getElementById('alt-input-' + id).value;
+  document.getElementById('action-type').value = 'update_alt';
+  document.getElementById('action-item-id').value = id;
+  document.getElementById('action-alt-text').value = altVal;
+  document.getElementById('action-form').submit();
+}
+</script>
+{% endblock %}
+

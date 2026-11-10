@@ -1,0 +1,52 @@
+/* BookBuddy v30 / admin-only final cascade — navy on white, AA contrast. */
+:root{--bb30-ink:#2A1A20;--bb30-blue:#7A1636;--bb30-dark:#4A0F24;--bb30-border:#EBDDD6;--bb30-hover:#e7efff;--bb30-muted:#43546d}
+body:has(.workspace) .admin-content{color:var(--bb30-ink)!important}
+body:has(.workspace) .admin-content :is(p,small,.hint,.s26-muted){color:var(--bb30-muted)!important}
+body:has(.workspace) .admin-content :is(h1,h2,h3,h4,th,legend){color:var(--bb30-dark)!important}
+body:has(.workspace) .admin-content label{color:var(--bb30-dark)!important}
+body:has(.workspace) .admin-content :is(input:not([type=checkbox]):not([type=radio]),select,textarea){background:#fff!important;color:#182d44!important;border:1px solid #9aabc1!important;opacity:1!important}
+body:has(.workspace) .admin-content :is(input,select,textarea)::placeholder{color:#53647b!important;opacity:1}
+body:has(.workspace) .admin-content :is(input,select,textarea):focus-visible{outline:3px solid #406bbf!important;outline-offset:2px!important}
+/* Anchor buttons and real buttons obey the same colours. An earlier global
+   .admin-content a selector gave filled buttons navy text on navy background. */
+body:has(.workspace) .admin-content :is(a.s26-btn,a.bb30-btn,a.button:not(.secondary),button.s26-btn,button.bb30-btn,button:not(.secondary):not(.s26-outline),input[type=submit]){
+ background:var(--bb30-blue)!important;color:#fff!important;border:1px solid var(--bb30-blue)!important;text-decoration:none!important;text-shadow:none!important;box-shadow:none!important;opacity:1!important
+}
+body:has(.workspace) .admin-content :is(a.s26-btn,a.bb30-btn,a.button:not(.secondary),button.s26-btn,button.bb30-btn,button:not(.secondary):not(.s26-outline),input[type=submit]):hover:not(:disabled){background:var(--bb30-dark)!important;color:#fff!important;border-color:var(--bb30-dark)!important;filter:none!important;box-shadow:0 6px 16px #7A16361f!important}
+body:has(.workspace) .admin-content :is(a.s26-outline,a.bb30-secondary,a.button.secondary,a.button-outline,button.s26-outline,button.bb30-secondary,button.secondary,button.button-outline){background:#fff!important;color:var(--bb30-blue)!important;border:1px solid #91a6c8!important;filter:none!important}
+body:has(.workspace) .admin-content :is(a.s26-outline,a.bb30-secondary,a.button.secondary,a.button-outline,button.s26-outline,button.bb30-secondary,button.secondary,button.button-outline):hover:not(:disabled){background:var(--bb30-hover)!important;color:var(--bb30-dark)!important;border-color:var(--bb30-blue)!important;filter:none!important}
+body:has(.workspace) .admin-content :is(a:not(.s26-btn):not(.bb30-btn):not(.button):not(.is-active):not([aria-current='page']),button.link-button){color:var(--bb30-blue)!important;text-decoration:none!important}
+body:has(.workspace) .admin-content :is(a:not(.s26-btn):not(.bb30-btn):not(.button)):hover{color:var(--bb30-dark)!important;text-decoration:underline!important}
+body:has(.workspace) .admin-content .s27-skill-switch a.is-active,body:has(.workspace) .admin-content .s28-admin-tabs a.is-active{background:var(--bb30-blue)!important;color:#fff!important;border-color:var(--bb30-blue)!important}
+body:has(.workspace) .admin-content .s27-skill-switch a:not(.is-active):hover{background:var(--bb30-hover)!important;color:var(--bb30-dark)!important}
+body:has(.workspace) .admin-content :is(.s26-chip,.s29-kicker,.s26-eyebrow){color:var(--bb30-blue)!important}
+body:has(.workspace) .admin-content .s26-chip{background:#F4E4DB!important}
+body:has(.workspace) .admin-content table :is(td,th){color:var(--bb30-ink)!important}
+body:has(.workspace) .admin-content table tr:hover td{background:#f0f5ff!important}
+body:has(.workspace) .sidebar :is(a,summary){color:#233c5b!important}
+body:has(.workspace) .sidebar :is(a:hover,a:focus-visible,summary:hover){background:#F4E4DB!important;color:var(--bb30-blue)!important}
+body:has(.workspace) .sidebar a.selected{background:#dfeaff!important;color:var(--bb30-dark)!important;border-left:0!important}
+body:has(.workspace) .sidebar .notification-badge{background:var(--bb30-blue)!important;color:#fff!important}
+body:has(.workspace) .admin-content .notification-badge{background:var(--bb30-blue)!important;color:#fff!important}
+body:has(.workspace) :is(button,a,input,select,textarea,summary):focus-visible{outline:3px solid #406bbf!important;outline-offset:3px}
+/* Bulk skills form. */
+.bb30-bulk{max-width:1250px;margin:auto;display:grid;gap:20px}
+.bb30-bulk-intro{display:flex;justify-content:space-between;gap:22px;align-items:center}
+.bb30-bulk-intro>div{max-width:800px}.bb30-bulk-intro h2{font-size:clamp(calc(23px * var(--bb-scale)),2.2vw,calc(31px * var(--bb-scale)))!important;margin:5px 0 10px!important}
+.bb30-kicker,.bb30-step{font-size:calc(11px * var(--bb-scale));letter-spacing:.12em;color:var(--bb30-blue);font-weight:800}
+.bb30-filter{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:16px 20px;border:1px solid var(--bb30-border);background:#fff;border-radius:13px}
+.bb30-filter label{margin:0}.bb30-filter select{max-width:320px;min-width:230px;margin:0}.bb30-count{color:#35465c;font-weight:700;margin-left:auto}
+.bb30-bulk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.admin-content .bb30-box{padding:clamp(20px,2.5vw,29px)!important;background:#fff;border:1px solid var(--bb30-border)!important;border-radius:15px!important;min-width:0}
+.bb30-box h3{font-size:calc(20px * var(--bb-scale))!important;margin:9px 0 13px!important}.bb30-box p{max-width:790px;line-height:1.7}
+.bb30-action-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:18px}
+.bb30-btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:43px;padding:10px 17px;background:var(--bb30-blue);color:#fff;border:1px solid var(--bb30-blue);border-radius:9px;font-weight:750;font-size:calc(13px * var(--bb-scale));text-decoration:none;cursor:pointer}
+.bb30-btn.bb30-secondary{background:#fff;color:var(--bb30-blue);border-color:#9aaccc}
+.bb30-tip{font-size:calc(12px * var(--bb-scale))!important;margin-top:20px}.bb30-hint{font-size:calc(12px * var(--bb-scale));color:var(--bb30-muted)}
+.bb30-import-form{display:grid;gap:12px}.bb30-import-form label{margin-top:8px}.bb30-import-form input[type=file]{width:100%;border:1px dashed #a0b2ce!important;min-height:70px;padding:18px}
+.bb30-import-form button{justify-self:start}.bb30-template-box{display:flex;justify-content:space-between;align-items:center;gap:22px}.bb30-template-box>div:first-child{max-width:740px}.bb30-guidance{display:grid;gap:12px;margin:12px 0 0;padding-left:24px;color:var(--bb30-ink)}.bb30-guidance li{padding-left:4px;line-height:1.7}.bb30-guidance code,.bb30-tip code{background:#f0f5ff;border:1px solid #dbe6f8;border-radius:4px;color:#163b7c;padding:1px 5px;white-space:normal}
+@media(max-width:950px){.bb30-bulk-grid{grid-template-columns:1fr}}@media(max-width:720px){.bb30-bulk-intro,.bb30-template-box{flex-direction:column;align-items:stretch}.bb30-filter{align-items:stretch;flex-direction:column}.bb30-count{margin-left:0}.bb30-filter select{width:100%;max-width:100%;min-width:0}.bb30-btn{white-space:normal}}
+
+/* Do not give the Skills workspace an unnecessary giant outer card. */
+body:has(.workspace) .admin-content .s29-admin-shell{border:0!important;background:transparent!important;box-shadow:none!important;max-width:100%!important;padding:0 0 48px!important}
+body:has(.workspace) .admin-content .s29-admin-shell .s26-panel{background:#fff!important;border:1px solid var(--bb30-border)!important;box-shadow:0 5px 20px #7A16360c!important}

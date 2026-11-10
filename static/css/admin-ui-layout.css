@@ -1,0 +1,26 @@
+/* BookBuddy v31 admin: high-contrast button and active-tab cascade.
+   Applied after admin-v30.css to prevent the generic .admin-content a rule
+   from painting active tab labels navy on a navy background. */
+:root{--bb31-primary:#7A1636;--bb31-primary-hover:#4A0F24;--bb31-soft:#F4E4DB;--bb31-border:#EBDDD6;--bb31-ink:#21334b}
+.workspace .admin-content .s28-admin-tabs a:is(.is-active,[aria-current='page']),
+.workspace .admin-content .s27-skill-switch a:is(.is-active,[aria-current='page']){color:#fff!important;background:var(--bb31-primary)!important;border-color:var(--bb31-primary)!important;text-shadow:none!important}
+.workspace .admin-content .s28-admin-tabs a:is(.is-active,[aria-current='page']) :is(small,span,svg,i),
+.workspace .admin-content .s27-skill-switch a:is(.is-active,[aria-current='page']) :is(small,span,svg,i){color:#fff!important;opacity:1!important;fill:currentColor!important}
+.workspace .admin-content .s28-admin-tabs a:not(.is-active):hover,
+.workspace .admin-content .s27-skill-switch a:not(.is-active):hover{background:var(--bb31-soft)!important;border-color:var(--bb31-border)!important;color:var(--bb31-primary)!important}
+.workspace .admin-content a:is(.s26-btn,.bb30-btn,.button):not(.secondary):not(.s26-outline):not(.bb30-secondary),
+.workspace .admin-content button:is(.s26-btn,.bb30-btn,.button):not(.secondary):not(.s26-outline):not(.bb30-secondary){background:var(--bb31-primary)!important;color:#fff!important;border-color:var(--bb31-primary)!important;box-shadow:none!important;opacity:1!important;text-decoration:none!important}
+.workspace .admin-content a:is(.s26-btn,.bb30-btn,.button):not(.secondary):not(.s26-outline):not(.bb30-secondary):hover,
+.workspace .admin-content button:is(.s26-btn,.bb30-btn,.button):not(.secondary):not(.s26-outline):not(.bb30-secondary):hover{background:var(--bb31-primary-hover)!important;color:#fff!important;border-color:var(--bb31-primary-hover)!important;box-shadow:0 5px 14px #7A163620!important}
+.workspace .admin-content :is(a.s26-btn.s26-outline,a.bb30-secondary,button.s26-btn.s26-outline,button.bb30-secondary){background:#fff!important;border-color:var(--bb31-border)!important;color:var(--bb31-primary)!important}
+.workspace .admin-content :is(a.s26-btn.s26-outline,a.bb30-secondary,button.s26-btn.s26-outline,button.bb30-secondary):hover{background:var(--bb31-soft)!important;border-color:var(--bb31-primary)!important;color:var(--bb31-primary-hover)!important}
+.workspace .admin-content .s28-admin-tabs a{display:inline-flex!important;align-items:center;gap:8px;min-height:46px;padding:12px 15px;border-radius:10px;white-space:normal;word-break:normal}
+.workspace .admin-content .s28-admin-tabs a small{font-size:calc(11px * var(--bb-scale));white-space:nowrap}
+.workspace .admin-content :is(a,button,input,select,textarea,summary):focus-visible,
+.workspace .sidebar :is(a,summary):focus-visible{outline:3px solid #4f76cf!important;outline-offset:2px!important}
+.workspace .sidebar :is(a,summary):hover{color:var(--bb31-primary)!important;background:var(--bb31-soft)!important}
+.workspace .sidebar a.selected{color:var(--bb31-primary)!important;background:#dfeaff!important}
+/* Record badges remain legible on all row backgrounds. */
+.workspace .admin-content .s26-chip{background:var(--bb31-soft)!important;color:var(--bb31-primary)!important}
+.workspace .admin-content :is(input,select,textarea){color:#182b43!important}
+@media(max-width:820px){.workspace .admin-content .s28-admin-tabs{display:flex;flex-wrap:wrap;gap:8px}.workspace .admin-content .s28-admin-tabs a{flex:1 1 160px;justify-content:space-between}}

@@ -1,0 +1,356 @@
+/* ==========================================================================
+   BookBuddy Official Brand Theme (Burgundy & Gold)
+   ========================================================================== */
+
+/* --- Local Font Declarations (WOFF2) --- */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/static/fonts/lora-variable.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/static/fonts/lora-variable-italic.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/static/fonts/inter-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/static/fonts/inter-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/static/fonts/inter-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/static/fonts/inter-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/static/fonts/inter-800.woff2') format('woff2');
+}
+
+/* --- Brand Palette Variables --- */
+:root {
+  /* Primary Burgundy Palette */
+  --primary: #7A1636;
+  --primary-hover: #4A0F24;
+  --primaryColor: #7A1636;
+  --secondaryColor: #7A1636;
+  --bb-primary: #7A1636;
+  --bb-primary-hover: #4A0F24;
+  --bb-primary-dark: #4A0F24;
+  --wine: #A02A4F;
+
+  /* Gold Accents */
+  --gold: #C9A557;
+  --gold-light: #E9D39A;
+  --gold-dark: #A9822F;
+
+  /* Surfaces & Backgrounds */
+  --page-bg: #FFFCF7;
+  --bg: #FFFCF7;
+  --soft-ivory: #FBF4EA;
+  --blush: #F4E4DB;
+  --rose: #E9C3CB;
+  --soft: #FBF4EA;
+
+  /* Ink & Neutral Text */
+  --ink: #2A1A20;
+  --text: #2A1A20;
+  --muted: #76675F;
+  --line: #EBDDD6;
+  --border: #EBDDD6;
+
+  /* Font Variables */
+  --headingFont: 'Lora', Georgia, 'Times New Roman', serif;
+  --bb-display-font: 'Lora', Georgia, serif;
+  --bodyFont: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --bb-body-font: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --contentFont: 'Inter', sans-serif;
+}
+
+/* --- Base Body & Typography --- */
+html,
+body,
+body.folio,
+body.bookbuddy-modern,
+body.folio-admin {
+  background-color: var(--page-bg) !important;
+  color: var(--ink) !important;
+  font-family: var(--bb-body-font) !important;
+  overflow-x: clip;
+  max-width: 100vw;
+}
+
+/* Headings in Lora Serif */
+body.folio :is(h1, h2, h3, .home-v5-hero h1, .bb-book-title, .folio-book h3, .folio-page-banner h1),
+body.folio-admin :is(h1, h2, h3, .admin-content > header h1) {
+  font-family: var(--bb-display-font) !important;
+  letter-spacing: -0.015em !important;
+  color: var(--ink);
+}
+
+/* Reset old heavy hero letter tracking */
+.home-v5-hero h1,
+body.folio .home-v5-hero h1 {
+  letter-spacing: -0.015em !important;
+}
+
+/* Hero Highlight Line in gold-dark italic Lora */
+.hero-hook,
+.home-v5-hero h1 em,
+.folio-hero-copy h1 em,
+body.folio :is(h1 em, h2 em) {
+  font-family: var(--bb-display-font) !important;
+  font-style: italic !important;
+  font-weight: 500 !important;
+  color: var(--gold-dark) !important;
+}
+
+/* Preserve Font Awesome icon fonts */
+i.fa, i.fa-solid, i.fa-regular, i.fa-brands, [class*="fa-"] {
+  font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+}
+
+/* --- Brand Accents --- */
+
+/* Short gold line before .folio-kicker */
+.folio-kicker {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  color: var(--primary) !important;
+}
+.folio-kicker::before {
+  content: '';
+  display: inline-block;
+  width: 18px;
+  height: 2px;
+  background: var(--gold);
+  border-radius: 2px;
+}
+
+/* Gold underline under .folio-page-banner h1 */
+.folio-page-banner h1 {
+  position: relative;
+  text-decoration: underline !important;
+  text-decoration-color: var(--gold) !important;
+  text-decoration-thickness: 3px !important;
+  text-underline-offset: 8px !important;
+}
+
+/* Gold focus-visible outline */
+:focus-visible {
+  outline: 2px solid var(--gold) !important;
+  outline-offset: 2px !important;
+}
+
+/* Burgundy focus ring on inputs */
+input:not([type="checkbox"]):not([type="radio"]):focus,
+textarea:focus,
+select:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(122, 22, 54, 0.18) !important;
+  outline: none !important;
+}
+
+/* Burgundy Admin Sidebar Gradient with Gold Active Marker */
+.workspace .sidebar,
+body.folio-admin .sidebar,
+aside#admin-sidebar {
+  background: linear-gradient(180deg, #7A1636 0%, #4A0F24 100%) !important;
+  border-right: 1px solid rgba(201, 165, 87, 0.25) !important;
+}
+
+body.folio-admin .sidebar a,
+body.folio-admin .sidebar summary,
+aside#admin-sidebar a,
+aside#admin-sidebar summary {
+  color: rgba(255, 252, 247, 0.92) !important;
+}
+
+body.folio-admin .sidebar a:hover,
+body.folio-admin .sidebar summary:hover,
+aside#admin-sidebar a:hover,
+aside#admin-sidebar summary:hover {
+  background: rgba(255, 252, 247, 0.12) !important;
+  color: #FFFFFF !important;
+}
+
+body.folio-admin .sidebar a.selected,
+body.folio-admin .sidebar details a.selected,
+aside#admin-sidebar a.selected {
+  background: rgba(255, 252, 247, 0.18) !important;
+  color: #FFFFFF !important;
+  border-left: 3px solid var(--gold) !important;
+  font-weight: 700 !important;
+}
+
+/* Blush-to-ivory .folio-join panel */
+.folio-join,
+.panel.folio-join {
+  background: linear-gradient(135deg, var(--blush) 0%, var(--soft-ivory) 100%) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 20px !important;
+}
+
+/* Primary Burgundy Buttons */
+.button:not(.button-outline):not(.button-secondary),
+.button-primary,
+button[type="submit"]:not(.menu-toggle):not(.admin-menu-toggle),
+a.button:not(.button-outline):not(.button-secondary) {
+  background-color: var(--primary) !important;
+  color: #FFFFFF !important;
+  border-color: var(--primary) !important;
+}
+
+.button:not(.button-outline):not(.button-secondary):hover,
+.button-primary:hover,
+button[type="submit"]:hover:not(.menu-toggle):not(.admin-menu-toggle),
+a.button:not(.button-outline):not(.button-secondary):hover {
+  background-color: var(--primary-hover) !important;
+  border-color: var(--primary-hover) !important;
+  color: #FFFFFF !important;
+}
+
+.button-outline {
+  background: transparent !important;
+  color: var(--primary) !important;
+  border: 1px solid var(--primary) !important;
+}
+
+.button-outline:hover {
+  background: var(--primary) !important;
+  color: #FFFFFF !important;
+}
+
+.button-secondary {
+  background: var(--soft-ivory) !important;
+  color: var(--primary) !important;
+  border: 1px solid var(--line) !important;
+}
+
+.button-secondary:hover {
+  background: var(--blush) !important;
+  color: var(--primary-hover) !important;
+}
+
+/* --- SVG Icon Suite Styling --- */
+.icon,
+svg.icon {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: -0.15em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.15s ease, stroke 0.15s ease;
+}
+
+svg.icon-filled {
+  fill: currentColor;
+}
+
+/* Header & Navigation icons */
+.site-header .main-nav .icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.site-header .dropdown-panel a {
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+}
+
+.site-header .dropdown-panel .icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  color: var(--primary);
+}
+
+.header-search summary {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.header-search summary .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.menu-toggle .icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+}
+
+/* Admin Sidebar icons */
+.folio-admin .sidebar a,
+.folio-admin .sidebar summary {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.folio-admin .sidebar .icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Dashboard & Cards icons */
+.s29-center-icon .icon {
+  width: 22px;
+  height: 22px;
+}
+
+.bb17-tabs a {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.bb17-tabs .icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+

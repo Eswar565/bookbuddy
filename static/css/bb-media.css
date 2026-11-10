@@ -1,0 +1,520 @@
+/* ==========================================================================
+   Book Buddy - Media Pages Styles (Newspaper, Magazine, Podcasts)
+   Matches live site structure with maroon (#740f28) & navy (#061446) tokens
+   ========================================================================== */
+
+.bb-media-page {
+  background: linear-gradient(180deg, #f4f6fc 0%, #ffffff 100%);
+  min-height: 80vh;
+  padding: 40px 0 80px;
+}
+
+.bb-media-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Common Header */
+.bb-media-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 40px;
+  border-bottom: 1px solid rgba(6, 20, 70, 0.08);
+  padding-bottom: 24px;
+}
+
+.bb-media-header-left {
+  flex: 1;
+}
+
+.bb-media-pill {
+  display: inline-block;
+  background: #eef2fb;
+  color: #061446;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 6px 16px;
+  border-radius: 999px;
+  margin-bottom: 12px;
+}
+
+.bb-media-title {
+  font-family: 'Hind', sans-serif;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #061446;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.bb-media-title .bb-accent {
+  color: #740f28 !important;
+}
+
+.bb-media-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  color: #475569;
+  max-width: 480px;
+  text-align: right;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   1. Newspaper Page (Vertical Issue Cards)
+   ========================================================================== */
+.bb-newspaper-list {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.bb-newspaper-card {
+  background: #ffffff;
+  border: 1px solid rgba(6, 20, 70, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(6, 20, 70, 0.04);
+  padding: 28px;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 32px;
+  align-items: start;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bb-newspaper-card:hover {
+  box-shadow: 0 8px 24px rgba(6, 20, 70, 0.08);
+}
+
+.bb-newspaper-cover-wrap {
+  width: 100%;
+  max-width: 260px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8fafc;
+  border: 1px solid rgba(6, 20, 70, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bb-newspaper-cover {
+  width: 100%;
+  height: auto;
+  max-height: 360px;
+  object-fit: contain;
+  display: block;
+}
+
+.bb-newspaper-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bb-newspaper-vol {
+  color: #740f28;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.bb-newspaper-heading {
+  font-family: 'Hind', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #061446;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.bb-newspaper-meta {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: -4px;
+}
+
+.bb-newspaper-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #334155;
+  margin: 0;
+  position: relative;
+}
+
+.bb-newspaper-desc.clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.bb-read-more-btn {
+  background: none;
+  border: none;
+  color: #740f28;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 4px;
+  display: inline-block;
+  align-self: flex-start;
+}
+
+.bb-read-more-btn:hover {
+  text-decoration: underline;
+}
+
+.bb-newspaper-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.bb-btn-primary-maroon {
+  background: #740f28;
+  color: #ffffff !important;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.bb-btn-primary-maroon:hover {
+  background: #5b0c20;
+}
+
+.bb-btn-outline {
+  background: transparent;
+  color: #061446;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid rgba(6, 20, 70, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bb-btn-outline:hover {
+  border-color: #061446;
+  background: rgba(6, 20, 70, 0.04);
+}
+
+/* ==========================================================================
+   2. Magazine Page (2-Column Grid + Cover Preview Area + CTA Box)
+   ========================================================================== */
+.bb-magazine-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px;
+}
+
+.bb-magazine-card {
+  background: #ffffff;
+  border: 1px solid rgba(6, 20, 70, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(6, 20, 70, 0.04);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bb-magazine-card:hover {
+  box-shadow: 0 8px 24px rgba(6, 20, 70, 0.08);
+}
+
+.bb-magazine-card-header {
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(6, 20, 70, 0.06);
+}
+
+.bb-magazine-card-title {
+  font-family: 'Hind', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #061446;
+  margin: 0;
+}
+
+.bb-magazine-card-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bb-mag-badge {
+  background: #740f28;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.bb-share-icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  padding: 6px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.bb-share-icon-btn:hover {
+  color: #061446;
+  background: rgba(6, 20, 70, 0.05);
+}
+
+.bb-magazine-preview-area {
+  background: #0f172a;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 380px;
+  position: relative;
+  overflow: hidden;
+}
+
+.bb-magazine-cover-link {
+  display: block;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.bb-magazine-cover-link:hover {
+  transform: scale(1.02);
+}
+
+.bb-magazine-cover-img {
+  max-height: 340px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+}
+
+.bb-magazine-actions {
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+}
+
+/* Magazine CTA Box */
+.bb-magazine-cta {
+  background: #ffffff;
+  border: 1px solid rgba(6, 20, 70, 0.08);
+  border-radius: 16px;
+  padding: 40px 32px;
+  margin-top: 48px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(6, 20, 70, 0.04);
+}
+
+.bb-magazine-cta-title {
+  font-family: 'Hind', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #061446;
+  margin: 0 0 12px 0;
+}
+
+.bb-magazine-cta-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #475569;
+  max-width: 680px;
+  margin: 0 auto 24px;
+}
+
+/* ==========================================================================
+   3. Podcasts Page (3-Column Grid + Spotify Embed Player)
+   ========================================================================== */
+.bb-podcasts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.bb-podcast-card {
+  background: #ffffff;
+  border: 1px solid rgba(6, 20, 70, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(6, 20, 70, 0.04);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bb-podcast-card:hover {
+  box-shadow: 0 8px 24px rgba(6, 20, 70, 0.08);
+}
+
+.bb-podcast-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.bb-podcast-label {
+  color: #64748b;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.bb-podcast-title {
+  font-family: 'Hind', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #061446;
+  margin: 0 0 14px 0;
+  line-height: 1.35;
+  min-height: 2.7em;
+}
+
+.bb-podcast-player-wrap {
+  width: 100%;
+  margin-top: auto;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #181818;
+  min-height: 152px;
+}
+
+.bb-podcast-player-wrap iframe {
+  width: 100%;
+  height: 232px;
+  border: none;
+  border-radius: 12px;
+  display: block;
+}
+
+.bb-podcast-fallback-card {
+  background: #f8fafc;
+  border: 1px dashed rgba(6, 20, 70, 0.15);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Toast Message */
+.bb-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #061446;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.bb-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .bb-podcasts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .bb-media-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .bb-media-subtitle {
+    text-align: left;
+    margin-top: 4px;
+  }
+  .bb-newspaper-card {
+    grid-template-columns: 1fr;
+  }
+  .bb-newspaper-cover-wrap {
+    max-width: 100%;
+  }
+  .bb-newspaper-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .bb-newspaper-actions .bb-btn-primary-maroon,
+  .bb-newspaper-actions .bb-btn-outline {
+    width: 100%;
+    justify-content: center;
+  }
+  .bb-magazine-grid {
+    grid-template-columns: 1fr;
+  }
+  .bb-podcasts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

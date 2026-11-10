@@ -1,0 +1,98 @@
+{% extends 'site/base.html' %}
+
+{% block title %}The Chronicle Archive · Book Buddy Newspaper{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/bb-media.css?v=1">
+{% endblock %}
+
+{% block body %}
+<main class="bb-media-page">
+  <div class="bb-media-container">
+    <!-- Header with Pill, Heading with accent word, and Subtitle -->
+    <header class="bb-media-header">
+      <div class="bb-media-header-left">
+        <span class="bb-media-pill">{{ media_settings.newspaper_pill or 'Press & Media' }}</span>
+        {% set full_heading = media_settings.newspaper_heading or 'The Chronicle Archive' %}
+        {% set accent_word = media_settings.newspaper_accent or 'Chronicle' %}
+        <h1 class="bb-media-title">
+          {% if accent_word and accent_word in full_heading %}
+            {{ full_heading|replace(accent_word, '<span class="bb-accent">' ~ accent_word ~ '</span>')|safe }}
+          {% else %}
+            The <span class="bb-accent">Chronicle</span> Archive
+          {% endif %}
+        </h1>
+      </div>
+      <p class="bb-media-subtitle">{{ media_settings.newspaper_subtitle or 'Exploring the intersection of stories and learning.' }}</p>
+    </header>
+
+    <!-- Newspaper Issues Vertical List -->
+    {% if publications %}
+    <div class="bb-newspaper-list" role="feed" aria-label="Newspaper issues archive">
+      {% for item in publications %}
+      <article class="bb-newspaper-card" id="issue-{{ item.id }}">
+        <!-- Left: Cover image -->
+        <div class="bb-newspaper-cover-wrap">
+          {% if item.cover_path %}
+          <img class="bb-newspaper-cover" src="{{ item.cover_path if item.cover_path.startswith(('http', '/')) else '/' ~ item.cover_path }}" alt="{{ item.title }} cover" loading="lazy">
+          {% else %}
+          <img class="bb-newspaper-cover" src="/static/img/art/07-newspaper.png" alt="Book Buddy Chronicle Cover" width="1240" height="840" loading="lazy">
+          {% endif %}
+        </div>
+
+        <!-- Right: Issue Details -->
+        <div class="bb-newspaper-content">
+          <span class="bb-newspaper-vol">
+            {{ item.volume or 'VOLUME 01' }} | {{ item.issue_number or item.edition or 'ISSUE 01' }}
+          </span>
+
+          <h2 class="bb-newspaper-heading">{{ item.title }}</h2>
+
+          {% if item.published_on %}
+          <div class="bb-newspaper-meta">Published on {{ item.published_on }}</div>
+          {% endif %}
+
+          {% if item.description %}
+          <div class="bb-newspaper-desc clamped" id="desc-{{ item.id }}">
+            {{ item.description|replace('\n', '<br>')|safe }}
+          </div>
+          {% if item.description|length > 220 %}
+          <button type="button" class="bb-read-more-btn" data-read-more-btn data-target="desc-{{ item.id }}" aria-expanded="false">Read more</button>
+          {% endif %}
+          {% endif %}
+
+          <!-- Bottom Action Buttons -->
+          <div class="bb-newspaper-actions">
+            {% if item.file_path %}
+            <a href="{{ item.file_path if item.file_path.startswith(('http', '/')) else '/' ~ item.file_path }}" target="_blank" rel="noopener noreferrer" class="bb-btn-primary-maroon">
+              <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-download"/></svg>
+              View / Download PDF
+            </a>
+            {% else %}
+            <button type="button" class="bb-btn-primary-maroon" onclick="alert('Digital PDF copy will be published shortly. Check back soon!');">
+              <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-download"/></svg>
+              View / Download PDF
+            </button>
+            {% endif %}
+
+            <button type="button" class="bb-btn-outline" data-bb-share data-share-title="{{ item.title }}" data-share-url="{{ request.host_url ~ 'newspaper/#issue-' ~ item.id }}" aria-label="Share this newspaper issue">
+              <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-share"/></svg>
+              Share
+            </button>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="background:#fff; border:1px solid rgba(6,20,70,0.08); border-radius:14px; padding:48px; text-align:center;">
+      <h3 style="font-family:'Hind',sans-serif; color:#061446; margin:0 0 8px;">No newspaper issues published yet</h3>
+      <p style="color:#64748b; margin:0;">Check back soon for new editions of The Book Buddy Chronicle!</p>
+    </div>
+    {% endif %}
+  </div>
+</main>
+
+<script src="/static/js/bb-media.js?v=1" defer></script>
+{% endblock %}
+

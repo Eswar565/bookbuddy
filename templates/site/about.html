@@ -1,0 +1,69 @@
+{% extends 'site/base.html' %}
+{% block title %}The Book Buddy Philosophy | About Book Buddy{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/bb-gallery.css?v=2">
+{% endblock %}
+
+{% block body %}
+<main class="bb24-about bb24-wrap">
+  <section class="bb24-philosophy" aria-labelledby="bb24-philosophy-title">
+    <p class="bb24-eyebrow">ABOUT OUR LIBRARY</p><h1 id="bb24-philosophy-title">{{ about_page_heading }}</h1>
+    <p class="bb24-philosophy-lead">{{ philosophy_intro }}</p>
+    <div class="bb24-philosophy-grid">
+      <div class="bb24-ikigai"><img src="{{ ikigai_url if ikigai_url else '/static/img/art/11-about-library.png' }}" alt="Book Buddy library community illustration" width="1240" height="840" loading="lazy" onerror="this.onerror=null;this.src='/static/img/art/11-about-library.png'"></div>
+      <div class="bb24-philosophy-copy"><h2>{{ about_philosophy_subheading }}</h2>
+        {% if philosophy_paragraphs %}{% for paragraph in philosophy_paragraphs %}<p>{{ paragraph }}</p>{% endfor %}{% else %}<p>Explore our book collection, reading circles and community library services.</p>{% endif %}
+      </div>
+    </div>
+  </section>
+  <section class="bb24-videos" aria-labelledby="bb24-videos-title">
+    <p class="bb24-eyebrow">LIBRARY HIGHLIGHTS &amp; GUIDES</p><h2 id="bb24-videos-title">{{ about_video_heading }}</h2><p class="bb24-section-intro">{{ about_video_intro }}</p>
+    <div class="bb24-video-grid">
+      {% for video in about_videos %}<article class="bb24-video-card"><div class="bb24-video-frame"><iframe src="{{ video.embed }}" title="{{ video.title }}" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div><div class="bb24-video-body"><h3>{{ video.title }}</h3><p>{{ video.description }}</p><a href="{{ video.external }}" target="_blank" rel="noopener noreferrer">Watch on YouTube <svg class="icon" aria-hidden="true"><use href="#i-external-link"></use></svg></a></div></article>{% endfor %}
+    </div>
+  </section>
+
+  <!-- Gallery Section -->
+  <section class="bb-gallery-section" id="gallery" aria-labelledby="bb-gallery-heading" style="scroll-margin-top: 90px; padding: 48px 0 20px;">
+    <header class="bb-gallery-header">
+      <span class="bb-gallery-pill">{{ gallery_settings.gallery_pill or 'Our Gallery' }}</span>
+      <h2 id="bb-gallery-heading" class="bb-gallery-heading">{{ gallery_settings.gallery_heading or 'Capturing Moments, Creating Memories' }}</h2>
+    </header>
+
+    <!-- White container card holding the photo grid -->
+    <div class="bb-gallery-card">
+      {% if gallery %}
+      <div class="bb-gallery-grid" role="region" aria-label="Photo gallery">
+        {% for item in gallery %}
+        <button type="button" class="bb-gallery-tile" data-gallery-tile data-full-image="{{ item.full_path }}" aria-label="View photo {{ loop.index }} of {{ gallery|length }}">
+          <img src="{{ item.thumbnail_path }}" alt="{{ item.alt_text or ('Book Buddy gallery photo ' ~ loop.index) }}" width="800" height="500" loading="lazy" decoding="async">
+        </button>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="bb-gallery-empty">
+        <p>No gallery photos available yet. Check back soon!</p>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+</main>
+
+<!-- Accessible Lightbox Modal -->
+<div class="bb-lightbox" id="bb-lightbox" role="dialog" aria-modal="true" aria-label="Image lightbox" aria-hidden="true">
+  <div class="bb-lightbox-dialog">
+    <button type="button" class="bb-lightbox-close" aria-label="Close lightbox">&times;</button>
+    <button type="button" class="bb-lightbox-prev" aria-label="Previous image">
+      <svg class="bb-icon" style="width:20px;height:20px;" aria-hidden="true"><use href="#i-arrow-left"/></svg>
+    </button>
+    <img class="bb-lightbox-media" src="" alt="Enlarged gallery photo">
+    <button type="button" class="bb-lightbox-next" aria-label="Next image">
+      <svg class="bb-icon" style="width:20px;height:20px;" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+    </button>
+    <div class="bb-lightbox-counter" aria-live="polite"></div>
+  </div>
+</div>
+
+<script src="/static/js/bb-gallery.js?v=2" defer></script>
+{% endblock %}

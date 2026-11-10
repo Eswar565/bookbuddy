@@ -1,0 +1,51 @@
+{% extends 'workspace/base.html' %}
+{% block content %}
+<form method="get">
+  <label>Choose page
+    <select name="page">
+      {% for k,v in pages.items() %}
+      <option value="{{ k }}" {{ 'selected' if k==slug }}>{{ v }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px; margin-bottom: 16px;">
+    <button type="submit" class="button">Open page</button>
+    <a class="button" href="/{{ '' if slug=='home' else slug+'/' }}" target="_blank" rel="noopener">Preview page <svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-external-link"/></svg></a>
+  </div>
+</form>
+<p>Add as many sections as you need. Sort by position; choose before or after the main page content. Disabled sections are hidden from visitors.</p>
+<section class="panel">
+  <h2>{{ 'Edit section' if current else 'Add section' }}</h2>
+  <form method="post">
+    <input type="hidden" name="page" value="{{ slug }}">
+    <input type="hidden" name="id" value="{{ current.id or '' }}">
+    <label>Title<input name="title" required maxlength="160" value="{{ current.title or '' }}"></label>
+    <label>Section layout<select name="kind">{% for k in kinds %}<option {{ 'selected' if k==current.kind }}>{{ k }}</option>{% endfor %}</select></label>
+    <label>Introduction / body<textarea name="body" rows="5">{{ current.body or '' }}</textarea></label>
+    <label>Items: one per line, formatted Title | Description | /optional-link/<textarea name="items" rows="7">{{ current.items_text or '' }}</textarea></label>
+    <label>YouTube / Vimeo URL (video layout)<input type="url" name="video_url" value="{{ current.video_url or '' }}"></label>
+    <label>Position<input type="number" name="position" min="0" max="10000" value="{{ current.position or 0 }}"></label>
+    <label>Placement<select name="placement"><option value="after" {{ 'selected' if current.placement!='before' }}>After main content</option><option value="before" {{ 'selected' if current.placement=='before' }}>Before main content</option></select></label>
+    <label><input type="checkbox" name="is_active" {{ 'checked' if current.is_active }}> Enabled / visible</label>
+    <label><input type="checkbox" name="premium" {{ 'checked' if current.premium }}> Library membership required</label>
+    <button type="submit" class="button">Save section</button>
+    <a class="button secondary" href="?page={{ slug }}">New section</a>
+  </form>
+</section>
+<section class="panel">
+  <h2>{{ rows|length }} sections</h2>
+  {% for s in rows %}
+  <article>
+    <h3>{{ s.position }} · {{ s.title }}</h3>
+    <p>{{ s.kind }} · {{ s.placement }} main content · {{ 'Enabled' if s.is_active else 'Disabled' }}{{ ' · Premium' if s.premium else '' }}</p>
+    <a href="?page={{ slug }}&edit={{ s.id }}">Edit</a>
+    <form method="post">
+      <input type="hidden" name="page" value="{{ slug }}">
+      <input type="hidden" name="id" value="{{ s.id }}">
+      <input type="hidden" name="action" value="toggle">
+      <button>{{ 'Disable' if s.is_active else 'Enable' }}</button>
+    </form>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% set sbpath=request.path %}
+{% if sbpath == '/library/' %}{% set sbdata=('THE COLLECTION','Discover your next great read.','Search the shelves, find a favorite and make it yours.','library-shelf.svg') %}
+{% elif sbpath.startswith('/reading-circles/') %}{% set sbdata=('STORIES ARE BETTER TOGETHER','Come read with us!','Join our friendly reading circles and share wonderful stories.','reading-circle.svg') %}
+{% elif sbpath.startswith('/contests/') %}{% set sbdata=('TIME TO SHINE','A space for bright ideas.','Get creative and join our fun reading contests.','contest.svg') %}
+{% elif sbpath.startswith('/events/') %}{% set sbdata=('MARK YOUR CALENDAR','Your community calendar.','Reading circles, contests and unforgettable library days.','reading-circle.svg') %}
+{% elif sbpath.startswith('/podcasts/') %}{% set sbdata=('STORYTIME FOR YOUR EARS','Listen, imagine, smile.','Hear stories, conversations and the voices of our reading community.','podcast.svg') %}
+{% elif sbpath.startswith('/magazine/') %}{% set sbdata=('OUR CREATIVE CORNER','Stories worth sharing.','Flip through a world of imagination and ideas.','magazine.svg') %}
+{% elif sbpath.startswith('/publications/') and request.args.get('kind') == 'news' %}{% set sbdata=('THE LITTLE NEWSROOM','Fresh news, bright minds.','Read news and stories from our community.','newspaper.svg') %}
+{% elif sbpath.startswith('/publications/') %}{% set sbdata=('PAGES FULL OF IDEAS','Made by curious minds.','Browse our newspapers, magazines and creative voices.','magazine.svg') %}
+{% elif sbpath.startswith('/gallery/') %}{% set sbdata=('SMILES & MEMORIES','Our happy moments.','Every picture has a story to tell.','gallery.svg') %}
+{% elif sbpath.startswith('/contact/') %}{% set sbdata=('WE LOVE HEARING FROM YOU','Say hello, Book Buddy!','Questions about books, events or memberships? We are here to help.','contact.svg') %}
+{% elif sbpath.startswith('/membership-options/') %}{% set sbdata=('JOIN THE READING FAMILY','Your library adventure begins.','Choose a membership to bring more stories home.','membership.svg') %}
+{% elif sbpath.startswith('/accounts/login/') %}{% set sbdata=('WELCOME BACK','Your reading adventure awaits.','Sign in to pick up right where your last story ended.','hero-readers.svg') %}
+{% elif sbpath.startswith('/accounts/signup/') %}{% set sbdata=('HELLO NEW READER','Your book corner is waiting!','Create a reader account and begin your Book Buddy journey.','membership.svg') %}
+{% else %}{% set sbdata=none %}{% endif %}
+{% if sbdata %}<section class="folio-page-banner folio-wrap"><a href="/" class="folio-kicker">BOOK BUDDY / {{ sbdata[0] }}</a><h1>{{ sbdata[1] }}</h1><p>{{ sbdata[2] }}</p></section>{% endif %}
