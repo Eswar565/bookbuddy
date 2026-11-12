@@ -51,6 +51,9 @@ if os.environ.get("VERCEL"):  # read-only filesystem: keep writable data in /tmp
     os.environ.setdefault("SECRET_KEY", "change-me-set-SECRET_KEY-in-vercel")
 DATABASE_PATH = Path(os.environ.get("BOOK_BUDDY_DATABASE", BASE_DIR / "instance" / "book_buddy.sqlite3"))
 
+def get_database_path() -> Path:
+    return DATABASE_PATH
+
 app = Flask(__name__, template_folder=str(BASE_DIR / "templates"), static_folder=str(BASE_DIR / "static"))
 secret_path = DATABASE_PATH.parent / '.session-secret'
 secret_path.parent.mkdir(parents=True, exist_ok=True)
