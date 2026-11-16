@@ -35,10 +35,10 @@ def install_site_design(app,db):
                 db().execute('INSERT INTO site_content(content_key,content_value) VALUES(?,?) ON CONFLICT(content_key) DO UPDATE SET content_value=excluded.content_value',(key,value))
             db().execute("UPDATE homepage_sections SET title=?,highlight=?,kicker=?,description=?,button_label=? WHERE section_key='hero'",('A book today.','A bigger world tomorrow.','READ. DISCOVER. BELONG.','Find stories for every age, explore Tamil, English and Hindi books, and connect with a community that loves to read.','Find your next read'))
             db().execute("INSERT INTO schema_updates(version) VALUES('official-brand-v7')")
-        if not db().execute("SELECT 1 FROM schema_updates WHERE version='madurai-address-v2'").fetchone():
+        if not db().execute("SELECT 1 FROM schema_updates WHERE version='chennai-saligramam-address-v3'").fetchone():
             db().execute("UPDATE site_content SET content_value=? WHERE content_key='contact_address'",
-                         ('MK Complex 2nd floor Chennai Hot Puffs upstairs, K.Pudur, Madurai, Tamil Nadu 625007',))
-            db().execute("INSERT INTO schema_updates(version) VALUES('madurai-address-v2')")
+                         ('1, Thiruvalluvar St, Thiru Nagar Colony, Gandhi Nagar,\nSaligramam, Chennai, Tamil Nadu 600093',))
+            db().execute("INSERT INTO schema_updates(version) VALUES('chennai-saligramam-address-v3')")
         if not db().execute("SELECT 1 FROM schema_updates WHERE version='brand-art-v8'").fetchone():
             mapping = {
                 'hero-readers': '/static/img/art/01-hero-readers.png',
@@ -91,7 +91,9 @@ def install_site_design(app,db):
         # Ensure retired sections are removed from active databases
         db().execute("DELETE FROM homepage_sections WHERE lower(section_key) IN ('challenges', 'innovation', 'membership', 'visit', 'collection', 'media', 'footer')")
         db().execute("UPDATE homepage_sections SET button_label='Contact Us', url='/contact/' WHERE section_key='hero' AND (button_label='Weekly Book Delivery' OR url LIKE '%membership%')")
-        db().execute("DELETE FROM site_navigation WHERE group_name='footer_useful' AND (label='Membership & Plans' OR url LIKE '%membership%')")
+        # Ensure Membership & Plans link exists in footer_useful navigation
+        if not db().execute("SELECT 1 FROM site_navigation WHERE url='/membership/'").fetchone():
+            db().execute("INSERT INTO site_navigation(label, url, group_name, position, is_active) VALUES('Membership & Plans', '/membership/', 'footer_useful', 1, 1)")
         db().commit()
     MODELS['home-sections']=('Homepage content & images','homepage_sections','section_key title highlight kicker description image_path image_alt button_label url button2_label button2_url position is_active')
     name,table,fields=MODELS['books']

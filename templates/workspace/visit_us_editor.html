@@ -1,0 +1,185 @@
+{% extends 'workspace/base.html' %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/bb-visit-us.css?v=1">
+
+<div class="panel" style="max-width: 1200px; margin: 0 auto 30px;">
+  
+  <div style="display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 2px solid #e5e7eb; padding-bottom: 12px; align-items: center; flex-wrap: wrap;">
+    <a href="#settings" class="button" style="text-decoration:none;">Content &amp; Settings</a>
+    <a href="#preview" class="button" style="text-decoration:none;">Live Preview</a>
+    <a href="/visit-us/" target="_blank" class="button" style="margin-left: auto; text-decoration:none;">View Public Page &nearr;</a>
+  </div>
+
+  <!-- Settings Section -->
+  <section id="settings" style="margin-bottom: 48px;">
+    <h2 style="margin-top: 0; color: var(--navy, #061446);">Visit Us Page Configuration</h2>
+    <p style="color: #6b7280; margin-bottom: 24px;">
+      Manage all texts, contact cards, map embeds, and library tour content. Changes to address, phone, and email automatically sync with the public footer and Contact page.
+    </p>
+
+    <form method="post" action="/admin/visit-us-editor/">
+      <input type="hidden" name="csrf_token" value="{{ session.get('_csrf_token', '') }}">
+
+      <!-- 1. Header Band -->
+      <fieldset style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; margin-bottom: 24px; background: #fafafa;">
+        <legend style="font-weight: 700; color: var(--maroon, #740f28); padding: 0 8px;">1. Header Band</legend>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 16px;">
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 6px;">Eyebrow</label>
+            <input type="text" name="visit_eyebrow" value="{{ visit.eyebrow }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;" required>
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 6px;">Heading (H1)</label>
+            <input type="text" name="visit_heading" value="{{ visit.heading }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;" required>
+          </div>
+        </div>
+
+        <div>
+          <label style="display: block; font-weight: 600; margin-bottom: 6px;">Subtitle</label>
+          <textarea name="visit_subtitle" rows="2" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">{{ visit.subtitle }}</textarea>
+        </div>
+      </fieldset>
+
+      <!-- 2. Contact Details & Shared Settings -->
+      <fieldset style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; margin-bottom: 24px; background: #fafafa;">
+        <legend style="font-weight: 700; color: var(--navy, #061446); padding: 0 8px;">2. Contact Details &amp; Shared Website Settings</legend>
+        
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 6px;">Column Heading (H2)</label>
+          <input type="text" name="visit_contact_heading" value="{{ visit.contact_heading }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;" required>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 6px;">Library Address (Single Source of Truth)</label>
+          <p style="font-size: 0.85rem; color: #6b7280; margin: 0 0 6px;">Updating this address updates the Visit Us page, the public footer, and the Contact page simultaneously.</p>
+          <textarea name="contact_address" rows="3" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-family: monospace;" required>{{ visit.address }}</textarea>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 16px;">
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 6px;">Phone Number</label>
+            <input type="text" name="contact_phone" value="{{ visit.phone }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;" required>
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 6px;">WhatsApp Number</label>
+            <input type="text" name="contact_whatsapp" value="{{ visit.whatsapp }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 6px;">Email Address</label>
+            <input type="email" name="contact_email" value="{{ visit.email }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;" required>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- 3. Card Titles & Labels -->
+      <fieldset style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; margin-bottom: 24px; background: #fafafa;">
+        <legend style="font-weight: 700; color: var(--navy, #061446); padding: 0 8px;">3. Card Titles &amp; Directions Configuration</legend>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 16px;">
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 6px;">Card 1 Title</label>
+            <input type="text" name="visit_card_library_title" value="{{ visit.card_library_title }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 6px;">Card 2 Title</label>
+            <input type="text" name="visit_card_phone_title" value="{{ visit.card_phone_title }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 6px;">Card 3 Title</label>
+            <input type="text" name="visit_card_email_title" value="{{ visit.card_email_title }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 6px;">Card 4 Title</label>
+            <input type="text" name="visit_card_directions_title" value="{{ visit.card_directions_title }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 6px;">Directions Helper Text</label>
+            <input type="text" name="visit_directions_helper" value="{{ visit.directions_helper }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 6px;">Directions Input Placeholder</label>
+            <input type="text" name="visit_directions_placeholder" value="{{ visit.directions_placeholder }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 6px;">Directions Button Label</label>
+            <input type="text" name="visit_directions_btn" value="{{ visit.directions_btn }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- 4. Map Overrides (Optional) -->
+      <fieldset style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; margin-bottom: 24px; background: #fafafa;">
+        <legend style="font-weight: 700; color: var(--navy, #061446); padding: 0 8px;">4. Google Maps Embed Overrides (Optional)</legend>
+        <p style="font-size: 0.85rem; color: #6b7280; margin: 0 0 12px;">Leave blank to automatically query Google Maps using the library address above.</p>
+        
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 6px;">Custom Map Embed URL (iframe src)</label>
+          <input type="url" name="visit_map_embed_url" value="{{ visit.embed_url if 'output=embed' not in visit.embed_url else '' }}" placeholder="https://www.google.com/maps?q=...&output=embed" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 6px;">Custom 'Open in Maps' Link URL</label>
+          <input type="url" name="visit_maps_url" value="{{ visit.maps_url if '?q=' not in visit.maps_url else '' }}" placeholder="https://maps.app.goo.gl/..." style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 6px;">Latitude (Optional)</label>
+            <input type="text" name="visit_lat" value="{{ visit.lat }}" placeholder="e.g. 13.0531" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 6px;">Longitude (Optional)</label>
+            <input type="text" name="visit_lng" value="{{ visit.lng }}" placeholder="e.g. 80.1982" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- 5. Library Tour Gallery -->
+      <fieldset style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; margin-bottom: 24px; background: #fafafa;">
+        <legend style="font-weight: 700; color: var(--maroon, #740f28); padding: 0 8px;">5. Library Tour Section</legend>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 16px;">
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 6px;">Tour Eyebrow</label>
+            <input type="text" name="tour_eyebrow" value="{{ visit.tour_eyebrow }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; margin-bottom: 6px;">Tour Heading (H2)</label>
+            <input type="text" name="tour_heading" value="{{ visit.tour_heading }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+          </div>
+        </div>
+
+        <div>
+          <label style="display: block; font-weight: 600; margin-bottom: 6px;">Tour Subtitle</label>
+          <textarea name="tour_subtitle" rows="2" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">{{ visit.tour_subtitle }}</textarea>
+        </div>
+      </fieldset>
+
+      <div style="text-align: right; margin-top: 24px;">
+        <button type="submit" class="button" style="background: var(--maroon, #740f28); color: white; padding: 12px 32px; font-weight: 600; font-size: 1rem; border: none; border-radius: 8px; cursor: pointer;">
+          Save All Changes
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Live Preview Section -->
+  <section id="preview" style="border-top: 2px solid #e5e7eb; padding-top: 36px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;">
+      <h2 style="margin: 0; color: var(--navy, #061446);">Live Page Preview</h2>
+      <span style="font-size: 0.85rem; color: #6b7280; background: #e5e7eb; padding: 4px 10px; border-radius: 9999px;">Preview Mode</span>
+    </div>
+
+    <div style="border: 2px dashed #cbd5e1; border-radius: 12px; overflow: hidden; background: #ffffff;">
+      {% include 'site/_visit_us_content.html' %}
+    </div>
+  </section>
+
+</div>
+{% endblock %}
+

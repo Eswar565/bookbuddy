@@ -1,0 +1,226 @@
+{% extends 'workspace/base.html' %}
+
+{% block content %}
+<div class="panel" style="max-width: 1200px; margin: 0 auto 30px;">
+  {% if cms_conflict %}
+    <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 14px 18px; margin-bottom: 24px; color: #92400e;">
+      <strong>Notice:</strong> An active legacy CMS page with slug <code>how-to-borrow</code> exists in the database.
+      The new How to Borrow editor takes precedence over it on the public site.
+    </div>
+  {% endif %}
+
+  <div style="display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 2px solid #e5e7eb; padding-bottom: 12px;">
+    <a href="#settings" class="button" style="text-decoration:none;">Page &amp; Form Settings</a>
+    <a href="#blocks" class="button" style="text-decoration:none;">Content Blocks</a>
+    <a href="#preview" class="button" style="text-decoration:none;">Live Preview</a>
+    <a href="/how-to-borrow/" target="_blank" class="button" style="margin-left: auto; text-decoration:none;">View Public Page &nearr;</a>
+  </div>
+
+  <!-- Settings Section -->
+  <section id="settings" style="margin-bottom: 48px;">
+    <h2 style="margin-top: 0; color: var(--navy, #0b1f6b);">Page &amp; Form Configuration</h2>
+    <form method="post" action="/admin/how-to-borrow-editor/">
+      <input type="hidden" name="action" value="save_settings">
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 20px;">
+        <div>
+          <label style="display: block; font-weight: 600; margin-bottom: 6px;">Page Heading (H1)</label>
+          <input type="text" name="page_heading" value="{{ page.page_heading }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;" required>
+        </div>
+        <div>
+          <label style="display: block; font-weight: 600; margin-bottom: 6px;">Form Card Title (H2)</label>
+          <input type="text" name="form_title" value="{{ page.form_title }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;" required>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer;">
+          <input type="checkbox" name="form_enabled" value="1" {% if page.form_enabled %}checked{% endif %}>
+          <span>Enable Online Book Inquiry &amp; Request Form on Public Page</span>
+        </label>
+      </div>
+
+      <h3 style="color: var(--navy, #0b1f6b); border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-top: 28px;">Form Field Labels &amp; Placeholders</h3>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 16px;">
+        <div>
+          <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Membership ID Label</label>
+          <input type="text" name="membership_id_label" value="{{ page.membership_id_label }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Membership ID Placeholder</label>
+          <input type="text" name="membership_id_placeholder" value="{{ page.membership_id_placeholder }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+        </div>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Membership ID Small Helper Text (shown under input)</label>
+        <input type="text" name="membership_id_helper" value="{{ page.membership_id_helper or 'Valid Membership ID or registered phone/email' }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 16px;">
+        <div>
+          <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Book Title Label</label>
+          <input type="text" name="book_title_label" value="{{ page.book_title_label }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Book Title Placeholder</label>
+          <input type="text" name="book_title_placeholder" value="{{ page.book_title_placeholder }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 16px;">
+        <div>
+          <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Author Label</label>
+          <input type="text" name="author_label" value="{{ page.author_label }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Author Placeholder</label>
+          <input type="text" name="author_placeholder" value="{{ page.author_placeholder }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 16px;">
+        <div>
+          <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Language Select Label</label>
+          <input type="text" name="language_label" value="{{ page.language_label }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Language Options (one per line)</label>
+          <textarea name="languages" rows="3" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">{{ page.languages }}</textarea>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 16px;">
+        <div>
+          <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Notes Textarea Label</label>
+          <input type="text" name="notes_label" value="{{ page.notes_label }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Notes Placeholder</label>
+          <input type="text" name="notes_placeholder" value="{{ page.notes_placeholder }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+        <div>
+          <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Consent Checkbox Text</label>
+          <textarea name="consent_text" rows="2" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">{{ page.consent_text }}</textarea>
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Button Label</label>
+          <input type="text" name="button_label" value="{{ page.button_label }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+        </div>
+      </div>
+
+      <div style="margin-bottom: 24px;">
+        <label style="display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Success Message</label>
+        <input type="text" name="success_message" value="{{ page.success_message }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+      </div>
+
+      <button type="submit" class="button button-primary" style="background: var(--maroon, #7c1d2e); color:#fff; border:none; padding:10px 24px; border-radius:6px; font-weight:bold; cursor:pointer;">Save Page Settings</button>
+    </form>
+  </section>
+
+  <!-- Repeatable Content Blocks Section -->
+  <section id="blocks" style="margin-bottom: 48px;">
+    <h2 style="color: var(--navy, #0b1f6b); border-top: 2px solid #e5e7eb; padding-top: 28px;">Content Blocks</h2>
+    <p style="color: var(--muted, #6b7280);">Manage the explanatory sections and checklist items displayed on the left side of the page.</p>
+
+    <form method="post" action="/admin/how-to-borrow-editor/">
+      <input type="hidden" name="action" value="save_blocks">
+
+      {% for block in blocks %}
+        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+          <input type="hidden" name="block_id" value="{{ block.id }}">
+          
+          <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px;">
+            <div style="flex: 1;">
+              <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Block Heading (H2)</label>
+              <input type="text" name="block_heading_{{ block.id }}" value="{{ block.heading }}" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 4px; font-weight: bold;" required>
+            </div>
+            <div style="width: 100px;">
+              <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Order</label>
+              <input type="number" name="block_position_{{ block.id }}" value="{{ block.position }}" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 4px;">
+            </div>
+            <div style="width: 120px; padding-top: 20px;">
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 0.9rem; cursor: pointer;">
+                <input type="checkbox" name="block_active_{{ block.id }}" value="1" {% if block.is_active %}checked{% endif %}>
+                <span>Active</span>
+              </label>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Paragraph Body</label>
+            <textarea name="block_body_{{ block.id }}" rows="2" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 4px;">{{ block.body }}</textarea>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Checklist Items (one per line, shown with checkmark icon)</label>
+            <textarea name="block_checklist_{{ block.id }}" rows="3" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 4px;" placeholder="Leave empty if this block has no checklist...">{{ block.checklist }}</textarea>
+          </div>
+
+          <div style="text-align: right;">
+            <button type="submit" form="delete_block_{{ block.id }}" style="background: transparent; color: #dc2626; border: 1px solid #fca5a5; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">Delete Block</button>
+          </div>
+        </div>
+      {% endfor %}
+
+      <!-- Add New Block Card -->
+      <div style="background: #ffffff; border: 2px dashed #d1d5db; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+        <h4 style="margin: 0 0 12px 0; color: var(--navy, #0b1f6b);">+ Add New Content Block</h4>
+        <div style="display: grid; grid-template-columns: 1fr 100px; gap: 16px; margin-bottom: 12px;">
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Heading</label>
+            <input type="text" name="new_heading" placeholder="e.g. Additional Guidelines" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 4px;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Order</label>
+            <input type="number" name="new_position" value="{{ (blocks|length) + 1 }}" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 4px;">
+          </div>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Paragraph Body</label>
+          <textarea name="new_body" rows="2" placeholder="Text for this section..." style="width: 100%; padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 4px;"></textarea>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Checklist Items (one per line)</label>
+          <textarea name="new_checklist" rows="2" placeholder="Item 1&#10;Item 2" style="width: 100%; padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 4px;"></textarea>
+        </div>
+      </div>
+
+      <button type="submit" class="button button-primary" style="background: var(--maroon, #7c1d2e); color:#fff; border:none; padding:10px 24px; border-radius:6px; font-weight:bold; cursor:pointer;">Save All Content Blocks</button>
+    </form>
+
+    <!-- Hidden separate forms for individual block deletion -->
+    {% for block in blocks %}
+      <form id="delete_block_{{ block.id }}" method="post" action="/admin/how-to-borrow-editor/" style="display:none;" onsubmit="return confirm('Delete this block permanently?');">
+        <input type="hidden" name="action" value="delete_block">
+        <input type="hidden" name="delete_block_id" value="{{ block.id }}">
+      </form>
+    {% endfor %}
+  </section>
+
+  <!-- Live Preview Section -->
+  <section id="preview" style="border-top: 2px solid #e5e7eb; padding-top: 28px;">
+    <h2 style="color: var(--navy, #0b1f6b); margin-top: 0;">Live Preview</h2>
+    <p style="color: var(--muted, #6b7280);">Renders using the exact shared partial and styles as the public page.</p>
+
+    <div style="border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05); background: #ffffff;">
+      <div style="background: #f3f4f6; padding: 10px 16px; border-bottom: 1px solid #e5e7eb; font-size: 0.85rem; color: #6b7280; display: flex; align-items: center; justify-content: space-between;">
+        <span>Preview: <code>https://book-buddy.in/how-to-borrow/</code></span>
+        <span style="background: #e5e7eb; padding: 2px 8px; border-radius: 4px;">Public Template View</span>
+      </div>
+      <div style="padding: 20px 0;">
+        {% set preview_form_data = {'membership_id': 'LIB-2026-001', 'book_title': 'Sample Title', 'author': 'Sample Author', 'language': 'English', 'notes': '', 'consent': '1'} %}
+        <div class="bb8-borrow-page">
+          {% with blocks=preview_blocks, form_data=preview_form_data, submitted=false, errors=[] %}
+            {% include 'site/accounts/_how_to_borrow_content.html' %}
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

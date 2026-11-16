@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en-IN">
+<html lang="en-IN" data-theme="{{ site_theme or 'maroon' }}" data-font="{{ site_font or 'inter' }}">
 
 <head>
   <meta charset="utf-8">
@@ -25,11 +25,14 @@
   <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='img/brand/apple-touch-icon.png') }}?v=2">
   <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
 
+  <!-- Google Fonts: Inter, Playfair Display, Poppins (400, 600, 700) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
   <!-- Self-hosted font preloads for Inter and Hind -->
   <link rel="preload" href="/static/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/static/fonts/hind-700-latin.woff2" as="font" type="font/woff2" crossorigin>
-
-  {% block extra_css %}{% endblock %}
 
   <!-- /static/vendor/fontawesome/css/all.min.css -->
 
@@ -43,7 +46,11 @@
   <link rel="stylesheet" href="/static/css/bb-icons.css?v=2">
   <link rel="stylesheet" href="/static/css/bb-tokens.css?v=1">
   <link rel="stylesheet" href="/static/css/bb-typography.css?v=2">
-  <link rel="stylesheet" href="/static/css/bb-home-v8.css?v=3">
+  <link rel="stylesheet" href="/static/css/bb-home-v8.css?v=5">
+  <link rel="stylesheet" href="/static/css/bb-appearance.css?v=1">
+  {{ custom_theme_style|safe }}
+  {% if custom_btn_tx and site_theme == 'custom' %}<style>:root{--btn-tx:{{ custom_btn_tx }};}</style>{% endif %}
+  {% block extra_css %}{% endblock %}
 </head>
 
 <body class="bookbuddy-modern folio">
@@ -75,6 +82,7 @@
           <summary>Library <svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-chevron-down"/></svg></summary>
           <div class="bb8-dropdown-menu">
             <a href="/library/">Book Catalogue</a>
+            <a href="/membership/">Membership &amp; Plans</a>
             <a href="/how-to-borrow/">How to Borrow</a>
             <a href="/visit-us/">Visit Us</a>
           </div>
@@ -151,6 +159,7 @@
           <summary>Library ▾</summary>
           <div class="bb8-dropdown-menu">
             <a href="/library/">Book Catalogue</a>
+            <a href="/membership/">Membership &amp; Plans</a>
             <a href="/how-to-borrow/">How to Borrow</a>
             <a href="/visit-us/">Visit Us</a>
           </div>
@@ -209,7 +218,7 @@
         <!-- Col 1: Brand & Bio -->
         <div class="bb8-footer-brand">
           <a href="/" aria-label="Book Buddy — Home">
-            <img src="{{ url_for('static', filename='img/brand/bookbuddy-official-logo.png') }}" alt="Book Buddy" width="169" height="42">
+            <img src="{{ url_for('static', filename='img/brand/bookbuddy-official-logo.png') }}" alt="Book Buddy" width="177" height="44">
           </a>
           <p>{{ content.footer_bio or 'A welcoming lending library for discovering books, fostering curiosity, and connecting with community.' }}</p>
         </div>
@@ -217,8 +226,26 @@
         <!-- Col 2: Working Hours -->
         <div class="bb8-footer-col">
           <h3>{{ content.footer_hours_heading or 'Working Hours' }}</h3>
-          <p><strong>Tuesday – Sunday:</strong><br>10:00 AM – 1:00 PM<br>4:30 PM – 8:30 PM</p>
-          <p><strong>Monday:</strong><br>Closed</p>
+          {% if working_hours_list %}
+            {% for item in working_hours_list %}
+              <p>
+                <strong>{{ item.days }}</strong>
+                {% if item.closed %}
+                  <br><span>{{ item.closed }}</span>
+                {% endif %}
+                {% if item.hours %}
+                  {% for line in item.hours.splitlines() %}
+                    {% if line.strip() %}
+                      <br><span>{{ line.strip() }}</span>
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+              </p>
+            {% endfor %}
+          {% else %}
+            <p><strong>Tuesday – Sunday</strong><br>10:00 AM – 1:00 PM<br>4:30 PM – 8:30 PM</p>
+            <p><strong>Monday</strong><br>Closed</p>
+          {% endif %}
         </div>
 
         <!-- Col 3: Useful Links -->
@@ -230,6 +257,7 @@
                 <li><a href="{{ item.url }}">{{ item.label }}</a></li>
               {% endfor %}
             {% else %}
+              <li><a href="/membership/">Membership &amp; Plans</a></li>
               <li><a href="/newspaper/">Newspaper</a></li>
               <li><a href="/magazine/">Magazine</a></li>
               <li><a href="/podcasts/">Podcasts</a></li>
@@ -239,18 +267,18 @@
 
         <!-- Col 4: Get In Touch -->
         <div class="bb8-footer-col">
-          <h3>Get In Touch</h3>
+          <h3>{{ content.footer_contact_heading or 'Get In Touch' }}</h3>
           <p>
-            <strong>Phone:</strong><br>
+            <strong>{{ content.footer_phone_label or 'Phone' }}</strong><br>
             <a href="tel:{{ content.contact_phone or '+91 9080759312' }}" style="color:#fff;text-decoration:none;">{{ content.contact_phone or '+91 9080759312' }}</a>
           </p>
           <p>
-            <strong>Email:</strong><br>
+            <strong>{{ content.footer_email_label or 'Email' }}</strong><br>
             <a href="mailto:{{ content.contact_email or 'bookbuddy.edu@gmail.com' }}" style="color:#fff;text-decoration:none;">{{ content.contact_email or 'bookbuddy.edu@gmail.com' }}</a>
           </p>
           <p>
-            <strong>Address:</strong><br>
-            <span>{{ content.contact_address or 'MK Complex 2nd floor Chennai Hot Puffs upstairs, K.Pudur, Madurai, Tamil Nadu 625007' }}</span>
+            <strong>{{ content.footer_address_label or 'Address' }}</strong><br>
+            <span style="white-space: pre-line;">{{ content.contact_address }}</span>
           </p>
         </div>
       </div>
@@ -274,9 +302,7 @@
   </footer>
 
   <!-- Round Back to Top Button -->
-  <button class="bb8-back-to-top" id="bb8-back-to-top" aria-label="Scroll back to top" type="button">
-    <svg class="bb-icon" style="width:20px;height:20px;" aria-hidden="true" focusable="false"><use href="#i-arrow-up"/></svg>
-  </button>
+  <button class="bb8-back-to-top" id="bb8-back-to-top" aria-label="Back to top" type="button"><svg class="bb-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#i-arrow-up"/></svg></button>
 
   <!-- Interactive Scripts for Mobile Drawer, Dropdowns, and Back-to-Top -->
   <script>
@@ -327,7 +353,8 @@
         }, { passive: true });
 
         backToTop.addEventListener('click', function () {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
         });
       }
     });

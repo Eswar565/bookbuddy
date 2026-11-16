@@ -1,4 +1,10 @@
 {% extends 'workspace/base.html' %}{% block content %}
+{% if active in ['navigation', 'working-hours', 'hours', 'working_hours'] %}
+<div class="s29-dashboard-links" style="margin-bottom: 18px; display: flex; gap: 10px;">
+  <a class="button {{ 'button-primary' if active == 'navigation' else 'secondary' }}" href="/admin/manage/navigation/">Navigation &amp; footer links</a>
+  <a class="button {{ 'button-primary' if active in ['working-hours', 'hours', 'working_hours'] else 'secondary' }}" href="/admin/manage/working-hours/">Working hours list</a>
+</div>
+{% endif %}
 <section class="bb34-filter-panel"><div class="bb34-filter-head"><div><h2>Find {{ title|lower }}</h2><p>Search, filter and sort records in this section.</p></div><a class="bb34-reset" href="{{ url_for('manage_records',kind=active) }}">Clear filters</a></div>
 <form class="bb34-manage-filters" method="get" role="search" action="{{ url_for('manage_records',kind=active) }}">
 <label class="bb34-search">Search records <input type="search" name="q" value="{{ q }}" placeholder="Search {{ title|lower }}" maxlength="100"></label>

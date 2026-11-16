@@ -16,9 +16,12 @@ from werkzeug.security import check_password_hash, generate_password_hash
 MODELS = {
     'books': ('Books', 'books', 'title author collection age_group language price stock description image_path is_active archived audience'),
     'events': ('Events', 'events', 'title description event_date event_time location fee capacity is_online is_active'),
-    'publications': ('Publications', 'publications', 'title kind description edition file_path published_on is_active'),
+    'publications': ('Publications', 'publications', 'title kind description edition file_path published_on is_active download_count'),
     'pages': ('Website pages', 'cms_pages', 'slug title summary body is_active'),
     'navigation': ('Navigation & footer links', 'site_navigation', 'group_name label url position is_active'),
+    'working-hours': ('Working hours', 'working_hours', 'days hours closed position is_active'),
+    'hours': ('Working hours', 'working_hours', 'days hours closed position is_active'),
+    'working_hours': ('Working hours', 'working_hours', 'days hours closed position is_active'),
     'orders': ('Orders', 'orders', 'customer_name email phone address total status'),
     'registrations': ('Event registrations', 'event_registrations', 'event_id name email phone seats amount status'),
     'requests': ('Borrowing requests', 'book_requests', 'book_title user_name member_id phone_number request_type status'),
@@ -29,9 +32,9 @@ MODELS = {
     'contributions': ('Reader contributions', 'reader_contributions', 'student_name email title category body status'),
 }
 READ_ONLY = {'orders','registrations','members','requests','enquiries','subscribers','contributions'}
-NUMBERS = {'price','fee','stock','capacity','seats','amount','total','event_id','position'}
+NUMBERS = {'price','fee','stock','capacity','seats','amount','total','event_id','position','download_count'}
 BOOLS = {'is_active','is_online'}
-LONG = {'body','description','summary','message','address','proposal_type'}
+LONG = {'body','description','summary','message','address','proposal_type','hours'}
 
 def install_management(app, get_db, render_site, current_admin, base_dir):
     with app.app_context():
@@ -46,8 +49,92 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
             url TEXT NOT NULL, position INTEGER DEFAULT 0, is_active INTEGER DEFAULT 1);
             CREATE TABLE IF NOT EXISTS reader_contributions (
             id INTEGER PRIMARY KEY, student_name TEXT, email TEXT, title TEXT, category TEXT,
-            body TEXT, status TEXT DEFAULT 'Pending');''')
+            body TEXT, status TEXT DEFAULT 'Pending');
+            CREATE TABLE IF NOT EXISTS working_hours (
+            id INTEGER PRIMARY KEY, days TEXT NOT NULL DEFAULT '', hours TEXT NOT NULL DEFAULT '',
+            closed TEXT NOT NULL DEFAULT '', position INTEGER NOT NULL DEFAULT 0, is_active INTEGER NOT NULL DEFAULT 1);''')
+        if get_db().execute('SELECT COUNT(*) FROM working_hours').fetchone()[0] == 0:
+            get_db().executescript('''
+                INSERT INTO working_hours(days, hours, closed, position, is_active) VALUES ('Tuesday – Sunday', '10:00 AM – 1:00 PM\n4:30 PM – 8:30 PM', '', 1, 1);
+                INSERT INTO working_hours(days, hours, closed, position, is_active) VALUES ('Monday', '', 'Closed', 2, 1);
+            ''')
+        get_db().executescript('''
+            CREATE TABLE IF NOT EXISTS site_settings (
+                id INTEGER PRIMARY KEY,
+                theme TEXT NOT NULL DEFAULT 'maroon',
+                font TEXT NOT NULL DEFAULT 'inter',
+                custom_p TEXT NOT NULL DEFAULT '#7a1230',
+                custom_bg TEXT NOT NULL DEFAULT '#f7f8fc',
+                custom_card TEXT NOT NULL DEFAULT '#ffffff',
+                custom_tx TEXT NOT NULL DEFAULT '#1a1a2e'
+            );
+        ''')
+        cols = [r[1] for r in get_db().execute("PRAGMA table_info(site_settings)").fetchall()]
+        for col, default in [
+            ('theme', "'maroon'"),
+            ('font', "'inter'"),
+            ('custom_p', "'#7a1230'"),
+            ('custom_bg', "'#f7f8fc'"),
+            ('custom_card', "'#ffffff'"),
+            ('custom_tx', "'#1a1a2e'")
+        ]:
+            if col not in cols:
+                get_db().execute(f"ALTER TABLE site_settings ADD COLUMN {col} TEXT NOT NULL DEFAULT {default}")
+        if not get_db().execute("SELECT id FROM site_settings WHERE id=1").fetchone():
+            get_db().execute(
+                "INSERT INTO site_settings (id, theme, font, custom_p, custom_bg, custom_card, custom_tx) "
+                "VALUES (1, 'maroon', 'inter', '#7a1230', '#f7f8fc', '#ffffff', '#1a1a2e')"
+            )
         get_db().commit()
+
+    @app.context_processor
+    def appearance_context():
+        theme = 'maroon'
+        font = 'inter'
+        custom_p = '#7a1230'
+        custom_bg = '#f7f8fc'
+        custom_card = '#ffffff'
+        custom_tx = '#1a1a2e'
+        try:
+            row = get_db().execute('SELECT theme, font, custom_p, custom_bg, custom_card, custom_tx FROM site_settings WHERE id=1').fetchone()
+            if row:
+                theme = row['theme'] or 'maroon'
+                font = row['font'] or 'inter'
+                custom_p = row['custom_p'] or '#7a1230'
+                custom_bg = row['custom_bg'] or '#f7f8fc'
+                custom_card = row['custom_card'] or '#ffffff'
+                custom_tx = row['custom_tx'] or '#1a1a2e'
+        except Exception:
+            pass
+
+        custom_theme_style = ""
+        custom_btn_tx = '#ffffff'
+        if theme == 'custom':
+            custom_theme_style = f"<style>:root{{--p:{custom_p};--bg:{custom_bg};--card:{custom_card};--tx:{custom_tx};}}</style>"
+            try:
+                def _rel_lum(h):
+                    h = h.lstrip('#')
+                    r, g, b = [int(h[i:i+2], 16) / 255.0 for i in (0, 2, 4)]
+                    def _adj(c):
+                        return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+                    return 0.2126 * _adj(r) + 0.7152 * _adj(g) + 0.0722 * _adj(b)
+                lp = _rel_lum(custom_p)
+                c_w = 1.05 / (lp + 0.05) if 1.0 >= lp else (lp + 0.05) / 0.05
+                c_b = (lp + 0.05) / 0.05
+                custom_btn_tx = '#ffffff' if c_w >= c_b else '#000000'
+            except Exception:
+                custom_btn_tx = '#ffffff'
+
+        return {
+            'site_theme': theme,
+            'site_font': font,
+            'custom_p': custom_p,
+            'custom_bg': custom_bg,
+            'custom_card': custom_card,
+            'custom_tx': custom_tx,
+            'custom_btn_tx': custom_btn_tx,
+            'custom_theme_style': custom_theme_style
+        }
 
     @app.context_processor
     def navigation_context():
@@ -140,8 +227,16 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
 
     @guard
     def dashboard():
-        counts = {key: get_db().execute('SELECT COUNT(*) FROM '+model[1]).fetchone()[0] for key,model in MODELS.items()}
-        recent = get_db().execute('SELECT * FROM admin_audit ORDER BY id DESC LIMIT 10').fetchall()
+        counts = {}
+        for key, model in MODELS.items():
+            try:
+                counts[key] = get_db().execute('SELECT COUNT(*) FROM ' + model[1]).fetchone()[0]
+            except Exception:
+                counts[key] = 0
+        try:
+            recent = get_db().execute('SELECT * FROM admin_audit ORDER BY id DESC LIMIT 10').fetchall()
+        except Exception:
+            recent = []
         return workspace('dashboard', title='Overview', active='', counts=counts, recent=recent)
     app.view_functions['admin_dashboard'] = dashboard
 
@@ -689,7 +784,7 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
         groups={}
         for item in settings:
             key=item['content_key']
-            group=('SEO & sharing' if key.startswith('seo_') else 'Contact information' if key.startswith('contact_') else 'About & founder' if key.startswith(('about_','founder_','team_')) else 'Homepage' if key.startswith(('home_','hero_','newsletter_')) else 'Footer & navigation' if key.startswith('base_') else key.split('_')[0].replace('-',' ').title())
+            group=('SEO & sharing' if key.startswith('seo_') else 'Contact information' if key.startswith('contact_') else 'About & founder' if key.startswith(('about_','founder_','team_')) else 'Homepage' if key.startswith(('home_','hero_','newsletter_')) else 'Footer & navigation' if key.startswith(('base_','footer_')) else key.split('_')[0].replace('-',' ').title())
             groups.setdefault(group,[]).append(item)
         return workspace('settings', title='Website settings',active='settings',settings_groups=groups)
 
@@ -706,6 +801,96 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
                 audit('Changed password'); get_db().commit(); flash('Password updated.','success')
         return workspace('password',title='Change password',active='password')
 
+    ALLOWED_THEMES = {'maroon', 'navy', 'dark', 'custom'}
+    ALLOWED_FONTS = {'inter', 'playfair', 'poppins'}
+    HEX_COLOR_RE = re.compile(r'^#[0-9a-fA-F]{6}$')
+
+    DEFAULT_P = '#7a1230'
+    DEFAULT_BG = '#f7f8fc'
+    DEFAULT_CARD = '#ffffff'
+    DEFAULT_TX = '#1a1a2e'
+
+    @app.route('/admin/appearance/', methods=['GET', 'POST'])
+    @guard
+    def workspace_appearance():
+        if request.method == 'POST':
+            action = request.form.get('action', 'save')
+            if action == 'reset':
+                theme = 'maroon'
+                font = 'inter'
+                custom_p = DEFAULT_P
+                custom_bg = DEFAULT_BG
+                custom_card = DEFAULT_CARD
+                custom_tx = DEFAULT_TX
+            else:
+                theme = request.form.get('theme', 'maroon').strip().lower()
+                font = request.form.get('font', 'inter').strip().lower()
+                custom_p = request.form.get('custom_p', DEFAULT_P).strip()
+                custom_bg = request.form.get('custom_bg', DEFAULT_BG).strip()
+                custom_card = request.form.get('custom_card', DEFAULT_CARD).strip()
+                custom_tx = request.form.get('custom_tx', DEFAULT_TX).strip()
+
+                if theme not in ALLOWED_THEMES:
+                    theme = 'maroon'
+                if font not in ALLOWED_FONTS:
+                    font = 'inter'
+
+                for color_name, val in [('Primary', custom_p), ('Background', custom_bg), ('Card', custom_card), ('Text', custom_tx)]:
+                    if not HEX_COLOR_RE.match(val):
+                        flash(f'Invalid hex color format for {color_name} ({val}). Expected format: #RRGGBB', 'danger')
+                        return redirect('/admin/appearance/')
+
+            get_db().execute(
+                "INSERT INTO site_settings (id, theme, font, custom_p, custom_bg, custom_card, custom_tx) "
+                "VALUES (1, ?, ?, ?, ?, ?, ?) "
+                "ON CONFLICT(id) DO UPDATE SET "
+                "theme=excluded.theme, font=excluded.font, "
+                "custom_p=excluded.custom_p, custom_bg=excluded.custom_bg, "
+                "custom_card=excluded.custom_card, custom_tx=excluded.custom_tx",
+                (theme, font, custom_p, custom_bg, custom_card, custom_tx)
+            )
+            audit(f'Updated appearance settings to theme={theme}, font={font}')
+            get_db().commit()
+            flash('Saved ✓', 'success')
+            return redirect('/admin/appearance/')
+
+        theme = 'maroon'
+        font = 'inter'
+        custom_p = DEFAULT_P
+        custom_bg = DEFAULT_BG
+        custom_card = DEFAULT_CARD
+        custom_tx = DEFAULT_TX
+        try:
+            row = get_db().execute('SELECT theme, font, custom_p, custom_bg, custom_card, custom_tx FROM site_settings WHERE id=1').fetchone()
+            if row:
+                theme = row['theme'] or 'maroon'
+                font = row['font'] or 'inter'
+                custom_p = row['custom_p'] or DEFAULT_P
+                custom_bg = row['custom_bg'] or DEFAULT_BG
+                custom_card = row['custom_card'] or DEFAULT_CARD
+                custom_tx = row['custom_tx'] or DEFAULT_TX
+        except Exception:
+            pass
+
+        return workspace(
+            'appearance',
+            title='Appearance',
+            active='appearance',
+            current_theme=theme,
+            current_font=font,
+            custom_p=custom_p,
+            custom_bg=custom_bg,
+            custom_card=custom_card,
+            custom_tx=custom_tx
+        )
+
+    @app.route('/admin/appearance', methods=['GET', 'POST'])
+    @guard
+    def workspace_appearance_slash():
+        if request.method == 'POST':
+            return workspace_appearance()
+        return redirect('/admin/appearance/')
+
     @app.before_request
     def published_pages():
         path=request.path.strip('/')
@@ -716,9 +901,8 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
             # admin-managed copy is resolved by about_content.about_context.
             # Other explicitly implemented routes must not be silently replaced by
             # a generic CMS body merely because an identically named slug exists.
-            if path in {'about', 'contact'} or (
+            if path in {'about', 'contact', 'how-to-borrow', 'visit-us'} or (
                 request.endpoint not in (None, 'dynamic_page')
-                and path not in {'how-to-borrow'}
             ):
                 return None
             page=get_db().execute('SELECT * FROM cms_pages WHERE slug=? AND is_active=1',(path,)).fetchone()

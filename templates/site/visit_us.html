@@ -1,1 +1,13 @@
-{% extends 'site/base.html' %}{% block title %}Visit us | BookBuddy{% endblock %}{% block body %}<main class="bb17-shell"><h1>Visit the library</h1>{% if content.contact_address %}<p>{{ content.contact_address }}</p>{% endif %}{% if content.contact_hours %}<h2>Opening hours</h2><p>{{ content.contact_hours }}</p>{% endif %}<a href="/contact/">Contact the library <svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg></a></main>{% endblock %}
+{% extends 'site/base.html' %}
+
+{% block title %}{{ page_title|default(visit.heading ~ ' | Book Buddy Library') }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/bb-visit-us.css?v=1">
+{% endblock %}
+
+{% block body %}
+<main id="main-content">
+  {% include 'site/_visit_us_content.html' %}
+</main>
+{% endblock %}

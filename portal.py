@@ -13,7 +13,7 @@ from functools import wraps
 from pathlib import Path
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
-from flask import abort, request, session, redirect, flash, render_template, jsonify, send_file, Response
+from flask import abort, request, session, redirect, flash, render_template, jsonify, send_file, Response, url_for
 from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
 from accounts import years_old, academic_label, age_matches
@@ -65,9 +65,16 @@ def install_release17(app,db,render,admin,root):
           'admin_users':{'role':"TEXT NOT NULL DEFAULT 'super_admin'",'is_active':'INTEGER NOT NULL DEFAULT 1'},
           'users':{'email_verified':'INTEGER NOT NULL DEFAULT 0','session_version':'INTEGER NOT NULL DEFAULT 0'},
           'books':{'isbn':"TEXT NOT NULL DEFAULT ''",'publisher':"TEXT NOT NULL DEFAULT ''",'edition':"TEXT NOT NULL DEFAULT ''",'archived':'INTEGER NOT NULL DEFAULT 0'},
-          'lending_plans':{'duration_days':'INTEGER NOT NULL DEFAULT 30','loan_days':'INTEGER NOT NULL DEFAULT 14','renewal_limit':'INTEGER NOT NULL DEFAULT 1','fine_daily_paise':'INTEGER NOT NULL DEFAULT 0','learning_access':'INTEGER NOT NULL DEFAULT 1','ai_access':'INTEGER NOT NULL DEFAULT 0'},
+          'lending_plans':{
+              'duration_days':'INTEGER NOT NULL DEFAULT 30','loan_days':'INTEGER NOT NULL DEFAULT 14','renewal_limit':'INTEGER NOT NULL DEFAULT 1','fine_daily_paise':'INTEGER NOT NULL DEFAULT 0','learning_access':'INTEGER NOT NULL DEFAULT 1','ai_access':'INTEGER NOT NULL DEFAULT 0',
+              'tier':"TEXT NOT NULL DEFAULT ''",'tagline':"TEXT NOT NULL DEFAULT ''",'badge':"TEXT NOT NULL DEFAULT ''",'benefits':"TEXT NOT NULL DEFAULT ''",'total_books':'INTEGER NOT NULL DEFAULT 0'
+          },
           'lending_loans':{'copy_id':'INTEGER REFERENCES copies17(id)','return_requested_at':"TEXT NOT NULL DEFAULT ''",'renewals':'INTEGER NOT NULL DEFAULT 0','fine_daily_paise':'INTEGER NOT NULL DEFAULT 0'},
-          'lending_subscriptions':{'duration_snapshot':'INTEGER NOT NULL DEFAULT 0','learning_snapshot':'INTEGER NOT NULL DEFAULT 1','ai_snapshot':'INTEGER NOT NULL DEFAULT 0'},
+          'lending_subscriptions':{
+              'duration_snapshot':'INTEGER NOT NULL DEFAULT 0','learning_snapshot':'INTEGER NOT NULL DEFAULT 1','ai_snapshot':'INTEGER NOT NULL DEFAULT 0',
+              'child_name':"TEXT NOT NULL DEFAULT ''",'child_dob':"TEXT NOT NULL DEFAULT ''",'student_grade':"TEXT NOT NULL DEFAULT ''",'parent_name':"TEXT NOT NULL DEFAULT ''",'email':"TEXT NOT NULL DEFAULT ''",'phone':"TEXT NOT NULL DEFAULT ''",
+              'service_mode':"TEXT NOT NULL DEFAULT 'offline'",'delivery_fee':'REAL NOT NULL DEFAULT 0','address_flat':"TEXT NOT NULL DEFAULT ''",'address_street':"TEXT NOT NULL DEFAULT ''",'address_city':"TEXT NOT NULL DEFAULT ''",'address_state':"TEXT NOT NULL DEFAULT ''",'address_pincode':"TEXT NOT NULL DEFAULT ''",'address_country':"TEXT NOT NULL DEFAULT 'India'",'referral_code':"TEXT NOT NULL DEFAULT ''"
+          },
 }
         for table,fields in additions.items():
             have={r[1] for r in c.execute('PRAGMA table_info('+table+')')}
@@ -84,6 +91,33 @@ def install_release17(app,db,render,admin,root):
                 copy=c.execute("INSERT INTO copies17(book_id,barcode,status) VALUES(?,?,'Borrowed')",(loan['book_id'],f'BB-LEGACY-LOAN-{loan["id"]}')).lastrowid
                 c.execute('UPDATE lending_loans SET copy_id=? WHERE id=?',(copy,loan['id']))
             c.execute("INSERT INTO schema_updates VALUES('v17')")
+        c.commit()
+
+        # Seed membership plans (6 rows: tier x duration) only if missing
+        if c.execute("SELECT COUNT(*) FROM lending_plans WHERE tier!=''").fetchone()[0] == 0:
+            benefits_text = "Online Portal Access\nAcademic Worksheets\nThe Book Buddy Times\nBeyond School Activities\nGames\nContribute to Magazine"
+            default_plans = [
+                ('Solo Explorer - 2 Months', 2, 60, 'Solo Explorer', 'Summer Special', '', 800.0, 2, 8, benefits_text, '2 Months Summer Special membership for 1 reader (2 books at a time).', 1, 'Membership', 14, 1),
+                ('Family Pack / Elite - 2 Months', 2, 60, 'Family Pack / Elite', 'Summer Special', '', 1400.0, 4, 16, benefits_text, '2 Months Summer Special membership for family (4 books at a time).', 1, 'Membership', 14, 1),
+                ('Solo Explorer - 3 Months', 3, 90, 'Solo Explorer', 'Regular', '', 1100.0, 2, 12, benefits_text, '3 Months Regular membership for 1 reader (2 books at a time).', 1, 'Membership', 14, 1),
+                ('Family Pack / Elite - 3 Months', 3, 90, 'Family Pack / Elite', 'Regular', '', 2000.0, 4, 24, benefits_text, '3 Months Regular membership for family (4 books at a time).', 1, 'Membership', 14, 1),
+                ('Solo Explorer - 9 Months', 9, 270, 'Solo Explorer', 'Academic Year', 'BEST VALUE', 3000.0, 2, 36, benefits_text, '9 Months Academic Year membership for 1 reader (2 books at a time).', 1, 'Membership', 14, 1),
+                ('Family Pack / Elite - 9 Months', 9, 270, 'Family Pack / Elite', 'Academic Year', 'BEST VALUE', 5500.0, 4, 72, benefits_text, '9 Months Academic Year membership for family (4 books at a time).', 1, 'Membership', 14, 1),
+            ]
+            for p in default_plans:
+                c.execute('''INSERT INTO lending_plans(name, months, duration_days, tier, tagline, badge, amount, book_limit, total_books, benefits, description, is_active, kind, loan_days, renewal_limit)
+                             VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''', p)
+            c.commit()
+
+        # Seed site_content defaults for delivery and service modes if missing
+        delivery_defaults = {
+            'membership_delivery_fee_monthly': '350',
+            'membership_delivery_area': 'Gandhi Nagar, Saligramam and surrounding areas (within 5 km)',
+            'membership_delivery_day': 'Fixed pick-up & drop on designated weekday (e.g. Saturday)',
+            'membership_pickup_address': 'Gandhi Nagar, Saligramam, Chennai',
+        }
+        for k, v in delivery_defaults.items():
+            c.execute("INSERT OR IGNORE INTO site_content(content_key, content_value) VALUES(?, ?)", (k, v))
         c.commit()
 
     with app.app_context():
@@ -185,7 +219,7 @@ def install_release17(app,db,render,admin,root):
             role=staff()['role']
             if role not in {'super_admin','org_admin'}:
                 allowed={'librarian':('/admin/library-center/','/admin/library17/','/admin/lending/','/admin/support17/','/admin/manage/books/'), 'instructor':('/admin/support17/',), 'support':('/admin/support17/',)}.get(role,())
-                if path=='/admin/dashboard/':return redirect({'librarian':'/admin/library17/','instructor':'/admin/support17/','support':'/admin/support17/'}[role])
+                if path=='/admin/dashboard/':return redirect({'librarian':'/admin/library17/','instructor':'/admin/support17/','support':'/admin/support17/'}.get(role, '/admin/support17/'))
                 if not path.startswith(allowed) and path!='/admin/password/':abort(403,'Your staff role cannot access this section.')
         if path.startswith(('/media/users/','/media/interns/','/media/resumes/','/static/resumes/')) and not privileged():abort(404)
         # Deny raw legacy media documents unless entitled; new files are outside public directories.
@@ -397,23 +431,103 @@ def install_release17(app,db,render,admin,root):
         notify(s['user_id'],'Membership confirmed',f'Valid {start} to {end}.','/members/dashboard/')
 
     def request_plan(plan_id):
-        u=require_user();c=db();c.execute('BEGIN IMMEDIATE')
+        u=user()
+        if not u:
+            flash('Please log in or sign up to complete your subscription.','info')
+            next_url=f'/membership/?plan_id={plan_id}'
+            return redirect(url_for('account_login',next=next_url))
+        c=db();c.execute('BEGIN IMMEDIATE')
         p=c.execute('SELECT * FROM lending_plans WHERE id=? AND is_active=1',(plan_id,)).fetchone()
-        if not p:abort(404)
-        existing=c.execute("SELECT id FROM lending_subscriptions WHERE user_id=? AND status='Pending'",(u['id'],)).fetchone()
-        if existing:c.rollback();return redirect(f'/members/billing/{existing[0]}/')
-        amount=paise(p['amount']);coupon=None;code=textfield('coupon',50)
+        if not p:
+            c.rollback();abort(404,'Selected plan not found.')
+        pd=dict(p)
+
+        service_mode=request.form.get('service_mode','offline').strip().lower()
+        if service_mode not in {'offline','online'}:service_mode='offline'
+
+        ud=dict(u) if u else {}
+        child_name=textfield('child_name',150) or ud.get('name','')
+        child_dob=textfield('child_dob',20) or ud.get('dob','')
+        student_grade=textfield('student_grade',50)
+        parent_name=textfield('parent_name',150) or ud.get('guardian_name','') or ud.get('name','')
+        email=textfield('email',150) or ud.get('email','')
+        phone=textfield('phone',50) or ud.get('phone','')
+
+        address_flat=textfield('address_flat',255)
+        address_street=textfield('address_street',255)
+        address_city=textfield('address_city',100) or 'Chennai'
+        address_state=textfield('address_state',100) or 'Tamil Nadu'
+        address_pincode=textfield('address_pincode',20)
+        address_country='India'
+        referral_code=textfield('referral_code',50)
+
+        # Server validation
+        if service_mode=='online' and (not address_flat or not address_street or not address_pincode):
+            c.rollback();flash('Please provide your complete delivery address for doorstep delivery.','danger')
+            return redirect(f'/membership/?plan_id={plan_id}')
+
+        settings_fee=c.execute("SELECT content_value FROM site_content WHERE content_key='membership_delivery_fee_monthly'").fetchone()
+        try: monthly_rate=float(settings_fee[0]) if settings_fee and settings_fee[0] else 350.0
+        except ValueError: monthly_rate=350.0
+
+        months=int(pd.get('months') or max(1,pd['duration_days']//30))
+        delivery_fee=(monthly_rate * months) if service_mode=='online' else 0.0
+        base_amount=float(pd['amount'])
+        amount=paise(base_amount + delivery_fee)
+
+        coupon=None;code=textfield('coupon',50)
         if code:
             coupon=c.execute("SELECT * FROM coupons17 WHERE code=? AND is_active=1 AND (expires_on='' OR expires_on>=?)",(code,today().isoformat())).fetchone()
-            if not coupon:abort(400,'Coupon is invalid or expired.')
+            if not coupon:c.rollback();abort(400,'Coupon is invalid or expired.')
             used=c.execute('SELECT COUNT(*) FROM coupon_uses17 WHERE coupon_id=?',(coupon['id'],)).fetchone()[0]
-            if coupon['max_uses'] and used>=coupon['max_uses']:abort(409,'Coupon usage limit reached.')
+            if coupon['max_uses'] and used>=coupon['max_uses']:c.rollback();abort(409,'Coupon usage limit reached.')
             amount=(amount*(100-coupon['percent'])+50)//100
-        sid=c.execute('INSERT INTO lending_subscriptions(user_id,plan_id,amount,duration_snapshot,book_limit_snapshot,learning_snapshot,ai_snapshot) VALUES(?,?,?,?,?,?,?)',(u['id'],plan_id,amount/100,p['duration_days'],p['book_limit'],p['learning_access'],p['ai_access'])).lastrowid
-        if coupon:c.execute('INSERT INTO coupon_uses17 VALUES(?,?)',(coupon['id'],sid))
-        if amount==0:activate(sid,'Free plan')
+
+        total_final = amount / 100
+
+        # Update user's profile with contact / DOB if missing
+        c.execute("""UPDATE users SET
+            phone=CASE WHEN (phone IS NULL OR phone='') AND ?!='' THEN ? ELSE phone END,
+            dob=CASE WHEN (dob IS NULL OR dob='') AND ?!='' THEN ? ELSE dob END,
+            guardian_name=CASE WHEN (guardian_name IS NULL OR guardian_name='') AND ?!='' THEN ? ELSE guardian_name END
+            WHERE id=?""", (phone,phone,child_dob,child_dob,parent_name,parent_name,u['id']))
+
+        existing=c.execute("SELECT id FROM lending_subscriptions WHERE user_id=? AND status='Pending' ORDER BY id DESC LIMIT 1",(u['id'],)).fetchone()
+        if existing:
+            sid=existing[0]
+            c.execute("""UPDATE lending_subscriptions SET
+                plan_id=?,amount=?,delivery_fee=?,service_mode=?,child_name=?,child_dob=?,
+                student_grade=?,parent_name=?,email=?,phone=?,address_flat=?,address_street=?,
+                address_city=?,address_state=?,address_pincode=?,address_country=?,referral_code=?,
+                duration_snapshot=?,book_limit_snapshot=?,learning_snapshot=?,ai_snapshot=?
+                WHERE id=?""", (
+                    plan_id,total_final,delivery_fee,service_mode,child_name,child_dob,
+                    student_grade,parent_name,email,phone,address_flat,address_street,
+                    address_city,address_state,address_pincode,address_country,referral_code,
+                    pd['duration_days'],pd['book_limit'],pd['learning_access'],pd['ai_access'],sid
+                ))
+        else:
+            sid=c.execute("""INSERT INTO lending_subscriptions(
+                user_id,plan_id,amount,delivery_fee,service_mode,child_name,child_dob,
+                student_grade,parent_name,email,phone,address_flat,address_street,
+                address_city,address_state,address_pincode,address_country,referral_code,
+                duration_snapshot,book_limit_snapshot,learning_snapshot,ai_snapshot
+            ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (
+                u['id'],plan_id,total_final,delivery_fee,service_mode,child_name,child_dob,
+                student_grade,parent_name,email,phone,address_flat,address_street,
+                address_city,address_state,address_pincode,address_country,referral_code,
+                pd['duration_days'],pd['book_limit'],pd['learning_access'],pd['ai_access']
+            )).lastrowid
+
+        if coupon:c.execute('INSERT OR IGNORE INTO coupon_uses17 VALUES(?,?)',(coupon['id'],sid))
+        if total_final==0:activate(sid,'Free plan')
         c.commit();return redirect(f'/members/billing/{sid}/')
     app.view_functions['request_plan16']=request_plan
+
+    @app.route('/membership/subscribe/',methods=['POST'])
+    def membership_subscribe():
+        pid=integer(request.form.get('plan_id',0),1)
+        return request_plan(pid)
 
     def subscription_review(sub_id):
         a=require_staff();c=db();c.execute('BEGIN IMMEDIATE');s=c.execute('SELECT * FROM lending_subscriptions WHERE id=?',(sub_id,)).fetchone()
@@ -445,18 +559,108 @@ def install_release17(app,db,render,admin,root):
                     except ValueError:abort(400,'Invalid expiry date.')
                 if db().execute('SELECT 1 FROM coupons17 WHERE code=?',(code,)).fetchone():abort(409,'Coupon code already exists.')
                 db().execute('INSERT INTO coupons17(code,percent,max_uses,expires_on) VALUES(?,?,?,?)',(code,integer(request.form.get('percent'),1,100),integer(request.form.get('max_uses',0)),expiry))
+            elif action=='settings':
+                for k in ['membership_delivery_fee_monthly','membership_delivery_area','membership_delivery_day','membership_pickup_address']:
+                    if k in request.form:
+                        db().execute('INSERT INTO site_content(content_key,content_value) VALUES(?,?) ON CONFLICT(content_key) DO UPDATE SET content_value=excluded.content_value',(k, request.form[k].strip()))
+                audit('Membership delivery settings updated');db().commit();flash('Delivery and service settings saved.','success');return redirect('/admin/plans17/')
             else:
                 pid=integer(request.form.get('id') or 0);name=textfield('name',150,True);days=integer(request.form.get('duration_days',30),1,3650)
-                values=(name,days,integer(request.form.get('book_limit',2),0,100),paise(request.form.get('amount',0))/100,integer(request.form.get('loan_days',14),1,365),integer(request.form.get('renewal_limit',1),0,10),paise(request.form.get('fine_daily',0)),0,0,textfield('description',2000),int(request.form.get('is_active')=='1'))
+                tier=textfield('tier',100);tagline=textfield('tagline',100);badge=textfield('badge',50)
+                total_books=integer(request.form.get('total_books',0),0,1000)
+                months=integer(request.form.get('months',max(1,days//30)),1,36)
+                benefits=textfield('benefits',4000)
+                values=(name,days,integer(request.form.get('book_limit',2),0,100),paise(request.form.get('amount',0))/100,integer(request.form.get('loan_days',14),1,365),integer(request.form.get('renewal_limit',1),0,10),paise(request.form.get('fine_daily',0)),0,0,textfield('description',2000),int(request.form.get('is_active')=='1'),tier,tagline,badge,total_books,months,benefits)
                 duplicate=db().execute('SELECT 1 FROM lending_plans WHERE name=? AND id!=?',(name,pid)).fetchone()
                 if duplicate:abort(409,'Another plan has that name.')
                 if pid:
-                    result=db().execute('UPDATE lending_plans SET name=?,duration_days=?,book_limit=?,amount=?,loan_days=?,renewal_limit=?,fine_daily_paise=?,learning_access=?,ai_access=?,description=?,is_active=? WHERE id=?',(*values,pid))
+                    result=db().execute('UPDATE lending_plans SET name=?,duration_days=?,book_limit=?,amount=?,loan_days=?,renewal_limit=?,fine_daily_paise=?,learning_access=?,ai_access=?,description=?,is_active=?,tier=?,tagline=?,badge=?,total_books=?,months=?,benefits=? WHERE id=?',(*values,pid))
                     if not result.rowcount:abort(404)
-                else:db().execute("INSERT INTO lending_plans(name,duration_days,book_limit,amount,loan_days,renewal_limit,fine_daily_paise,learning_access,ai_access,description,is_active,months,kind) VALUES(?,?,?,?,?,?,?,?,?,?,?,1,'Membership')",values)
+                else:db().execute("INSERT INTO lending_plans(name,duration_days,book_limit,amount,loan_days,renewal_limit,fine_daily_paise,learning_access,ai_access,description,is_active,tier,tagline,badge,total_books,months,benefits,kind) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'Membership')",values)
             audit('Membership configuration: '+action);db().commit();flash('Saved.','success');return redirect('/admin/plans17/')
         edit=db().execute('SELECT * FROM lending_plans WHERE id=?',(integer(request.args.get('edit',0)),)).fetchone()
-        return desk('plans','Plans & promotions',plans=rows('SELECT * FROM lending_plans ORDER BY id'),edit=dict(edit) if edit else {},coupons=rows('SELECT * FROM coupons17 ORDER BY id DESC'))
+        settings_map={r['content_key']:r['content_value'] for r in db().execute('SELECT * FROM site_content').fetchall()}
+        return desk('plans','Plans & promotions',plans=rows('SELECT * FROM lending_plans ORDER BY months, amount, id'),edit=dict(edit) if edit else {},coupons=rows('SELECT * FROM coupons17 ORDER BY id DESC'),settings=settings_map)
+
+    def render_membership_page():
+        c=db()
+        plans_raw=[dict(r) for r in c.execute('SELECT * FROM lending_plans WHERE is_active=1 ORDER BY months ASC, amount ASC, id ASC').fetchall()]
+        settings_map={r['content_key']:r['content_value'] for r in c.execute('SELECT * FROM site_content').fetchall()}
+
+        delivery_fee_monthly=350
+        try: delivery_fee_monthly=int(float(settings_map.get('membership_delivery_fee_monthly','350')))
+        except ValueError: pass
+        delivery_area=settings_map.get('membership_delivery_area','Gandhi Nagar, Saligramam and surrounding areas (within 5 km)')
+        delivery_day=settings_map.get('membership_delivery_day','Fixed pick-up & drop on designated weekday (e.g. Saturday)')
+        pickup_address=settings_map.get('membership_pickup_address','Gandhi Nagar, Saligramam, Chennai')
+
+        # Group by duration months (e.g. 2, 3, 9)
+        months_set=[]
+        for p in plans_raw:
+            m=p.get('months') or max(1,p['duration_days']//30)
+            if m not in months_set:months_set.append(m)
+        months_set.sort()
+
+        duration_groups=[]
+        for m in months_set:
+            group_plans=[p for p in plans_raw if (p.get('months') or max(1,p['duration_days']//30))==m]
+            solo=next((p for p in group_plans if 'solo' in (p.get('tier') or '').lower()), None)
+            if not solo:solo=next((p for p in group_plans if p.get('book_limit')==2), group_plans[0] if group_plans else None)
+
+            family=next((p for p in group_plans if any(k in (p.get('tier') or '').lower() for k in ['family','elite'])), None)
+            if not family:family=next((p for p in group_plans if p.get('book_limit')==4), group_plans[-1] if len(group_plans)>1 else None)
+
+            tagline=next((p['tagline'] for p in group_plans if p.get('tagline')), ('Summer Special' if m==2 else 'Regular' if m==3 else 'Academic Year'))
+            badge=next((p['badge'] for p in group_plans if p.get('badge')), ('BEST VALUE' if m==9 else ''))
+            benefits_raw=next((p['benefits'] for p in group_plans if p.get('benefits')), '')
+            if not benefits_raw:
+                benefits_list=['Online Portal Access','Academic Worksheets','The Book Buddy Times','Beyond School Activities','Games','Contribute to Magazine']
+            else:
+                benefits_list=[b.strip() for b in benefits_raw.split('\n') if b.strip()]
+
+            duration_groups.append({
+                'months': m,
+                'label': f'{m} Months',
+                'tagline': tagline,
+                'badge': badge,
+                'is_best_value': bool(badge and 'best' in badge.lower()) or (m==9),
+                'solo_plan': solo,
+                'family_plan': family,
+                'solo_price': int(solo['amount']) if solo else 0,
+                'family_price': int(family['amount']) if family else 0,
+                'solo_books': (solo.get('total_books') or (8 if m==2 else 12 if m==3 else 36)) if solo else 0,
+                'family_books': (family.get('total_books') or (16 if m==2 else 24 if m==3 else 72)) if family else 0,
+                'benefits': benefits_list,
+                'plans': group_plans,
+            })
+
+        import json
+        plans_json=json.dumps([{
+            'id': p['id'],
+            'name': p['name'],
+            'months': p.get('months') or max(1,p['duration_days']//30),
+            'tier': p.get('tier') or ('Family Pack / Elite' if p['book_limit']>2 else 'Solo Explorer'),
+            'amount': float(p['amount']),
+            'book_limit': p['book_limit'],
+            'total_books': p.get('total_books') or 0,
+            'tagline': p.get('tagline') or '',
+            'badge': p.get('badge') or '',
+        } for p in plans_raw])
+
+        current_u=user()
+        return render('membership','library',
+                      duration_groups=duration_groups,
+                      plans=plans_raw,
+                      plans_json=plans_json,
+                      delivery_fee_monthly=delivery_fee_monthly,
+                      delivery_area=delivery_area,
+                      delivery_day=delivery_day,
+                      pickup_address=pickup_address,
+                      prefill_user=dict(current_u) if current_u else None,
+                      page_title='Membership & Plans | Book Buddy')
+
+    app.add_url_rule('/membership/', 'membership_page', render_membership_page, methods=['GET'])
+    app.view_functions['membership']=render_membership_page
 
     @app.route('/members/billing/<int:sid>/',methods=['GET','POST'])
     def billing17(sid):

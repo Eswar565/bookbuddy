@@ -256,6 +256,17 @@ def init_db() -> None:
             message TEXT,
             created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
+        CREATE TABLE IF NOT EXISTS partner_submissions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            full_name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            phone TEXT NOT NULL DEFAULT '',
+            organisation TEXT NOT NULL DEFAULT '',
+            proposal_type TEXT NOT NULL DEFAULT 'General',
+            message TEXT NOT NULL DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'New',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
         CREATE TABLE IF NOT EXISTS activities (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
@@ -342,6 +353,8 @@ def init_db() -> None:
         "image_path": "TEXT NOT NULL DEFAULT ''",
         "stock": "INTEGER NOT NULL DEFAULT 1",
         "product_type": "TEXT NOT NULL DEFAULT 'book'",
+        "is_active": "INTEGER NOT NULL DEFAULT 1",
+        "archived": "INTEGER NOT NULL DEFAULT 0",
     }.items():
         if column not in existing_columns:
             connection.execute(f"ALTER TABLE books ADD COLUMN {column} {definition}")
@@ -352,7 +365,31 @@ def init_db() -> None:
             'INSERT OR IGNORE INTO admin_users(email,name,password_hash) VALUES (?,?,?)',
             (os.environ['ADMIN_EMAIL'].lower(),'Book Buddy Admin',generate_password_hash(os.environ['ADMIN_PASSWORD'])),
         )
-    connection.executemany('INSERT OR IGNORE INTO site_content VALUES (?,?)', [('hero_eyebrow',''),('hero_title',''),('hero_text',''),('about_text',''),('newsletter_title',''),('newsletter_text','')])
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS working_hours (
+            id INTEGER PRIMARY KEY,
+            days TEXT NOT NULL DEFAULT '',
+            hours TEXT NOT NULL DEFAULT '',
+            closed TEXT NOT NULL DEFAULT '',
+            position INTEGER NOT NULL DEFAULT 0,
+            is_active INTEGER NOT NULL DEFAULT 1
+        );
+        """
+    )
+    if connection.execute("SELECT COUNT(*) FROM working_hours").fetchone()[0] == 0:
+        connection.executemany(
+            "INSERT INTO working_hours (days, hours, closed, position, is_active) VALUES (?, ?, ?, ?, ?)",
+            [
+                ("Tuesday – Sunday", "10:00 AM – 1:00 PM\n4:30 PM – 8:30 PM", "", 1, 1),
+                ("Monday", "", "Closed", 2, 1),
+            ],
+        )
+    connection.executemany('INSERT OR IGNORE INTO site_content VALUES (?,?)', [
+        ('hero_eyebrow',''),('hero_title',''),('hero_text',''),('about_text',''),('newsletter_title',''),('newsletter_text',''),
+        ('footer_phone_label','Phone'),('footer_email_label','Email'),('footer_address_label','Address'),
+        ('footer_hours_heading','Working Hours'),('footer_contact_heading','Get In Touch')
+    ])
     pass
     pass
     pass
@@ -508,6 +545,10 @@ def site_context(section: str = "home") -> dict[str, Any]:
     activities = []
     events = [row_dict(row) for row in db.execute("SELECT * FROM events WHERE is_active = 1 ORDER BY event_date, event_time").fetchall()]
     publications = [row_dict(row) for row in db.execute("SELECT * FROM publications WHERE is_active = 1 ORDER BY published_on DESC, id DESC").fetchall()]
+    try:
+        working_hours_list = [row_dict(row) for row in db.execute("SELECT * FROM working_hours WHERE is_active = 1 ORDER BY position, id").fetchall()]
+    except Exception:
+        working_hours_list = []
     calendar_events = {}
     for event in events:
         calendar_events.setdefault(event['event_date'], []).append({**{k:v for k,v in event.items() if k!='join_url'},'url':safe_url_for('event_detail',event_id=event['id'])})
@@ -524,6 +565,7 @@ def site_context(section: str = "home") -> dict[str, Any]:
         "calendar_events": calendar_events,
         "activities": activities,
         "publications": publications,
+        "working_hours_list": working_hours_list,
         "content": content,
         "cart_items": items,
         "cart_total": cart_total,
@@ -1382,6 +1424,11 @@ def magazine() -> Response:
     return redirect(flask_url_for("publications_page", kind="magazine"))
 
 
+@app.get("/newspaper/", endpoint="newspaper_page")
+def newspaper_page() -> Response:
+    return redirect(flask_url_for("publications_page", kind="news"))
+
+
 @app.get("/newspaper-2026/", endpoint="newspaper_2026")
 def newspaper_2026() -> Response:
     return redirect(flask_url_for("publications_page", kind="news"))
@@ -1431,7 +1478,8 @@ def not_found(_: NotFound) -> Response:
 
 
 @app.errorhandler(500)
-def server_error(_: Exception) -> Response:
+def server_error(err: Exception) -> Response:
+    app.logger.exception("Internal Server Error: %s", err)
     try:
         return render_site("error", error_code=500, error_heading="Something went wrong", error_message="Please try again shortly."), 500
     except Exception:
@@ -1478,6 +1526,12 @@ install_library_centers(app, get_db, current_admin)
 
 from about_editor import install_about_editor
 install_about_editor(app, get_db, current_admin)
+
+from how_to_borrow import install_how_to_borrow
+install_how_to_borrow(app, get_db, current_admin, render_site)
+
+from visit_us import install_visit_us
+install_visit_us(app, get_db, current_admin, render_site)
 
 
 # Library-only routing guard: legacy learning URLs remain unavailable on both public and admin sides.

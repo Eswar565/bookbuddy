@@ -3,7 +3,7 @@
 {% block title %}The Magazine Archive · Book Buddy Magazine{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/static/css/bb-media.css?v=1">
+<link rel="stylesheet" href="/static/css/bb-media.css?v=2">
 {% endblock %}
 
 {% block body %}
@@ -34,19 +34,16 @@
         <!-- Card Header Row -->
         <div class="bb-magazine-card-header">
           <h2 class="bb-magazine-card-title">{{ item.edition or item.title }}</h2>
+          {% if item.badge_label %}
           <div class="bb-magazine-card-badges">
-            {% if item.badge_label %}
             <span class="bb-mag-badge">{{ item.badge_label }}</span>
-            {% endif %}
-            <button type="button" class="bb-share-icon-btn" data-bb-share data-share-title="{{ item.title }}" data-share-url="{{ request.host_url ~ 'magazine/#mag-' ~ item.id }}" aria-label="Share {{ item.title }}">
-              <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-share"/></svg>
-            </button>
           </div>
+          {% endif %}
         </div>
 
         <!-- Cover Preview Area (sized to cover, dark background) -->
         <div class="bb-magazine-preview-area">
-          {% set target_link = item.file_path or item.cover_path %}
+          {% set target_link = ('/publications/' ~ item.id ~ '/view/') if item.file_path else (item.cover_path or item.file_path) %}
           <a href="{{ target_link if target_link.startswith(('http', '/')) else '/' ~ target_link }}" target="_blank" rel="noopener noreferrer" class="bb-magazine-cover-link" aria-label="Read {{ item.title }}">
             {% if item.cover_path %}
             <img class="bb-magazine-cover-img" src="{{ item.cover_path if item.cover_path.startswith(('http', '/')) else '/' ~ item.cover_path }}" alt="{{ item.title }} cover" loading="lazy">
@@ -59,19 +56,43 @@
         <!-- Card Bottom Action -->
         <div class="bb-magazine-actions">
           <span style="font-size:13px; color:#64748b; font-weight:600;">{{ item.title }}</span>
-          {% if item.file_path %}
-          <a href="{{ item.file_path if item.file_path.startswith(('http', '/')) else '/' ~ item.file_path }}" target="_blank" rel="noopener noreferrer" class="bb-btn-primary-maroon" style="padding: 8px 16px; font-size: 13px;">
-            Open Edition &rarr;
-          </a>
-          {% elif item.embed_url %}
-          <a href="{{ item.embed_url }}" target="_blank" rel="noopener noreferrer" class="bb-btn-primary-maroon" style="padding: 8px 16px; font-size: 13px;">
-            Read Interactive &rarr;
-          </a>
-          {% else %}
-          <a href="{{ item.cover_path if item.cover_path.startswith(('http', '/')) else '/' ~ item.cover_path }}" target="_blank" rel="noopener noreferrer" class="bb-btn-primary-maroon" style="padding: 8px 16px; font-size: 13px;">
-            View Cover &rarr;
-          </a>
-          {% endif %}
+          <div class="bb-magazine-actions-row">
+            {% if item.file_path %}
+            <a href="/publications/{{ item.id }}/view/" target="_blank" rel="noopener noreferrer" class="bb-btn-primary-maroon" style="padding: 8px 14px; font-size: 13px;" aria-label="View {{ item.title }} PDF">
+              <svg class="bb-icon" style="width:15px;height:15px;" aria-hidden="true" focusable="false"><use href="#i-eye"/></svg>
+              View PDF
+            </a>
+            <a href="/publications/{{ item.id }}/download/" download="{{ make_friendly_pdf_name(item) }}" class="bb-btn-outline" style="padding: 8px 14px; font-size: 13px;" aria-label="Download {{ item.title }} PDF">
+              <svg class="bb-icon" style="width:15px;height:15px;" aria-hidden="true" focusable="false"><use href="#i-download"/></svg>
+              Download PDF
+            </a>
+            {% elif item.embed_url %}
+            <a href="{{ item.embed_url }}" target="_blank" rel="noopener noreferrer" class="bb-btn-primary-maroon" style="padding: 8px 14px; font-size: 13px;">
+              Read Interactive &rarr;
+            </a>
+            {% endif %}
+
+            <div class="bb-share-dropdown-wrap">
+              <button type="button" class="bb-btn-outline bb-share-trigger" data-bb-share data-share-title="{{ item.title }}" data-share-url="{{ request.host_url.rstrip('/') ~ '/magazine/#mag-' ~ item.id }}" style="padding: 8px 14px; font-size: 13px;" aria-haspopup="true" aria-expanded="false" aria-label="Share {{ item.title }}">
+                <svg class="bb-icon" style="width:15px;height:15px;" aria-hidden="true" focusable="false"><use href="#i-share"/></svg>
+                Share
+              </button>
+              <div class="bb-share-menu" role="menu" aria-label="Share options">
+                <button type="button" class="bb-share-menu-item" data-share-action="copy" role="menuitem">
+                  <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-link"/></svg>
+                  <span>Copy Link</span>
+                </button>
+                <a href="https://api.whatsapp.com/send?text={{ (item.title ~ ' - Read on Book Buddy: ' ~ request.host_url.rstrip('/') ~ '/magazine/#mag-' ~ item.id)|urlencode }}" target="_blank" rel="noopener noreferrer" class="bb-share-menu-item" role="menuitem">
+                  <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-whatsapp"/></svg>
+                  <span>WhatsApp</span>
+                </a>
+                <a href="mailto:?subject={{ (item.title ~ ' · Book Buddy')|urlencode }}&body={{ ('Check out ' ~ item.title ~ ' on Book Buddy: ' ~ request.host_url.rstrip('/') ~ '/magazine/#mag-' ~ item.id)|urlencode }}" class="bb-share-menu-item" role="menuitem">
+                  <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-mail"/></svg>
+                  <span>Email</span>
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </article>
       {% endfor %}

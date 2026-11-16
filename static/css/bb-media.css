@@ -190,19 +190,31 @@
   font-family: 'Inter', sans-serif;
   font-size: 14px;
   font-weight: 600;
-  padding: 10px 20px;
+  padding: 10px 18px;
   border-radius: 8px;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  border: none;
+  border: 1px solid #740f28;
   cursor: pointer;
-  transition: background 0.15s ease;
+  line-height: 1.25;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
 }
 
 .bb-btn-primary-maroon:hover {
   background: #5b0c20;
+  border-color: #5b0c20;
+}
+
+.bb-btn-primary-maroon:active {
+  transform: translateY(1px);
+}
+
+.bb-btn-primary-maroon:focus-visible {
+  outline: 2px solid #740f28;
+  outline-offset: 2px;
 }
 
 .bb-btn-outline {
@@ -216,14 +228,85 @@
   border: 1px solid rgba(6, 20, 70, 0.2);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   cursor: pointer;
+  text-decoration: none;
+  line-height: 1.25;
   transition: all 0.15s ease;
 }
 
 .bb-btn-outline:hover {
   border-color: #061446;
   background: rgba(6, 20, 70, 0.04);
+  color: #061446;
+}
+
+.bb-btn-outline:active {
+  transform: translateY(1px);
+}
+
+.bb-btn-outline:focus-visible {
+  outline: 2px solid #061446;
+  outline-offset: 2px;
+}
+
+/* Share Dropdown and Menu */
+.bb-share-dropdown-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.bb-share-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 180px;
+  background: #ffffff;
+  border: 1px solid rgba(6, 20, 70, 0.12);
+  border-radius: 10px;
+  box-shadow: 0 10px 25px -5px rgba(6, 20, 70, 0.15), 0 8px 10px -6px rgba(6, 20, 70, 0.1);
+  padding: 6px;
+  z-index: 50;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bb-share-menu.is-open {
+  display: flex;
+}
+
+.bb-share-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #061446;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.bb-share-menu-item:hover,
+.bb-share-menu-item:focus {
+  background: #f1f5f9;
+  color: #740f28;
+  outline: none;
+}
+
+.bb-share-menu-item svg {
+  flex-shrink: 0;
+  color: currentColor;
 }
 
 /* ==========================================================================
@@ -338,6 +421,15 @@
   justify-content: space-between;
   align-items: center;
   background: #ffffff;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.bb-magazine-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 /* Magazine CTA Box */
@@ -369,12 +461,13 @@
 }
 
 /* ==========================================================================
-   3. Podcasts Page (3-Column Grid + Spotify Embed Player)
+   3. Podcasts Page (Grid + Spotify Large Vertical Embed Player)
    ========================================================================== */
 .bb-podcasts-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(380px, 420px));
   gap: 24px;
+  justify-content: start;
 }
 
 .bb-podcast-card {
@@ -382,9 +475,13 @@
   border: 1px solid rgba(6, 20, 70, 0.08);
   border-radius: 14px;
   box-shadow: 0 4px 16px rgba(6, 20, 70, 0.04);
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
+  min-width: 380px;
+  max-width: 420px;
+  width: 100%;
+  box-sizing: border-box;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -396,11 +493,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .bb-podcast-label {
-  color: #64748b;
+  color: #740f28;
   font-family: 'Inter', sans-serif;
   font-size: 12px;
   font-weight: 700;
@@ -415,22 +512,18 @@
   color: #061446;
   margin: 0 0 14px 0;
   line-height: 1.35;
-  min-height: 2.7em;
 }
 
 .bb-podcast-player-wrap {
   width: 100%;
-  margin-top: auto;
   border-radius: 12px;
-  overflow: hidden;
-  background: #181818;
-  min-height: 152px;
+  background: transparent;
 }
 
 .bb-podcast-player-wrap iframe {
   width: 100%;
-  height: 232px;
-  border: none;
+  height: 352px;
+  border: 0;
   border-radius: 12px;
   display: block;
 }
@@ -480,9 +573,7 @@
    Responsive Breakpoints
    ========================================================================== */
 @media (max-width: 1024px) {
-  .bb-podcasts-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  /* Keep podcast grid auto-fill layout left-aligned */
 }
 
 @media (max-width: 768px) {
@@ -504,17 +595,59 @@
   .bb-newspaper-actions {
     flex-direction: column;
     width: 100%;
+    gap: 10px;
   }
   .bb-newspaper-actions .bb-btn-primary-maroon,
-  .bb-newspaper-actions .bb-btn-outline {
+  .bb-newspaper-actions .bb-btn-outline,
+  .bb-newspaper-actions .bb-share-dropdown-wrap,
+  .bb-newspaper-actions .bb-share-dropdown-wrap .bb-share-trigger {
     width: 100%;
+    min-height: 44px;
     justify-content: center;
+    box-sizing: border-box;
+  }
+  .bb-magazine-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .bb-magazine-actions-row {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+  .bb-magazine-actions-row .bb-btn-primary-maroon,
+  .bb-magazine-actions-row .bb-btn-outline,
+  .bb-magazine-actions-row .bb-share-dropdown-wrap,
+  .bb-magazine-actions-row .bb-share-dropdown-wrap .bb-share-trigger {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+  .bb-share-menu {
+    width: 100%;
+    left: 0;
+    right: 0;
+    box-sizing: border-box;
+  }
+  .bb-share-menu-item {
+    min-height: 44px;
   }
   .bb-magazine-grid {
     grid-template-columns: 1fr;
   }
+}
+
+@media (max-width: 640px) {
   .bb-podcasts-grid {
     grid-template-columns: 1fr;
+    width: 100%;
+  }
+  .bb-podcast-card {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
   }
 }
 

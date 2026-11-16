@@ -99,7 +99,7 @@ PUBLIC_PAGES = [
     ('About', '/about/', '/admin/about-editor/', 'Library story and videos', 'site_content'),
     ('Library', '/library/', '/admin/library-center/', 'Book catalogue, stock, lending and membership', 'books / copies17'),
     ('Membership plans', '/membership-options/', '/admin/plans17/', 'Borrowing limits and plan pricing', 'lending_plans'),
-    ('How to borrow', '/how-to-borrow/', '/admin/manage/pages/', 'Borrowing information', 'cms_pages'),
+    ('How to borrow', '/how-to-borrow/', '/admin/how-to-borrow-editor/', 'How to borrow guidelines & inquiry form', 'how_to_borrow_page'),
     ('Partner with us', '/work-with-us/', '/admin/manage/partners/', 'Collaboration proposals and partner enquiries', 'partner_submissions'),
     ('Reading circles', '/reading-circles/', '/admin/manage/events/?f_category=reading-circle', 'Reading circle events', 'events'),
     ('Contests', '/contests/', '/admin/manage/events/?f_category=contest', 'Reading contests', 'events'),

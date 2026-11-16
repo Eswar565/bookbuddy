@@ -1,1 +1,133 @@
-{% extends 'workspace/base.html' %}{% block content %}<section class="bb16-work-notice"><h2>Member subscriptions</h2><p>Approve plans only after confirming the membership arrangement. Payment status must be recorded accurately; no online payment is taken on this page.</p><div class="bb16-work-links"><a href="/admin/lending/">Borrowing desk</a><a href="/admin/manage/members/">Member list</a></div></section><div class="bb16-table-wrap"><table class="bb16-table"><thead><tr><th>Member</th><th>Plan</th><th>Subscription</th><th>Approval</th></tr></thead><tbody>{% for s in subs %}<tr><td><strong>{{ s.member_name }}</strong><small>{{ s.email }}</small><small>{{ s.phone }}</small></td><td>{{ s.plan_name }}<small>₹{{ s.amount|int }} · {{ s.book_limit }} slots</small></td><td><span class="bb16-status">{{ s.status }}</span><small>Requested {{ s.created_at[:10] }}</small><small>{{ s.starts_on or '—' }} <svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg> {{ s.expires_on or '—' }}</small><small>Payment: {{ s.payment_status }}</small></td><td>{% if s.status=='Pending' %}<form class="bb16-desk-form" method="post" action="{{ url_for('review_subscription16',sub_id=s.id) }}"><label>Payment verification <select name="payment_status"><option value="Unverified">Unverified</option><option value="Not paid">Not paid</option><option value="Paid - confirmed by staff">Paid - confirmed by staff</option></select></label><button name="action" type="submit" value="approve">Activate</button><button name="action" type="submit" value="reject" class="bb16-muted">Reject</button></form>{% elif s.status in ['Active','Scheduled'] %}<form method="post" action="/admin/membership-desk/{{ s.id }}/" class="bb16-desk-form" data-confirm="Change this membership’s access?"><label>Reason<input name="admin_note" maxlength="600" required></label><button name="action" value="suspend">Suspend</button><button name="action" value="cancel">Cancel</button></form>{% else %}Reviewed{% endif %}</td></tr>{% else %}<tr><td colspan="4">No membership requests yet.</td></tr>{% endfor %}</tbody></table></div><section class="bb16-work-notice"><h2>Guardian verifications</h2><p>These child accounts are not activated until independent guardian verification is completed. Check consent using your organisation's approved procedure before confirming.</p></section><div class="bb16-table-wrap"><table class="bb16-table"><thead><tr><th>Member</th><th>Guardian</th><th>Action</th></tr></thead><tbody>{% for m in minors %}<tr><td>{{ m.name }}<small>Age {{ (m.dob and m.dob) or '—' }} · {{ m.email }}</small></td><td>{{ m.guardian_name }}<small>{{ m.guardian_email }}</small></td><td><form class="bb16-desk-form" method="post" action="{{ url_for('approve_guardian16',uid=m.id) }}"><label class="bb16-checkbox"><input type="checkbox" name="verified_offline" value="yes" required> Guardian permission independently verified</label><button type="submit">Approve access</button></form></td></tr>{% else %}<tr><td colspan="3">No guardian reviews waiting.</td></tr>{% endfor %}</tbody></table></div>{% endblock %}
+{% extends 'workspace/base.html' %}
+{% block content %}
+<section class="bb16-work-notice">
+  <h2>Member subscriptions</h2>
+  <p>Approve plans only after confirming the membership arrangement. Payment status must be recorded accurately; no online payment is taken on this page.</p>
+  <div class="bb16-work-links">
+    <a href="/admin/plans17/">Plans &amp; Settings</a>
+    <a href="/admin/lending/">Borrowing desk</a>
+    <a href="/admin/manage/members/">Member list</a>
+  </div>
+</section>
+
+<div class="bb16-table-wrap">
+  <table class="bb16-table">
+    <thead>
+      <tr>
+        <th>Member &amp; Child</th>
+        <th>Plan &amp; Delivery</th>
+        <th>Subscription Status</th>
+        <th>Staff Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in subs %}
+        <tr>
+          <td>
+            <strong>{{ s.parent_name or s.member_name }}</strong>
+            <small>{{ s.email }} · {{ s.phone }}</small>
+            {% if s.child_name %}
+              <div style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed #d1d5db; font-size: 13px;">
+                <strong>Child:</strong> {{ s.child_name }}
+                {% if s.child_dob %}<small>(DOB: {{ s.child_dob }})</small>{% endif %}
+                {% if s.student_grade %}<small style="display:block; color:#4b5563;">Grade: {{ s.student_grade }}</small>{% endif %}
+              </div>
+            {% endif %}
+          </td>
+          <td>
+            <strong>{{ s.plan_name }}</strong>
+            <small>Total: ₹{{ s.amount|int }} · {{ s.book_limit }} slots</small>
+            <div style="margin-top: 4px;">
+              {% if s.service_mode == 'online' %}
+                <span style="display:inline-block; background:#0a2472; color:#fff; font-size:11px; font-weight:700; padding:2px 6px; border-radius:4px;">Doorstep Delivery (+₹{{ s.delivery_fee|int }})</span>
+                {% if s.address_flat or s.address_street %}
+                  <small style="display:block; color:#374151; margin-top:3px;">
+                    {{ s.address_flat }}{% if s.address_flat and s.address_street %}, {% endif %}{{ s.address_street }}, {{ s.address_city }} - {{ s.address_pincode }}
+                  </small>
+                {% endif %}
+              {% else %}
+                <span style="display:inline-block; background:#5c0c20; color:#fff; font-size:11px; font-weight:700; padding:2px 6px; border-radius:4px;">Offline Self-Pickup</span>
+              {% endif %}
+              {% if s.referral_code %}
+                <small style="display:block; color:#6b7280;">Ref: {{ s.referral_code }}</small>
+              {% endif %}
+            </div>
+          </td>
+          <td>
+            <span class="bb16-status">{{ s.status }}</span>
+            <small>Requested {{ s.created_at[:10] }}</small>
+            <small>{{ s.starts_on or '—' }} <svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-arrow-right"/></svg> {{ s.expires_on or '—' }}</small>
+            <small>Payment: {{ s.payment_status }}</small>
+          </td>
+          <td>
+            {% if s.status == 'Pending' %}
+              <form class="bb16-desk-form" method="post" action="{{ url_for('review_subscription16', sub_id=s.id) }}">
+                <label>Payment verification
+                  <select name="payment_status">
+                    <option value="Unverified">Unverified</option>
+                    <option value="Not paid">Not paid</option>
+                    <option value="Paid - confirmed by staff">Paid - confirmed by staff</option>
+                  </select>
+                </label>
+                <button name="action" type="submit" value="approve">Activate</button>
+                <button name="action" type="submit" value="reject" class="bb16-muted">Reject</button>
+              </form>
+            {% elif s.status in ['Active', 'Scheduled'] %}
+              <form method="post" action="/admin/membership-desk/{{ s.id }}/" class="bb16-desk-form" data-confirm="Change this membership’s access?">
+                <label>Reason
+                  <input name="admin_note" maxlength="600" required>
+                </label>
+                <button name="action" value="suspend">Suspend</button>
+                <button name="action" value="cancel">Cancel</button>
+              </form>
+            {% else %}
+              Reviewed
+            {% endif %}
+          </td>
+        </tr>
+      {% else %}
+        <tr>
+          <td colspan="4">No membership requests yet.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<section class="bb16-work-notice" style="margin-top: 2rem;">
+  <h2>Guardian verifications</h2>
+  <p>These child accounts are not activated until independent guardian verification is completed. Check consent using your organisation's approved procedure before confirming.</p>
+</section>
+
+<div class="bb16-table-wrap">
+  <table class="bb16-table">
+    <thead>
+      <tr>
+        <th>Member</th>
+        <th>Guardian</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in minors %}
+        <tr>
+          <td>{{ m.name }}<small>Age {{ (m.dob and m.dob) or '—' }} · {{ m.email }}</small></td>
+          <td>{{ m.guardian_name }}<small>{{ m.guardian_email }}</small></td>
+          <td>
+            <form class="bb16-desk-form" method="post" action="{{ url_for('approve_guardian16', uid=m.id) }}">
+              <label class="bb16-checkbox">
+                <input type="checkbox" name="verified_offline" value="yes" required> Guardian permission independently verified
+              </label>
+              <button type="submit">Approve access</button>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr>
+          <td colspan="3">No guardian reviews waiting.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

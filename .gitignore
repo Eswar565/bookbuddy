@@ -6,10 +6,12 @@ __pycache__/
 instance/
 media/
 backups/
+*backup*/
 *.sqlite3
 *.sqlite3-journal
 *.bak
 *.db
 *.zip
 scratch_*.py
+scratch/
 

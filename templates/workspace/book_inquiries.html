@@ -1,0 +1,129 @@
+{% extends 'workspace/base.html' %}
+
+{% block content %}
+<div class="panel" style="max-width: 1200px; margin: 0 auto 30px;">
+  <!-- Filter & Actions Bar -->
+  <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+    <!-- Filters Form -->
+    <form method="get" action="/admin/book-inquiries/" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+      <!-- Status Filter -->
+      <select name="status" onchange="this.form.submit()" style="padding: 7px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem;">
+        <option value="">All Statuses</option>
+        {% for st in valid_statuses %}
+          <option value="{{ st }}" {% if status_filter == st %}selected{% endif %}>{{ st }}</option>
+        {% endfor %}
+      </select>
+
+      <!-- Language Filter -->
+      <select name="language" onchange="this.form.submit()" style="padding: 7px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem;">
+        <option value="">All Languages</option>
+        {% for l in available_langs %}
+          <option value="{{ l }}" {% if lang_filter == l %}selected{% endif %}>{{ l }}</option>
+        {% endfor %}
+      </select>
+
+      <!-- Search Box -->
+      <div style="position: relative;">
+        <input type="text" name="q" value="{{ q }}" placeholder="Search title, member, ID..." style="padding: 7px 12px; padding-right: 28px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem; min-width: 220px;">
+        {% if q %}
+          <a href="/admin/book-inquiries/{% if status_filter or lang_filter %}?status={{ status_filter }}&language={{ lang_filter }}{% endif %}" style="position: absolute; right: 8px; top: 7px; color: #9ca3af; text-decoration: none;">&times;</a>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="button" style="padding: 7px 14px; font-size: 0.9rem;">Search</button>
+      {% if status_filter or lang_filter or q %}
+        <a href="/admin/book-inquiries/" style="font-size: 0.85rem; color: #6b7280; text-decoration: underline;">Clear filters</a>
+      {% endif %}
+    </form>
+
+    <!-- Actions -->
+    <div>
+      <a href="/admin/book-inquiries/export-csv/?status={{ status_filter }}&language={{ lang_filter }}&q={{ q }}" class="button" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-size: 0.9rem;">
+        <svg class="bb-icon" style="width: 16px; height: 16px;"><use href="#i-file-csv"/></svg>
+        <span>Export CSV</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Inquiries Table -->
+  <div style="overflow-x: auto;">
+    <table class="table" style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
+      <thead>
+        <tr style="background: #f9fafb; border-bottom: 2px solid #e5e7eb; text-align: left;">
+          <th style="padding: 12px 14px; width: 60px;">#</th>
+          <th style="padding: 12px 14px;">Book Title &amp; Topic</th>
+          <th style="padding: 12px 14px;">Author</th>
+          <th style="padding: 12px 14px;">Member / Contact</th>
+          <th style="padding: 12px 14px;">Language</th>
+          <th style="padding: 12px 14px; width: 110px;">Status</th>
+          <th style="padding: 12px 14px; width: 140px;">Date</th>
+          <th style="padding: 12px 14px; width: 90px; text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if inquiries %}
+          {% for inq in inquiries %}
+            <tr style="border-bottom: 1px solid #e5e7eb; transition: background 0.15s;">
+              <td style="padding: 12px 14px; color: #6b7280; font-weight: 600;">{{ inq.id }}</td>
+              <td style="padding: 12px 14px;">
+                <a href="/admin/book-inquiries/{{ inq.id }}/" style="font-weight: 600; color: var(--navy, #0b1f6b); text-decoration: none;">
+                  {{ inq.book_title }}
+                </a>
+                {% if inq.notes %}
+                  <div style="font-size: 0.8rem; color: #6b7280; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ inq.notes }}</div>
+                {% endif %}
+              </td>
+              <td style="padding: 12px 14px; color: #374151;">{{ inq.author or '—' }}</td>
+              <td style="padding: 12px 14px;">
+                {% if inq.member_name %}
+                  <div style="font-weight: 600;">{{ inq.member_name }}</div>
+                  <div style="font-size: 0.8rem; color: #6b7280;">ID: {{ inq.membership_id }}</div>
+                {% elif inq.membership_id %}
+                  <div>ID: <code>{{ inq.membership_id }}</code></div>
+                  {% if inq.contact_info %}
+                    <div style="font-size: 0.8rem; color: #6b7280;">{{ inq.contact_info }}</div>
+                  {% endif %}
+                {% elif inq.contact_info %}
+                  <div>{{ inq.contact_info }}</div>
+                  <div style="font-size: 0.8rem; color: #6b7280;">Visitor</div>
+                {% else %}
+                  <span style="color: #9ca3af;">—</span>
+                {% endif %}
+              </td>
+              <td style="padding: 12px 14px;">
+                <span style="font-size: 0.85rem; background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">{{ inq.language }}</span>
+              </td>
+              <td style="padding: 12px 14px;">
+                {% if inq.status == 'New' %}
+                  <span style="background: #dbeafe; color: #1e40af; font-size: 0.8rem; font-weight: 700; padding: 3px 10px; border-radius: 9999px;">New</span>
+                {% elif inq.status == 'Reviewing' %}
+                  <span style="background: #fef3c7; color: #92400e; font-size: 0.8rem; font-weight: 700; padding: 3px 10px; border-radius: 9999px;">Reviewing</span>
+                {% elif inq.status == 'Ordered' %}
+                  <span style="background: #e0e7ff; color: #3730a3; font-size: 0.8rem; font-weight: 700; padding: 3px 10px; border-radius: 9999px;">Ordered</span>
+                {% elif inq.status == 'Available' %}
+                  <span style="background: #d1fae5; color: #065f46; font-size: 0.8rem; font-weight: 700; padding: 3px 10px; border-radius: 9999px;">Available</span>
+                {% elif inq.status == 'Declined' %}
+                  <span style="background: #fee2e2; color: #991b1b; font-size: 0.8rem; font-weight: 700; padding: 3px 10px; border-radius: 9999px;">Declined</span>
+                {% else %}
+                  <span>{{ inq.status }}</span>
+                {% endif %}
+              </td>
+              <td style="padding: 12px 14px; font-size: 0.85rem; color: #6b7280;">{{ inq.created_at[:16] if inq.created_at else '' }}</td>
+              <td style="padding: 12px 14px; text-align: right;">
+                <a href="/admin/book-inquiries/{{ inq.id }}/" class="button" style="padding: 4px 10px; font-size: 0.85rem; text-decoration: none;">View</a>
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="8" style="padding: 32px 14px; text-align: center; color: #6b7280;">
+              No book inquiries found{% if status_filter or lang_filter or q %} matching the active filters{% endif %}.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+

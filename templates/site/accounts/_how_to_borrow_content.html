@@ -1,0 +1,136 @@
+<div class="bb8-borrow-container">
+  <!-- Page Header -->
+  <header class="bb8-borrow-header">
+    <h1 class="bb8-borrow-title">{{ page.page_heading or 'How to Borrow a Book' }}</h1>
+    <hr class="bb8-borrow-divider">
+  </header>
+
+  <!-- Two-Column Layout -->
+  <div class="bb8-borrow-grid">
+    <!-- Left Column: Content Blocks in Order -->
+    <div class="bb8-borrow-left">
+      {% for block in blocks %}
+        <section class="bb8-borrow-block">
+          <h2 class="bb8-borrow-block-title">{{ block.heading }}</h2>
+          {% if block.body %}
+            <p class="bb8-borrow-block-body">{{ block.body|replace('\n', '<br>')|safe }}</p>
+          {% endif %}
+          {% if block.checklist_items %}
+            <ul class="bb8-borrow-checklist">
+              {% for item in block.checklist_items %}
+                <li class="bb8-borrow-check-item">
+                  <svg class="bb-icon bb8-check-icon" aria-hidden="true" focusable="false"><use href="#i-check-circle"/></svg>
+                  <span>{{ item }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </section>
+      {% endfor %}
+    </div>
+
+    <!-- Right Column: Inquiry Form Card -->
+    <div class="bb8-borrow-right">
+      <aside class="bb8-borrow-card" aria-label="{{ page.form_title or 'Book Inquiry & Request Form' }}">
+        <h2 class="bb8-borrow-card-title">{{ page.form_title or 'Book Inquiry & Request Form' }}</h2>
+
+        {% if page.form_enabled %}
+          {% if submitted %}
+            <div class="bb8-alert bb8-alert-success" role="status">
+              <strong>{{ page.success_message or 'Thank you! We received your request and will notify you.' }}</strong>
+            </div>
+          {% endif %}
+
+          {% if errors %}
+            <div class="bb8-alert bb8-alert-error" role="alert">
+              <ul style="margin: 0; padding-left: 20px;">
+                {% for err in errors %}
+                  <li>{{ err }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+
+          <form method="post" action="/how-to-borrow/" class="bb8-borrow-form" novalidate>
+            <!-- Honeypot -->
+            <input type="text" name="website_hp" style="display:none;" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+            <!-- 1. Membership ID -->
+            <div class="bb8-form-group">
+              <label for="borrow_mem_id" class="bb8-form-label">
+                {{ page.membership_id_label or 'Membership ID' }}
+              </label>
+              <input type="text" id="borrow_mem_id" name="membership_id" class="bb8-form-input"
+                     value="{{ form_data.membership_id if form_data else '' }}"
+                     placeholder="{{ page.membership_id_placeholder or 'e.g. LIB-2026-001' }}"
+                     autocomplete="off">
+              {% if page.membership_id_helper %}
+                <small class="bb8-form-helper">{{ page.membership_id_helper }}</small>
+              {% endif %}
+            </div>
+
+            <!-- 2. Book Title / Topic (Required) -->
+            <div class="bb8-form-group">
+              <label for="borrow_title" class="bb8-form-label">
+                {{ page.book_title_label or 'Book Title / Topic' }} <span class="bb8-req-star" aria-hidden="true">*</span>
+              </label>
+              <input type="text" id="borrow_title" name="book_title" class="bb8-form-input"
+                     value="{{ form_data.book_title if form_data else '' }}"
+                     placeholder="{{ page.book_title_placeholder or 'Enter book name or subject' }}"
+                     required>
+            </div>
+
+            <!-- 3. Author Name (If Known) -->
+            <div class="bb8-form-group">
+              <label for="borrow_author" class="bb8-form-label">
+                {{ page.author_label or 'Author Name (If Known)' }}
+              </label>
+              <input type="text" id="borrow_author" name="author" class="bb8-form-input"
+                     value="{{ form_data.author if form_data else '' }}"
+                     placeholder="{{ page.author_placeholder or 'e.g. J.K. Rowling' }}">
+            </div>
+
+            <!-- 4. Preferred Language -->
+            <div class="bb8-form-group">
+              <label for="borrow_lang" class="bb8-form-label">
+                {{ page.language_label or 'Preferred Language' }}
+              </label>
+              <select id="borrow_lang" name="language" class="bb8-form-select">
+                {% for lang in page.language_options or ['English', 'Tamil', 'Hindi', 'Other'] %}
+                  <option value="{{ lang }}" {% if form_data and form_data.language == lang %}selected{% endif %}>{{ lang }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- 5. Additional Notes / Specific Edition -->
+            <div class="bb8-form-group">
+              <label for="borrow_notes" class="bb8-form-label">
+                {{ page.notes_label or 'Additional Notes / Specific Edition' }}
+              </label>
+              <textarea id="borrow_notes" name="notes" class="bb8-form-textarea" rows="4"
+                        placeholder="{{ page.notes_placeholder or 'Mention if you need a specific edition or have other queries...' }}">{{ form_data.notes if form_data else '' }}</textarea>
+            </div>
+
+            <!-- 6. Consent Checkbox (Required) -->
+            <div class="bb8-form-group">
+              <label class="bb8-form-checkbox-label" for="borrow_consent">
+                <input type="checkbox" id="borrow_consent" name="consent" value="1" class="bb8-form-checkbox"
+                       {% if not form_data or form_data.consent == '1' %}checked{% endif %} required>
+                <span>{{ page.consent_text or 'I agree to be notified via email/phone regarding this request.' }}</span>
+              </label>
+            </div>
+
+            <!-- 7. Full-width Primary Submit Button -->
+            <button type="submit" class="bb8-borrow-btn-submit">
+              {{ page.button_label or 'Submit Inquiry' }}
+            </button>
+          </form>
+        {% else %}
+          <div class="bb8-alert bb8-alert-info">
+            <p style="margin: 0; font-weight: 500;">Online inquiries are currently paused. Please visit the circulation desk during library hours to request titles in person.</p>
+          </div>
+        {% endif %}
+      </aside>
+    </div>
+  </div>
+</div>

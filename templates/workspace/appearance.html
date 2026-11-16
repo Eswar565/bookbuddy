@@ -1,0 +1,681 @@
+{% extends 'workspace/base.html' %}
+
+{% block content %}
+<div class="appearance-container">
+  <div class="appearance-intro">
+    <p class="hint">Customize the visual theme and typography across the entire Book Buddy website and admin workspace. Changes apply site-wide upon saving.</p>
+  </div>
+
+  <form method="post" action="/admin/appearance/" id="appearance-form">
+    <input type="hidden" name="csrf_token" value="{{ workspace_token() }}">
+    <input type="hidden" name="action" id="appearance-action" value="save">
+    <input type="hidden" name="theme" id="selected-theme" value="{{ current_theme }}">
+    <input type="hidden" name="font" id="selected-font" value="{{ current_font }}">
+
+    <!-- Section 1: Themes -->
+    <section class="appearance-section" aria-labelledby="theme-section-title">
+      <div class="section-header">
+        <h2 id="theme-section-title">Color Themes</h2>
+        <p class="section-desc">Choose a site-wide color palette. Colors update primary accents, surfaces, cards, and text contrast.</p>
+      </div>
+
+      <div class="theme-grid" role="radiogroup" aria-label="Color Themes">
+        <!-- Maroon Card (Default) -->
+        <div class="theme-card {% if current_theme == 'maroon' %}selected{% endif %}"
+             data-theme-val="maroon"
+             tabindex="0"
+             role="radio"
+             aria-checked="{{ 'true' if current_theme == 'maroon' else 'false' }}">
+          <div class="card-status-badge">
+            <svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>
+          </div>
+          <div class="card-swatches">
+            <div class="swatch-item">
+              <span class="swatch-dot" style="background-color: #7a1230;"></span>
+              <div>
+                <span class="swatch-label">--p</span>
+                <span class="swatch-code">#7a1230</span>
+              </div>
+            </div>
+            <div class="swatch-item">
+              <span class="swatch-dot" style="background-color: #f7f8fc; border: 1px solid #d1d5db;"></span>
+              <div>
+                <span class="swatch-label">--bg</span>
+                <span class="swatch-code">#f7f8fc</span>
+              </div>
+            </div>
+            <div class="swatch-item">
+              <span class="swatch-dot" style="background-color: #ffffff; border: 1px solid #d1d5db;"></span>
+              <div>
+                <span class="swatch-label">--card</span>
+                <span class="swatch-code">#ffffff</span>
+              </div>
+            </div>
+            <div class="swatch-item">
+              <span class="swatch-dot" style="background-color: #1a1a2e;"></span>
+              <div>
+                <span class="swatch-label">--tx</span>
+                <span class="swatch-code">#1a1a2e</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-info">
+            <h3 class="theme-name">Maroon <span class="tag-default">Default</span></h3>
+            <p class="theme-desc">Rich burgundy primary with crisp lavender-white background and deep ink text.</p>
+          </div>
+        </div>
+
+        <!-- Navy Card -->
+        <div class="theme-card {% if current_theme == 'navy' %}selected{% endif %}"
+             data-theme-val="navy"
+             tabindex="0"
+             role="radio"
+             aria-checked="{{ 'true' if current_theme == 'navy' else 'false' }}">
+          <div class="card-status-badge">
+            <svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>
+          </div>
+          <div class="card-swatches">
+            <div class="swatch-item">
+              <span class="swatch-dot" style="background-color: #0b2a6f;"></span>
+              <div>
+                <span class="swatch-label">--p</span>
+                <span class="swatch-code">#0b2a6f</span>
+              </div>
+            </div>
+            <div class="swatch-item">
+              <span class="swatch-dot" style="background-color: #eef3fb; border: 1px solid #cbd5e1;"></span>
+              <div>
+                <span class="swatch-label">--bg</span>
+                <span class="swatch-code">#eef3fb</span>
+              </div>
+            </div>
+            <div class="swatch-item">
+              <span class="swatch-dot" style="background-color: #ffffff; border: 1px solid #d1d5db;"></span>
+              <div>
+                <span class="swatch-label">--card</span>
+                <span class="swatch-code">#ffffff</span>
+              </div>
+            </div>
+            <div class="swatch-item">
+              <span class="swatch-dot" style="background-color: #10203f;"></span>
+              <div>
+                <span class="swatch-label">--tx</span>
+                <span class="swatch-code">#10203f</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-info">
+            <h3 class="theme-name">Navy</h3>
+            <p class="theme-desc">Authoritative deep blue primary with serene cool-blue background.</p>
+          </div>
+        </div>
+
+        <!-- Dark Card -->
+        <div class="theme-card {% if current_theme == 'dark' %}selected{% endif %}"
+             data-theme-val="dark"
+             tabindex="0"
+             role="radio"
+             aria-checked="{{ 'true' if current_theme == 'dark' else 'false' }}">
+          <div class="card-status-badge">
+            <svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>
+          </div>
+          <div class="card-swatches">
+            <div class="swatch-item">
+              <span class="swatch-dot" style="background-color: #e0a93b;"></span>
+              <div>
+                <span class="swatch-label">--p</span>
+                <span class="swatch-code">#e0a93b</span>
+              </div>
+            </div>
+            <div class="swatch-item">
+              <span class="swatch-dot" style="background-color: #12141c;"></span>
+              <div>
+                <span class="swatch-label">--bg</span>
+                <span class="swatch-code">#12141c</span>
+              </div>
+            </div>
+            <div class="swatch-item">
+              <span class="swatch-dot" style="background-color: #1d2030;"></span>
+              <div>
+                <span class="swatch-label">--card</span>
+                <span class="swatch-code">#1d2030</span>
+              </div>
+            </div>
+            <div class="swatch-item">
+              <span class="swatch-dot" style="background-color: #eceef5; border: 1px solid #3b425b;"></span>
+              <div>
+                <span class="swatch-label">--tx</span>
+                <span class="swatch-code">#eceef5</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-info">
+            <h3 class="theme-name">Dark</h3>
+            <p class="theme-desc">Warm gold accent on midnight slate background with maximum night-reading comfort.</p>
+          </div>
+        </div>
+
+        <!-- Custom Card -->
+        <div class="theme-card {% if current_theme == 'custom' %}selected{% endif %}"
+             data-theme-val="custom"
+             tabindex="0"
+             role="radio"
+             aria-checked="{{ 'true' if current_theme == 'custom' else 'false' }}"
+             id="theme-card-custom">
+          <div class="card-status-badge">
+            <svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>
+          </div>
+          <div class="card-swatches">
+            <div class="swatch-item">
+              <span class="swatch-dot" id="custom-card-p-dot" style="background-color: {{ custom_p }};"></span>
+              <div>
+                <span class="swatch-label">--p</span>
+                <span class="swatch-code" id="custom-card-p-code">{{ custom_p }}</span>
+              </div>
+            </div>
+            <div class="swatch-item">
+              <span class="swatch-dot" id="custom-card-bg-dot" style="background-color: {{ custom_bg }}; border: 1px solid #d1d5db;"></span>
+              <div>
+                <span class="swatch-label">--bg</span>
+                <span class="swatch-code" id="custom-card-bg-code">{{ custom_bg }}</span>
+              </div>
+            </div>
+            <div class="swatch-item">
+              <span class="swatch-dot" id="custom-card-card-dot" style="background-color: {{ custom_card }}; border: 1px solid #d1d5db;"></span>
+              <div>
+                <span class="swatch-label">--card</span>
+                <span class="swatch-code" id="custom-card-card-code">{{ custom_card }}</span>
+              </div>
+            </div>
+            <div class="swatch-item">
+              <span class="swatch-dot" id="custom-card-tx-dot" style="background-color: {{ custom_tx }};"></span>
+              <div>
+                <span class="swatch-label">--tx</span>
+                <span class="swatch-code" id="custom-card-tx-code">{{ custom_tx }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-info">
+            <h3 class="theme-name">Custom</h3>
+            <p class="theme-desc">User-defined palette using the custom color pickers below.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Custom Colors Card (below the theme grid) -->
+    <section class="appearance-section custom-colors-card" aria-labelledby="custom-colors-title">
+      <div class="section-header">
+        <h2 id="custom-colors-title">Custom Colors</h2>
+        <p class="section-desc">Fine-tune custom colors with native color pickers. Adjusting any picker or clicking a quick-pick swatch automatically selects Custom.</p>
+      </div>
+
+      <!-- Row of 8 quick-pick swatches for Primary -->
+      <div class="quick-swatches-wrap">
+        <span class="quick-swatches-label">Quick-pick Primary:</span>
+        <div class="quick-swatches-row" role="group" aria-label="Quick-pick Primary swatches">
+          <button type="button" class="quick-swatch-btn" data-color="#7a1230" title="Maroon (#7a1230)" style="background-color: #7a1230;"></button>
+          <button type="button" class="quick-swatch-btn" data-color="#0b2a6f" title="Navy (#0b2a6f)" style="background-color: #0b2a6f;"></button>
+          <button type="button" class="quick-swatch-btn" data-color="#e0a93b" title="Gold (#e0a93b)" style="background-color: #e0a93b;"></button>
+          <button type="button" class="quick-swatch-btn" data-color="#1f7a4d" title="Green (#1f7a4d)" style="background-color: #1f7a4d;"></button>
+          <button type="button" class="quick-swatch-btn" data-color="#6b3fa0" title="Purple (#6b3fa0)" style="background-color: #6b3fa0;"></button>
+          <button type="button" class="quick-swatch-btn" data-color="#0f7b7b" title="Teal (#0f7b7b)" style="background-color: #0f7b7b;"></button>
+          <button type="button" class="quick-swatch-btn" data-color="#d9622b" title="Orange (#d9622b)" style="background-color: #d9622b;"></button>
+          <button type="button" class="quick-swatch-btn" data-color="#1a1a2e" title="Black (#1a1a2e)" style="background-color: #1a1a2e;"></button>
+        </div>
+      </div>
+
+      <!-- 4 Native Color Pickers with Hex Display Beside Each Picker -->
+      <div class="color-pickers-grid">
+        <div class="picker-item">
+          <label for="picker-p" class="picker-label">Primary (--p)</label>
+          <div class="picker-control">
+            <input type="color" id="picker-p" name="custom_p" value="{{ custom_p }}" class="native-color-picker" aria-label="Primary color">
+            <span class="hex-value-display" id="hex-p">{{ custom_p }}</span>
+          </div>
+        </div>
+
+        <div class="picker-item">
+          <label for="picker-bg" class="picker-label">Background (--bg)</label>
+          <div class="picker-control">
+            <input type="color" id="picker-bg" name="custom_bg" value="{{ custom_bg }}" class="native-color-picker" aria-label="Background color">
+            <span class="hex-value-display" id="hex-bg">{{ custom_bg }}</span>
+          </div>
+        </div>
+
+        <div class="picker-item">
+          <label for="picker-card" class="picker-label">Card (--card)</label>
+          <div class="picker-control">
+            <input type="color" id="picker-card" name="custom_card" value="{{ custom_card }}" class="native-color-picker" aria-label="Card color">
+            <span class="hex-value-display" id="hex-card">{{ custom_card }}</span>
+          </div>
+        </div>
+
+        <div class="picker-item">
+          <label for="picker-tx" class="picker-label">Text (--tx)</label>
+          <div class="picker-control">
+            <input type="color" id="picker-tx" name="custom_tx" value="{{ custom_tx }}" class="native-color-picker" aria-label="Text color">
+            <span class="hex-value-display" id="hex-tx">{{ custom_tx }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contrast Safety Warning -->
+      <div id="contrast-warning" class="contrast-warning-box" role="alert" style="display: none;">
+        <svg class="bb-icon" aria-hidden="true" focusable="false" style="width: 20px; height: 20px; flex-shrink: 0;"><use href="#i-alert-circle"/></svg>
+        <div>
+          <div style="font-weight: 700;">Low contrast, text may be hard to read</div>
+          <div class="contrast-ratios-detail" id="contrast-detail"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Fonts -->
+    <section class="appearance-section" aria-labelledby="font-section-title">
+      <div class="section-header">
+        <h2 id="font-section-title">Typography &amp; Fonts</h2>
+        <p class="section-desc">Select Google Fonts applied across body copy, headings, and interface components (weights 400, 600, 700).</p>
+      </div>
+
+      <div class="font-grid" role="radiogroup" aria-label="Typography">
+        <!-- Inter Card (Default) -->
+        <div class="font-card {% if current_font == 'inter' %}selected{% endif %}"
+             data-font-val="inter"
+             tabindex="0"
+             role="radio"
+             aria-checked="{{ 'true' if current_font == 'inter' else 'false' }}">
+          <div class="card-status-badge">
+            <svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>
+          </div>
+          <div class="font-specimen" style="font-family: 'Inter', sans-serif;">
+            <div class="font-big-aa">Aa</div>
+            <div class="font-sample-weights">
+              <span style="font-weight: 400;">400 Regular</span> · 
+              <span style="font-weight: 600;">600 SemiBold</span> · 
+              <span style="font-weight: 700;">700 Bold</span>
+            </div>
+          </div>
+          <div class="card-info">
+            <h3 class="font-name" style="font-family: 'Inter', sans-serif;">Inter <span class="tag-default">Default</span></h3>
+            <p class="font-desc">'Inter', sans-serif · Modern, legible grotesque crafted specifically for computer screens.</p>
+          </div>
+        </div>
+
+        <!-- Playfair Display Card -->
+        <div class="font-card {% if current_font == 'playfair' %}selected{% endif %}"
+             data-font-val="playfair"
+             tabindex="0"
+             role="radio"
+             aria-checked="{{ 'true' if current_font == 'playfair' else 'false' }}">
+          <div class="card-status-badge">
+            <svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>
+          </div>
+          <div class="font-specimen" style="font-family: 'Playfair Display', serif;">
+            <div class="font-big-aa">Aa</div>
+            <div class="font-sample-weights">
+              <span style="font-weight: 400;">400 Regular</span> · 
+              <span style="font-weight: 600;">600 SemiBold</span> · 
+              <span style="font-weight: 700;">700 Bold</span>
+            </div>
+          </div>
+          <div class="card-info">
+            <h3 class="font-name" style="font-family: 'Playfair Display', serif;">Playfair Display</h3>
+            <p class="font-desc">'Playfair Display', serif · Editorial transitional serif conveying literature and heritage.</p>
+          </div>
+        </div>
+
+        <!-- Poppins Card -->
+        <div class="font-card {% if current_font == 'poppins' %}selected{% endif %}"
+             data-font-val="poppins"
+             tabindex="0"
+             role="radio"
+             aria-checked="{{ 'true' if current_font == 'poppins' else 'false' }}">
+          <div class="card-status-badge">
+            <svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>
+          </div>
+          <div class="font-specimen" style="font-family: 'Poppins', sans-serif;">
+            <div class="font-big-aa">Aa</div>
+            <div class="font-sample-weights">
+              <span style="font-weight: 400;">400 Regular</span> · 
+              <span style="font-weight: 600;">600 SemiBold</span> · 
+              <span style="font-weight: 700;">700 Bold</span>
+            </div>
+          </div>
+          <div class="card-info">
+            <h3 class="font-name" style="font-family: 'Poppins', sans-serif;">Poppins</h3>
+            <p class="font-desc">'Poppins', sans-serif · Geometric sans-serif with pure curves and friendly contemporary balance.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Live Preview Box -->
+    <section class="appearance-section" aria-labelledby="preview-section-title">
+      <div class="section-header">
+        <h2 id="preview-section-title">Live Preview Box</h2>
+        <p class="section-desc">Click any theme, customize colors, or select fonts above to preview changes instantly in the simulation box below.</p>
+      </div>
+
+      <div class="preview-stage" id="live-preview-box" data-theme="{{ current_theme }}" data-font="{{ current_font }}">
+        <div class="preview-navbar">
+          <div class="preview-brand-logo">
+            <span style="font-weight: 700;">Book Buddy</span>
+          </div>
+          <div class="preview-nav-links">
+            <span class="preview-nav-item active">Home</span>
+            <span class="preview-nav-item">About</span>
+            <span class="preview-nav-item">Catalogue</span>
+            <span class="preview-nav-item">Events</span>
+          </div>
+        </div>
+
+        <div class="preview-content-grid">
+          <div class="preview-main-card">
+            <span class="preview-badge">Featured Story</span>
+            <h3 class="preview-heading">Discover Your Next Favorite Book</h3>
+            <p class="preview-body">Explore curated reading circles, borrower privileges, and vibrant literary discussions in our library community.</p>
+            <div class="preview-actions">
+              <button type="button" class="preview-btn-primary">Browse Catalogue</button>
+              <button type="button" class="preview-btn-secondary">How to Borrow</button>
+            </div>
+          </div>
+
+          <div class="preview-side-card">
+            <h4 class="preview-side-title">Library Card</h4>
+            <p class="preview-side-text">Active Member: Eswar K.<br>Tier: Classic Circle · Unlimited Borrowing</p>
+            <div class="preview-input-group">
+              <label class="preview-label">Search catalogue</label>
+              <input type="text" class="preview-input" value="The Great Gatsby" readonly>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Action Bar -->
+    <div class="save-bar appearance-actions">
+      <button type="submit" class="button" id="save-appearance-btn">Save appearance</button>
+      <button type="button" class="button secondary" id="reset-appearance-btn">Reset to default</button>
+    </div>
+  </form>
+</div>
+
+<script>
+(function() {
+  var form = document.getElementById('appearance-form');
+  var actionInput = document.getElementById('appearance-action');
+  var themeInput = document.getElementById('selected-theme');
+  var fontInput = document.getElementById('selected-font');
+  var previewBox = document.getElementById('live-preview-box');
+  var themeCards = document.querySelectorAll('.theme-card');
+  var fontCards = document.querySelectorAll('.font-card');
+  var resetBtn = document.getElementById('reset-appearance-btn');
+
+  var pickerP = document.getElementById('picker-p');
+  var pickerBg = document.getElementById('picker-bg');
+  var pickerCard = document.getElementById('picker-card');
+  var pickerTx = document.getElementById('picker-tx');
+
+  var hexP = document.getElementById('hex-p');
+  var hexBg = document.getElementById('hex-bg');
+  var hexCard = document.getElementById('hex-card');
+  var hexTx = document.getElementById('hex-tx');
+
+  var customCard = document.getElementById('theme-card-custom');
+  var customCardPDot = document.getElementById('custom-card-p-dot');
+  var customCardBgDot = document.getElementById('custom-card-bg-dot');
+  var customCardCardDot = document.getElementById('custom-card-card-dot');
+  var customCardTxDot = document.getElementById('custom-card-tx-dot');
+  var customCardPCode = document.getElementById('custom-card-p-code');
+  var customCardBgCode = document.getElementById('custom-card-bg-code');
+  var customCardCardCode = document.getElementById('custom-card-card-code');
+  var customCardTxCode = document.getElementById('custom-card-tx-code');
+
+  var contrastWarning = document.getElementById('contrast-warning');
+  var contrastDetail = document.getElementById('contrast-detail');
+  var quickSwatches = document.querySelectorAll('.quick-swatch-btn');
+
+  // Preset palettes
+  var themePalettes = {
+    maroon: { p: '#7a1230', bg: '#f7f8fc', card: '#ffffff', tx: '#1a1a2e', btnTx: '#ffffff' },
+    navy:   { p: '#0b2a6f', bg: '#eef3fb', card: '#ffffff', tx: '#10203f', btnTx: '#ffffff' },
+    dark:   { p: '#e0a93b', bg: '#12141c', card: '#1d2030', tx: '#eceef5', btnTx: '#12141c' }
+  };
+
+  var fontFamilies = {
+    inter: "'Inter', sans-serif",
+    playfair: "'Playfair Display', serif",
+    poppins: "'Poppins', sans-serif"
+  };
+
+  // WCAG 2.1 Contrast Calculation
+  function getLuminance(hex) {
+    if (!hex) return 0;
+    var rgb = hex.replace('#', '');
+    if (rgb.length === 3) {
+      rgb = rgb.split('').map(function(c) { return c + c; }).join('');
+    }
+    var r = parseInt(rgb.substring(0, 2), 16) / 255;
+    var g = parseInt(rgb.substring(2, 4), 16) / 255;
+    var b = parseInt(rgb.substring(4, 6), 16) / 255;
+    var a = [r, g, b].map(function(v) {
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+  }
+
+  function getContrastRatio(hex1, hex2) {
+    var l1 = getLuminance(hex1);
+    var l2 = getLuminance(hex2);
+    var lighter = Math.max(l1, l2);
+    var darker = Math.min(l1, l2);
+    return (lighter + 0.05) / (darker + 0.05);
+  }
+
+  function autoPickButtonText(primaryHex) {
+    var cWhite = getContrastRatio(primaryHex, '#ffffff');
+    var cBlack = getContrastRatio(primaryHex, '#000000');
+    return cWhite >= cBlack ? '#ffffff' : '#000000';
+  }
+
+  function updateContrastSafety() {
+    var p = pickerP.value;
+    var bg = pickerBg.value;
+    var tx = pickerTx.value;
+    var btnTx = autoPickButtonText(p);
+
+    var ratioTextBg = getContrastRatio(tx, bg);
+    var ratioBtnPrimary = getContrastRatio(btnTx, p);
+
+    var hasLowContrast = (ratioTextBg < 4.5) || (ratioBtnPrimary < 4.5);
+    if (contrastWarning) {
+      if (hasLowContrast) {
+        contrastWarning.style.display = 'flex';
+        if (contrastDetail) {
+          contrastDetail.textContent = 'Text/Background: ' + ratioTextBg.toFixed(2) + ':1 (' + (ratioTextBg < 4.5 ? 'low' : 'ok') + ') · Button Text/Primary: ' + ratioBtnPrimary.toFixed(2) + ':1 (' + (ratioBtnPrimary < 4.5 ? 'low' : 'ok') + ')';
+        }
+      } else {
+        contrastWarning.style.display = 'none';
+      }
+    }
+    return btnTx;
+  }
+
+  function applyPaletteLive(pal, font) {
+    var fam = fontFamilies[font] || fontFamilies.inter;
+
+    // 1. Update Preview Box
+    if (previewBox) {
+      previewBox.style.setProperty('--p', pal.p);
+      previewBox.style.setProperty('--bg', pal.bg);
+      previewBox.style.setProperty('--card', pal.card);
+      previewBox.style.setProperty('--tx', pal.tx);
+      previewBox.style.setProperty('--btn-tx', pal.btnTx);
+      previewBox.style.setProperty('--ft', fam);
+      previewBox.style.backgroundColor = pal.bg;
+      previewBox.style.color = pal.tx;
+      previewBox.style.fontFamily = fam;
+    }
+
+    // 2. Update Whole Admin Page
+    document.documentElement.style.setProperty('--p', pal.p);
+    document.documentElement.style.setProperty('--bg', pal.bg);
+    document.documentElement.style.setProperty('--card', pal.card);
+    document.documentElement.style.setProperty('--tx', pal.tx);
+    document.documentElement.style.setProperty('--btn-tx', pal.btnTx);
+    document.documentElement.style.setProperty('--ft', fam);
+    document.documentElement.setAttribute('data-font', font);
+  }
+
+  function selectThemeCard(val) {
+    themeInput.value = val;
+    themeCards.forEach(function(c) {
+      var isCur = (c.getAttribute('data-theme-val') === val);
+      if (isCur) {
+        c.classList.add('selected');
+        c.setAttribute('aria-checked', 'true');
+      } else {
+        c.classList.remove('selected');
+        c.setAttribute('aria-checked', 'false');
+      }
+    });
+  }
+
+  function updateCustomThemeFromPickers() {
+    var p = pickerP.value;
+    var bg = pickerBg.value;
+    var card = pickerCard.value;
+    var tx = pickerTx.value;
+
+    // Update hex label text
+    if (hexP) hexP.textContent = p;
+    if (hexBg) hexBg.textContent = bg;
+    if (hexCard) hexCard.textContent = card;
+    if (hexTx) hexTx.textContent = tx;
+
+    // Update Custom card swatches
+    if (customCardPDot) customCardPDot.style.backgroundColor = p;
+    if (customCardBgDot) customCardBgDot.style.backgroundColor = bg;
+    if (customCardCardDot) customCardCardDot.style.backgroundColor = card;
+    if (customCardTxDot) customCardTxDot.style.backgroundColor = tx;
+
+    if (customCardPCode) customCardPCode.textContent = p;
+    if (customCardBgCode) customCardBgCode.textContent = bg;
+    if (customCardCardCode) customCardCardCode.textContent = card;
+    if (customCardTxCode) customCardTxCode.textContent = tx;
+
+    // Auto-select "Custom" theme option
+    selectThemeCard('custom');
+
+    // Auto-pick button text and update contrast safety
+    var btnTx = updateContrastSafety();
+
+    // Live update preview box and whole page
+    var customPal = { p: p, bg: bg, card: card, tx: tx, btnTx: btnTx };
+    applyPaletteLive(customPal, fontInput.value);
+  }
+
+  // Bind pickers
+  [pickerP, pickerBg, pickerCard, pickerTx].forEach(function(input) {
+    if (!input) return;
+    input.addEventListener('input', updateCustomThemeFromPickers);
+    input.addEventListener('change', updateCustomThemeFromPickers);
+  });
+
+  // Bind quick swatches
+  quickSwatches.forEach(function(swatch) {
+    swatch.addEventListener('click', function(e) {
+      e.preventDefault();
+      var color = swatch.getAttribute('data-color');
+      if (color && pickerP) {
+        pickerP.value = color;
+        updateCustomThemeFromPickers();
+      }
+    });
+  });
+
+  // Theme card click handler
+  themeCards.forEach(function(card) {
+    function onSelectTheme() {
+      var val = card.getAttribute('data-theme-val');
+      selectThemeCard(val);
+      if (val === 'custom') {
+        updateCustomThemeFromPickers();
+      } else {
+        var pal = themePalettes[val] || themePalettes.maroon;
+        applyPaletteLive(pal, fontInput.value);
+      }
+    }
+    card.addEventListener('click', onSelectTheme);
+    card.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onSelectTheme();
+      }
+    });
+  });
+
+  // Font card click handler
+  fontCards.forEach(function(card) {
+    function onSelectFont() {
+      var val = card.getAttribute('data-font-val');
+      fontInput.value = val;
+      fontCards.forEach(function(c) {
+        c.classList.remove('selected');
+        c.setAttribute('aria-checked', 'false');
+      });
+      card.classList.add('selected');
+      card.setAttribute('aria-checked', 'true');
+
+      // Refresh live preview with current theme
+      var curTheme = themeInput.value;
+      if (curTheme === 'custom') {
+        var btnTx = updateContrastSafety();
+        applyPaletteLive({
+          p: pickerP.value,
+          bg: pickerBg.value,
+          card: pickerCard.value,
+          tx: pickerTx.value,
+          btnTx: btnTx
+        }, val);
+      } else {
+        var pal = themePalettes[curTheme] || themePalettes.maroon;
+        applyPaletteLive(pal, val);
+      }
+    }
+    card.addEventListener('click', onSelectFont);
+    card.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onSelectFont();
+      }
+    });
+  });
+
+  // Initial load
+  updateContrastSafety();
+  if (themeInput.value === 'custom') {
+    updateCustomThemeFromPickers();
+  } else {
+    var initialPal = themePalettes[themeInput.value] || themePalettes.maroon;
+    applyPaletteLive(initialPal, fontInput.value);
+  }
+
+  // Reset button handler
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      actionInput.value = 'reset';
+      themeInput.value = 'maroon';
+      fontInput.value = 'inter';
+      pickerP.value = '#7a1230';
+      pickerBg.value = '#f7f8fc';
+      pickerCard.value = '#ffffff';
+      pickerTx.value = '#1a1a2e';
+      form.submit();
+    });
+  }
+})();
+</script>
+{% endblock %}
+

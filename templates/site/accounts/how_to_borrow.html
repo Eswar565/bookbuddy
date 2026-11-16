@@ -1,32 +1,9 @@
 {% extends 'site/base.html' %}
-{% block title %}How to Borrow · Book Buddy Library{% endblock %}
+
+{% block title %}{{ page.page_heading or 'How to Borrow a Book' }} · Book Buddy Library{% endblock %}
+
 {% block body %}
-<main class="section bb16-shell">
-  <div class="container" style="max-width:900px;margin:auto;padding:40px 20px;">
-    <span class="folio-kicker">LENDING POLICY</span>
-    <h1>How to Borrow Books</h1>
-    <p class="large-copy" style="color:var(--muted);margin-bottom:30px;">
-      Discover how to browse our shelves, request books online, and manage your active loans.
-    </p>
-
-    <div style="margin-bottom:28px;border-radius:18px;overflow:hidden;border:1px solid var(--line);box-shadow:0 6px 20px rgba(42,26,32,0.06);">
-      <img src="/static/img/art/11-how-to-borrow.png" alt="Book Buddy Community Library" width="1024" height="693" style="width:100%;height:auto;display:block;" loading="lazy">
-    </div>
-    
-    <div class="panel" style="padding:32px;background:#fff;border:1px solid var(--line);border-radius:16px;margin-bottom:24px;">
-      <h3 style="margin-top:0;">1. Browse &amp; Request Online</h3>
-      <p>Log into your reader account and browse the <a href="/library/">Book Catalogue</a>. Click <strong>Request book</strong> on any available title to reserve it for borrowing.</p>
-    </div>
-
-    <div class="panel" style="padding:32px;background:#fff;border:1px solid var(--line);border-radius:16px;margin-bottom:24px;">
-      <h3 style="margin-top:0;">2. Library Pickup</h3>
-      <p>Once library staff confirm your request, visit our physical reading room at <strong>{{ content.contact_address or 'MK Complex 2nd floor Chennai Hot Puffs upstairs, K.Pudur, Madurai, Tamil Nadu 625007' }}</strong> during opening hours ({{ content.contact_hours or 'Tue–Sun: 10:00 AM – 1:00 PM & 4:30 PM – 8:30 PM' }}).</p>
-    </div>
-
-    <div class="panel" style="padding:32px;background:#fff;border:1px solid var(--line);border-radius:16px;">
-      <h3 style="margin-top:0;">3. Borrowing Limits &amp; Due Dates</h3>
-      <p>Active members can hold up to their plan's book limit at any time. Due dates and renewal options are fully tracked inside your <a href="/members/dashboard/">Member Dashboard</a>.</p>
-    </div>
-  </div>
+<main id="main-content" class="bb8-borrow-page">
+  {% include 'site/accounts/_how_to_borrow_content.html' %}
 </main>
 {% endblock %}

@@ -1,0 +1,155 @@
+<!-- Shared Visit Us Content: Used by both public /visit-us/ and admin live preview -->
+<div class="bb-visit-page">
+  <!-- 1. Header Band -->
+  <header class="bb-visit-hero">
+    <div class="bb-visit-hero-inner">
+      <span class="bb-visit-eyebrow">{{ visit.eyebrow }}</span>
+      <h1 class="bb-visit-title">{{ visit.heading }}</h1>
+      <p class="bb-visit-subtitle">{{ visit.subtitle }}</p>
+    </div>
+  </header>
+
+  <!-- 2. Main Two-Column Container -->
+  <div class="bb-visit-container">
+    <div class="bb-visit-grid">
+      
+      <!-- LEFT COLUMN: Contact Details -->
+      <section class="bb-visit-contact-col" aria-labelledby="bb-visit-contact-heading">
+        <h2 id="bb-visit-contact-heading" class="bb-visit-col-heading">{{ visit.contact_heading }}</h2>
+        
+        <div class="bb-visit-cards-stack">
+          <!-- Card A: Our Library -->
+          <article class="bb-visit-card bb-visit-card-row">
+            <div class="bb-visit-icon-circle" aria-hidden="true">
+              <svg><use href="#i-map-pin"></use></svg>
+            </div>
+            <div class="bb-visit-card-body">
+              <h3 class="bb-visit-card-title">{{ visit.card_library_title }}</h3>
+              <p class="bb-visit-card-val bb-visit-address-val">{{ visit.address }}</p>
+            </div>
+          </article>
+
+          <!-- Card B: Phone / WhatsApp -->
+          <article class="bb-visit-card bb-visit-card-row">
+            <div class="bb-visit-icon-circle" aria-hidden="true">
+              <svg><use href="#i-phone"></use></svg>
+            </div>
+            <div class="bb-visit-card-body">
+              <h3 class="bb-visit-card-title">{{ visit.card_phone_title }}</h3>
+              <p class="bb-visit-card-val">
+                <a href="tel:{{ visit.phone }}" class="bb-visit-link">{{ visit.phone }}</a>
+                {% if visit.whatsapp_digits %}
+                  <a href="https://wa.me/{{ visit.whatsapp_digits }}" target="_blank" rel="noopener noreferrer" class="bb-visit-whatsapp-btn" aria-label="Chat on WhatsApp">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-whatsapp"></use></svg>
+                    <span>WhatsApp</span>
+                  </a>
+                {% endif %}
+              </p>
+            </div>
+          </article>
+
+          <!-- Card C: Email Us -->
+          <article class="bb-visit-card bb-visit-card-row">
+            <div class="bb-visit-icon-circle" aria-hidden="true">
+              <svg><use href="#i-envelope"></use></svg>
+            </div>
+            <div class="bb-visit-card-body">
+              <h3 class="bb-visit-card-title">{{ visit.card_email_title }}</h3>
+              <p class="bb-visit-card-val">
+                <a href="mailto:{{ visit.email }}" class="bb-visit-link">{{ visit.email }}</a>
+              </p>
+            </div>
+          </article>
+
+          <!-- Card D: Get Directions -->
+          <article class="bb-visit-card bb-visit-directions-card">
+            <div class="bb-visit-directions-header">
+              <div class="bb-visit-directions-icon" aria-hidden="true">
+                <svg><use href="#i-route"></use></svg>
+              </div>
+              <h3 class="bb-visit-card-title">{{ visit.card_directions_title }}</h3>
+            </div>
+            <p class="bb-visit-directions-helper">{{ visit.directions_helper }}</p>
+            <form id="bb-directions-form" class="bb-visit-directions-form" onsubmit="handleGetDirections(event)">
+              <input
+                type="text"
+                id="bb-directions-input"
+                class="bb-visit-directions-input"
+                placeholder="{{ visit.directions_placeholder }}"
+                aria-label="{{ visit.directions_placeholder }}"
+                autocomplete="street-address"
+              >
+              <button type="submit" class="bb-visit-directions-btn">
+                <svg aria-hidden="true"><use href="#i-route"></use></svg>
+                <span>{{ visit.directions_btn }}</span>
+              </button>
+            </form>
+          </article>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: Map Embed -->
+      <section class="bb-visit-map-col" aria-label="Library Location Map">
+        <div class="bb-visit-map-card">
+          <div class="bb-visit-map-frame-wrap">
+            <iframe
+              class="bb-visit-map-frame"
+              src="{{ visit.embed_url }}"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              title="Map showing the Book Buddy library location"
+              allowfullscreen
+            ></iframe>
+          </div>
+          <a
+            href="{{ visit.maps_url }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="bb-visit-map-bottom-bar"
+          >
+            <svg aria-hidden="true"><use href="#i-external-link"></use></svg>
+            <span>Open in Maps</span>
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- 3. Extra Section: Library Tour -->
+  {% if visit.tour_photos %}
+  <section class="bb-visit-tour-section" aria-labelledby="bb-visit-tour-heading">
+    <div class="bb-visit-tour-header">
+      <span class="bb-visit-tour-eyebrow">{{ visit.tour_eyebrow }}</span>
+      <h2 id="bb-visit-tour-heading" class="bb-visit-tour-title">{{ visit.tour_heading }}</h2>
+      <p class="bb-visit-tour-subtitle">{{ visit.tour_subtitle }}</p>
+    </div>
+    <div class="bb-visit-tour-grid">
+      {% for photo in visit.tour_photos %}
+        <div class="bb-visit-tour-item">
+          <img src="{{ photo.src }}" alt="{{ photo.alt }}" loading="lazy" width="400" height="300">
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+
+<script>
+function handleGetDirections(e) {
+  if (e) e.preventDefault();
+  var input = document.getElementById('bb-directions-input');
+  var origin = input ? input.value.trim() : '';
+  var destination = {{ visit.encoded_dest | tojson }};
+  
+  var mapsUrl = '';
+  if (origin) {
+    mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(origin) + '&destination=' + destination + '&travelmode=driving';
+  } else {
+    mapsUrl = 'https://www.google.com/maps/dir/?api=1&destination=' + destination;
+  }
+  window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+  return false;
+}
+</script>
+

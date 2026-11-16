@@ -8,7 +8,7 @@ from app import app, get_database_path
 
 if __name__ == "__main__":
     db_file = get_database_path()
-    port = int(os.environ.get("PORT", 5001))
+    port = int(os.environ.get("PORT") or os.environ.get("FLASK_PORT") or 5000)
     print(f"Starting Book Buddy [{os.environ.get('APP_ENV')}] on port {port} (Database: {db_file})")
     app.run(
         host="0.0.0.0",

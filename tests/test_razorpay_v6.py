@@ -9,7 +9,7 @@ def payment_case(monkeypatch):
     from app import app,get_db
     import payments
     key=uuid.uuid4().hex[:12]
-    for name,value in [('RAZORPAY_KEY_ID','rzp_test_placeholder'),('RAZORPAY_KEY_SECRET','qa-secret'),('RAZORPAY_WEBHOOK_SECRET','event-secret'),('RAZORPAY_MEMBERSHIP_WEBHOOK_SECRET','member-secret')]:monkeypatch.setenv(name,value)
+    for name,value in [('RAZORPAY_KEY_ID','rzp_test_placeholder'),('RAZORPAY_KEY_SECRET','qa-secret'),('RAZORPAY_WEBHOOK_SECRET','event-secret'),('RAZORPAY_MEMBERSHIP_WEBHOOK_SECRET','member-secret'),('DEMO_MODE','0')]:monkeypatch.setenv(name,value)
     with app.app_context():
         db=get_db()
         uid=db.execute("INSERT INTO users(name,email,password_hash,dob) VALUES(?,?,?,?)",('QA','qa-'+key+'@example.test','unused','1990-01-01')).lastrowid

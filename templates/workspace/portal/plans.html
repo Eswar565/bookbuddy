@@ -1,1 +1,137 @@
-{% extends 'workspace/portal/shell.html' %}{% block panel %}<div class="bb17-split"><section class="bb17-card"><h2>{{ 'Edit' if edit.id else 'Create' }} membership plan</h2><form method="post" class="bb17-form"><input name="action" value="plan" type="hidden"><input name="id" value="{{ edit.id or 0 }}" type="hidden"><label>Plan name<input name="name" value="{{ edit.name }}" required></label><div class="bb17-fields">{% for name,label,default in [('duration_days','Duration in days',30),('amount','Fee in rupees',0),('book_limit','Borrowing slots',2),('loan_days','Days per loan',14),('renewal_limit','Renewals per loan',1)] %}<label>{{ label }}<input name="{{ name }}" type="number" min="{{ 1 if name in ['duration_days','loan_days'] else 0 }}" step="{{ '0.01' if name=='amount' else '1' }}" value="{{ edit.get(name,default) }}" required></label>{% endfor %}<label>Overdue fine per day (₹)<input name="fine_daily" type="number" step="0.01" min="0" value="{{ edit.get('fine_daily_paise',0)/100 }}"></label></div><label>Benefits / description<textarea name="description">{{ edit.description }}</textarea></label>{% for n,label in [('is_active','Available for new subscriptions')] %}<label class="bb17-check"><input name="{{ n }}" type="checkbox" value="1" {{ 'checked' if edit.get(n,0) }}>{{ label }}</label>{% endfor %}<button>Save plan</button></form></section><section class="bb17-card"><h2>Plans</h2>{% for p in plans %}<div class="bb17-row"><div><strong>{{ p.name }}</strong><small>₹{{ '%.2f'|format(p.amount) }} / {{ p.duration_days }} days · {{ 'Active' if p.is_active else 'Hidden' }}</small></div><a href="?edit={{ p.id }}">Edit</a></div>{% else %}<p>No plans configured.</p>{% endfor %}<p>Renewals and plan changes begin after the current paid period. Existing recorded fees and access snapshots stay intact.</p></section></div><section class="bb17-card"><h2>Membership coupon</h2><form method="post" class="bb17-toolbar"><input type="hidden" name="action" value="coupon"><label>Code<input name="code" required></label><label>Discount %<input name="percent" type="number" min="1" max="100" required></label><label>Usage cap (0 = unlimited)<input name="max_uses" type="number" min="0" value="0"></label><label>Expiry<input name="expires_on" type="date"></label><button>Create coupon</button></form>{% for c in coupons %}<p>{{ c.code }} · {{ c.percent }}% · expires {{ c.expires_on or 'not set' }}</p>{% endfor %}</section>{% endblock %}
+{% extends 'workspace/portal/shell.html' %}
+{% block panel %}
+<div class="bb17-split">
+  <section class="bb17-card">
+    <h2>{{ 'Edit' if edit.id else 'Create' }} membership plan</h2>
+    <form method="post" class="bb17-form">
+      <input name="action" value="plan" type="hidden">
+      <input name="id" value="{{ edit.id or 0 }}" type="hidden">
+      
+      <label>Plan name
+        <input name="name" value="{{ edit.name or '' }}" placeholder="e.g. Solo Explorer - 2 Months" required>
+      </label>
+
+      <div class="bb17-fields">
+        <label>Tier
+          <select name="tier">
+            <option value="Solo Explorer" {% if edit.get('tier') == 'Solo Explorer' or edit.get('book_limit') == 2 %}selected{% endif %}>Solo Explorer (2 books at a time)</option>
+            <option value="Family Pack / Elite" {% if edit.get('tier') == 'Family Pack / Elite' or edit.get('book_limit') == 4 %}selected{% endif %}>Family Pack / Elite (4 books at a time)</option>
+          </select>
+        </label>
+        <label>Months
+          <input name="months" type="number" min="1" max="36" value="{{ edit.get('months', 2) }}" required>
+        </label>
+        <label>Duration in days
+          <input name="duration_days" type="number" min="1" max="3650" value="{{ edit.get('duration_days', 60) }}" required>
+        </label>
+        <label>Tagline
+          <input name="tagline" value="{{ edit.get('tagline', '') }}" placeholder="e.g. Summer Special / Regular / Academic Year">
+        </label>
+        <label>Badge
+          <input name="badge" value="{{ edit.get('badge', '') }}" placeholder="e.g. BEST VALUE">
+        </label>
+        <label>Fee in rupees (₹)
+          <input name="amount" type="number" step="0.01" min="0" value="{{ edit.get('amount', 0) }}" required>
+        </label>
+        <label>Books at a time (Borrowing slots)
+          <input name="book_limit" type="number" min="1" max="20" value="{{ edit.get('book_limit', 2) }}" required>
+        </label>
+        <label>Total books quota
+          <input name="total_books" type="number" min="0" max="500" value="{{ edit.get('total_books', 8) }}" required>
+        </label>
+        <label>Days per loan
+          <input name="loan_days" type="number" min="1" max="365" value="{{ edit.get('loan_days', 14) }}" required>
+        </label>
+        <label>Renewals per loan
+          <input name="renewal_limit" type="number" min="0" max="10" value="{{ edit.get('renewal_limit', 1) }}" required>
+        </label>
+        <label>Overdue fine per day (₹)
+          <input name="fine_daily" type="number" step="0.01" min="0" value="{{ (edit.get('fine_daily_paise', 0) / 100) if edit.get('fine_daily_paise') else 0 }}">
+        </label>
+      </div>
+
+      <label>Benefits (one per line, shown as checkmarks on comparison table)
+        <textarea name="benefits" rows="6" placeholder="Online Portal Access&#10;Academic Worksheets&#10;The Book Buddy Times&#10;Beyond School Activities&#10;Games&#10;Contribute to Magazine">{{ edit.get('benefits', '') }}</textarea>
+      </label>
+
+      <label>Description / Internal notes
+        <textarea name="description" rows="3">{{ edit.get('description', '') }}</textarea>
+      </label>
+
+      <label class="bb17-check">
+        <input name="is_active" type="checkbox" value="1" {{ 'checked' if (edit.get('is_active') is not defined or edit.get('is_active') == 1) else '' }}>
+        Available for new subscriptions
+      </label>
+
+      <button type="submit" class="bb17-btn">Save plan</button>
+      {% if edit.id %}
+        <a href="/admin/plans17/" style="margin-left: 1rem; text-decoration: underline;">Cancel edit</a>
+      {% endif %}
+    </form>
+  </section>
+
+  <section class="bb17-card">
+    <h2>Plans ({{ plans|length }})</h2>
+    {% for p in plans %}
+      <div class="bb17-row" style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid #e5e7eb;">
+        <div>
+          <strong>{{ p.name }}</strong>
+          {% if p.badge %}<span style="background:#fef3c7; color:#92400e; font-size:11px; font-weight:700; padding:2px 6px; border-radius:4px; margin-left:6px;">{{ p.badge }}</span>{% endif %}
+          <div style="font-size:13px; color:#4b5563; margin-top:3px;">
+            ₹{{ '%.0f'|format(p.amount) }} · {{ p.months }} mo ({{ p.duration_days }} days) · {{ p.book_limit }} at a time · {{ p.total_books }} total books
+          </div>
+          <small style="color:#6b7280;">Tier: {{ p.tier or 'Standard' }} · Tagline: {{ p.tagline or '—' }} · {{ 'Active' if p.is_active else 'Hidden' }}</small>
+        </div>
+        <a href="?edit={{ p.id }}" style="font-weight:600; text-decoration:underline;">Edit</a>
+      </div>
+    {% else %}
+      <p>No plans configured.</p>
+    {% endfor %}
+    <p style="font-size:12px; color:#6b7280; margin-top:1rem;">Renewals and plan changes begin after the current paid period. Existing recorded fees and access snapshots stay intact.</p>
+  </section>
+</div>
+
+<!-- Delivery & Service Logistics Settings -->
+<section class="bb17-card" style="margin-top: 1.5rem;">
+  <h2>Delivery &amp; Service Logistics Settings</h2>
+  <p style="font-size: 14px; color: #4b5563; margin-bottom: 1rem;">
+    Configure the doorstep delivery surcharge and service area shown to users on the Membership page and subscribe modal.
+  </p>
+  <form method="post" class="bb17-form">
+    <input type="hidden" name="action" value="settings">
+    
+    <div class="bb17-fields">
+      <label>Doorstep Delivery Monthly Fee (₹)
+        <input name="membership_delivery_fee_monthly" type="number" step="1" min="0" value="{{ settings.get('membership_delivery_fee_monthly', '350') }}" required>
+      </label>
+      <label>Service Area / Radius
+        <input name="membership_delivery_area" value="{{ settings.get('membership_delivery_area', 'Gandhi Nagar, Saligramam and surrounding areas (within 5 km)') }}" required>
+      </label>
+      <label>Delivery Schedule Day
+        <input name="membership_delivery_day" value="{{ settings.get('membership_delivery_day', 'Fixed pick-up & drop on designated weekday (e.g. Saturday)') }}" required>
+      </label>
+      <label>Library Self-Pickup Address
+        <input name="membership_pickup_address" value="{{ settings.get('membership_pickup_address', 'Gandhi Nagar, Saligramam, Chennai') }}" required>
+      </label>
+    </div>
+
+    <button type="submit" class="bb17-btn">Save Service Settings</button>
+  </form>
+</section>
+
+<!-- Membership Coupon -->
+<section class="bb17-card" style="margin-top: 1.5rem;">
+  <h2>Membership coupon</h2>
+  <form method="post" class="bb17-toolbar">
+    <input type="hidden" name="action" value="coupon">
+    <label>Code<input name="code" required></label>
+    <label>Discount %<input name="percent" type="number" min="1" max="100" required></label>
+    <label>Usage cap (0 = unlimited)<input name="max_uses" type="number" min="0" value="0"></label>
+    <label>Expiry<input name="expires_on" type="date"></label>
+    <button type="submit">Create coupon</button>
+  </form>
+  {% for c in coupons %}
+    <p>{{ c.code }} · {{ c.percent }}% · expires {{ c.expires_on or 'not set' }}</p>
+  {% endfor %}
+</section>
+{% endblock %}

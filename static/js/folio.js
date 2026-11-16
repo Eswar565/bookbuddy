@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  document.querySelectorAll('.sidebar a,.bb18-sidebar a').forEach(a=>{const u=new URL(a.href,location.href);if(u.pathname===location.pathname&&(!u.search||u.search===location.search)){a.setAttribute('aria-current','page');const parent=a.closest('details');if(parent)parent.open=true;}});
  document.querySelectorAll('.notice,.flash').forEach(el=>{el.setAttribute('role','status');const b=document.createElement('button');b.type='button';b.className='folio-dismiss';b.setAttribute('aria-label','Dismiss notification');b.innerHTML='<svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-x"/></svg>';b.addEventListener('click',()=>el.remove());el.append(b);});
  document.querySelectorAll('table').forEach((table,index)=>{
-  if(!table.tBodies.length||table.closest('[data-no-filter]'))return;
+  if(!table.tBodies.length||table.closest('[data-no-filter]')||table.hasAttribute('data-no-filter')||table.classList.contains('bb-compare-table'))return;
   const rows=[...table.tBodies[0].rows];if(rows.length<2)return;
   const wrap=document.createElement('div');wrap.className='folio-table-scroll';table.before(wrap);wrap.append(table);wrap.tabIndex=0;wrap.setAttribute('role','region');wrap.setAttribute('aria-label','Scrollable records table');
   const bar=document.createElement('div');bar.className='folio-table-tools';

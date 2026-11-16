@@ -133,15 +133,17 @@ def install_release16(app, db, render_site, admin):
     @app.before_request
     def v16_members_only():
         path=request.path
-        # Public browsing is independent of membership. Personal records stay private.
-        if request.method in {'GET','HEAD'} and not path.startswith(('/members/','/users/','/admin/')) and path not in {'/accounts/profile/','/account/profile/'}:
+        if path.startswith('/admin/'):
             return None
-        if request.method == 'POST' and (path.startswith('/events/') or path.startswith('/booking/') or path == '/submit-contribution/'):
+        # Public browsing is independent of membership. Personal records stay private.
+        if request.method in {'GET','HEAD'} and not path.startswith(('/members/','/users/')) and path not in {'/accounts/profile/','/account/profile/'}:
+            return None
+        if request.method == 'POST' and (path.startswith('/events/') or path.startswith('/booking/') or path == '/submit-contribution/' or path.startswith('/memberships/request/') or path == '/membership/subscribe/' or path == '/how-to-borrow/'):
             return None
         if path in {'/membership/','/plans/'} and request.method in {'GET','HEAD'}:
-            return membership16()
-        if path=='/how-to-borrow/' and request.method in {'GET','HEAD'}:
-            return render16('how_to_borrow','library')
+            return app.view_functions['membership']()
+        if path=='/how-to-borrow/':
+            return app.view_functions['how_to_borrow_route']()
         # Retain the homepage, contact, about and plan information for prospective members and SEO.
         if path in PUBLIC_EXACT or path.startswith(PUBLIC_PREFIX) or request.endpoint in app.config.get('PUBLIC_ENDPOINTS17', set()): return None
         if path.startswith('/health') or path.startswith('/member-setup/'):return None

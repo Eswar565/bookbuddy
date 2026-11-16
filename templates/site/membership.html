@@ -1,0 +1,558 @@
+{% extends 'site/base.html' %}
+
+{% block title %}Choose Your Membership Tier · Book Buddy{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/bb-membership.css?v=3">
+{% endblock %}
+
+{% block body %}
+<main class="bb-membership-page" id="main-content">
+  <div class="bb-mem-container">
+    
+    <!-- Hero / Header Section -->
+    <header class="bb-mem-header">
+      <p class="bb-mem-kicker">MEMBERSHIP &amp; PLANS</p>
+      <h1 class="bb-mem-title">Choose Your Membership Tier</h1>
+      <p class="bb-mem-subtitle">Pick the plan that fits your family's reading appetite.</p>
+    </header>
+
+    <!-- Comparison Table -->
+    <div class="bb-table-wrapper" data-no-filter>
+      <table class="bb-compare-table" data-no-filter>
+        <colgroup>
+          <col class="bb-col-feature-cg" style="width: 30%; min-width: 280px;">
+          {% for g in duration_groups %}
+            <col class="bb-col-plan-cg {% if g.months == 9 %}col-nine-months{% endif %}" style="width: calc(70% / {{ duration_groups|length }}); min-width: 190px;">
+          {% endfor %}
+        </colgroup>
+        <thead>
+          <tr>
+            <th class="bb-col-feature bb-header-label-cell" scope="col">Features &amp; Plans</th>
+            {% for g in duration_groups %}
+              <th class="bb-col-plan {% if g.months == 9 %}is-nine-months{% endif %} {% if g.is_best_value %}is-highlighted{% endif %}" scope="col">
+                <div class="bb-plan-header-cell">
+                  <div class="bb-badge-wrap">
+                    {% if g.badge %}
+                      <span class="bb-plan-badge">★ {{ g.badge }}</span>
+                    {% endif %}
+                  </div>
+                  <h2 class="bb-plan-duration-name">{{ g.label }}</h2>
+                  {% if g.tagline %}
+                    <p class="bb-plan-tagline">{{ g.tagline }}</p>
+                  {% endif %}
+                </div>
+              </th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Solo Explorer Row -->
+          <tr>
+            <th class="bb-col-feature" scope="row">
+              <span class="bb-row-title">Solo Explorer</span>
+              <span class="bb-row-sub">1 Reader · 2 Books at a time</span>
+            </th>
+            {% for g in duration_groups %}
+              <td class="bb-col-plan bb-price-cell {% if g.months == 9 %}is-nine-months{% endif %} {% if g.is_best_value %}is-highlighted{% endif %}">
+                <span class="bb-price-val">₹{{ g.solo_price }}</span>
+                <span class="bb-price-sub">₹{{ (g.solo_price / g.months)|round|int }} / month</span>
+              </td>
+            {% endfor %}
+          </tr>
+
+          <!-- Family Pack / Elite Row -->
+          <tr>
+            <th class="bb-col-feature" scope="row">
+              <span class="bb-row-title">Family Pack / Elite</span>
+              <span class="bb-row-sub">Family sharing · 4 Books at a time</span>
+            </th>
+            {% for g in duration_groups %}
+              <td class="bb-col-plan bb-price-cell {% if g.months == 9 %}is-nine-months{% endif %} {% if g.is_best_value %}is-highlighted{% endif %}">
+                <span class="bb-price-val">₹{{ g.family_price }}</span>
+                <span class="bb-price-sub">₹{{ (g.family_price / g.months)|round|int }} / month</span>
+              </td>
+            {% endfor %}
+          </tr>
+
+          <!-- Total Books Row -->
+          <tr>
+            <th class="bb-col-feature" scope="row">
+              <span class="bb-row-title">Total Books</span>
+              <span class="bb-row-sub">Cumulative reading quota</span>
+            </th>
+            {% for g in duration_groups %}
+              <td class="bb-col-plan bb-books-cell {% if g.months == 9 %}is-nine-months{% endif %} {% if g.is_best_value %}is-highlighted{% endif %}">
+                <div class="bb-books-val">{{ g.solo_books }} books (Solo)</div>
+                <div class="bb-books-meta">{{ g.family_books }} books (Family)</div>
+              </td>
+            {% endfor %}
+          </tr>
+
+          <!-- Benefits Included Row -->
+          <tr>
+            <th class="bb-col-feature" scope="row">
+              <span class="bb-row-title">Benefits Included</span>
+              <span class="bb-row-sub">Everything included with all plans</span>
+            </th>
+            {% for g in duration_groups %}
+              <td class="bb-col-plan bb-benefits-cell {% if g.months == 9 %}is-nine-months{% endif %} {% if g.is_best_value %}is-highlighted{% endif %}">
+                <ul class="bb-benefits-list">
+                  {% for benefit in g.benefits %}
+                    <li>
+                      <svg class="bb-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                      <span class="bb-benefit-text">{{ benefit }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </td>
+            {% endfor %}
+          </tr>
+
+          <!-- Action Row -->
+          <tr>
+            <th class="bb-col-feature" scope="row">
+              <span class="bb-row-title">Choose Duration</span>
+            </th>
+            {% for g in duration_groups %}
+              <td class="bb-col-plan bb-action-cell {% if g.months == 9 %}is-nine-months{% endif %} {% if g.is_best_value %}is-highlighted{% endif %}">
+                <button type="button" class="bb-btn-subscribe" data-duration="{{ g.months }}" data-tagline="{{ g.tagline }}">
+                  Subscribe
+                </button>
+              </td>
+            {% endfor %}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Service Modes Section -->
+    <section class="bb-modes-section" aria-labelledby="service-modes-heading">
+      <div class="bb-modes-header">
+        <h2 class="bb-modes-title" id="service-modes-heading">Flexible Service Modes</h2>
+        <p class="bb-modes-subtitle">Choose how you'd like your books delivered — in person or directly to your doorstep.</p>
+      </div>
+
+      <div class="bb-modes-grid">
+        <!-- Mode 1: Offline Self-Pickup -->
+        <article class="bb-mode-card">
+          <div class="bb-mode-top">
+            <div class="bb-mode-badge-icon" aria-label="Library pickup">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+            </div>
+            <span class="bb-mode-badge bb-badge-offline">Included Free</span>
+          </div>
+          <h3>Offline (Self-Pickup)</h3>
+          <p class="bb-mode-desc">
+            Visit our welcoming library to browse our curated shelves, participate in quiet reading, and pick up your books in person.
+          </p>
+          <div class="bb-mode-meta">
+            <div class="bb-mode-meta-item">
+              <svg class="bb-line-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m2 7 4.418-4.418A2 2 0 0 1 7.832 2h8.336a2 2 0 0 1 1.414.582L22 7" />
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4" />
+                <path d="M2 7h20" />
+              </svg>
+              <div>
+                <strong>Library Address:</strong>
+                <span>{{ pickup_address }}</span>
+              </div>
+            </div>
+            <div class="bb-mode-meta-item">
+              <svg class="bb-line-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <path d="m9 12 2 2 4-4" />
+              </svg>
+              <div>
+                <strong>Logistics fee:</strong>
+                <span>Free (included in base plan)</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Mode 2: Online Doorstep Delivery -->
+        <article class="bb-mode-card">
+          <div class="bb-mode-top">
+            <div class="bb-mode-badge-icon" aria-label="Doorstep delivery">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+                <path d="M15 18H9" />
+                <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14v10" />
+                <circle cx="17" cy="18.5" r="2.5" />
+                <circle cx="7" cy="18.5" r="2.5" />
+              </svg>
+            </div>
+            <span class="bb-mode-badge bb-badge-online">+₹{{ delivery_fee_monthly }}/month</span>
+          </div>
+          <h3>Online (Doorstep Delivery)</h3>
+          <p class="bb-mode-desc">
+            Enjoy fixed weekly book deliveries and returns right to your home. We handle the logistics so reading fits effortlessly into your family routine.
+          </p>
+          <div class="bb-mode-meta">
+            <div class="bb-mode-meta-item">
+              <svg class="bb-line-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              <div>
+                <strong>Service Area:</strong>
+                <span>{{ delivery_area }}</span>
+              </div>
+            </div>
+            <div class="bb-mode-meta-item">
+              <svg class="bb-line-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M8 2v4" />
+                <path d="M16 2v4" />
+                <rect width="18" height="18" x="3" y="4" rx="2" />
+                <path d="M3 10h18" />
+              </svg>
+              <div>
+                <strong>Delivery Schedule:</strong>
+                <span>{{ delivery_day }}</span>
+              </div>
+            </div>
+            <div class="bb-mode-meta-item">
+              <svg class="bb-line-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 6v12" />
+                <path d="M16 10H9.5a2.5 2.5 0 0 0 0 5H14a2.5 2.5 0 0 1 0 5H8" />
+              </svg>
+              <div>
+                <strong>Logistics fee:</strong>
+                <span>+₹{{ delivery_fee_monthly }} / month</span>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- Subscribe Modal -->
+<div class="bb-modal-overlay" id="subscription-modal" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
+  <div class="bb-modal-dialog">
+    <div class="bb-modal-header">
+      <h3 id="modal-heading">Complete Your Subscription</h3>
+      <button type="button" class="bb-modal-close" id="modal-close-btn" aria-label="Close dialog">&times;</button>
+    </div>
+
+    <div class="bb-modal-body">
+      <!-- Duration Banner -->
+      <div class="bb-selection-banner">
+        <p class="bb-selection-duration" id="modal-duration-display">Selected Duration: 2 Months (Summer Special)</p>
+        {% if not prefill_user %}
+          <div class="bb-auth-hint">
+            Already have an account? <a href="/accounts/login/?next={{ request.path }}">Log in to prefill</a> or continue below to register.
+          </div>
+        {% endif %}
+      </div>
+
+      <form method="post" action="/membership/subscribe/" id="membership-subscription-form">
+        <input type="hidden" name="months" id="form-months-input" value="2">
+
+        <!-- Tier Selection -->
+        <div class="bb-form-section">
+          <div class="bb-field-group">
+            <label for="tier-select">Select your tier <span class="req">*</span></label>
+            <select name="plan_id" id="tier-select" required>
+              <!-- Populated dynamically via JS -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Member Details -->
+        <div class="bb-form-section">
+          <h4 class="bb-form-section-title">Member Details</h4>
+          
+          <div class="bb-form-grid-2">
+            <div class="bb-field-group">
+              <label for="child_name">Child's Name <span class="req">*</span></label>
+              <input type="text" name="child_name" id="child_name" placeholder="Full name of reader" value="{{ prefill_user.name if prefill_user else '' }}" required>
+            </div>
+            <div class="bb-field-group">
+              <label for="child_dob">Date of Birth <span class="req">*</span></label>
+              <input type="date" name="child_dob" id="child_dob" value="{{ prefill_user.dob if prefill_user else '' }}" required>
+            </div>
+          </div>
+
+          <div class="bb-field-group">
+            <label for="student_grade">Student Grade <span class="req">*</span></label>
+            <select name="student_grade" id="student_grade" required>
+              <option value="" disabled selected>-- Select Grade --</option>
+              <option value="Pre-KG / LKG / UKG">Pre-KG / LKG / UKG</option>
+              <option value="Class 1 to 3">Class 1 to 3</option>
+              <option value="Class 4 to 5">Class 4 to 5</option>
+              <option value="Class 6 to 8">Class 6 to 8</option>
+              <option value="Class 9 to 10">Class 9 to 10</option>
+              <option value="Class 11 to 12">Class 11 to 12</option>
+              <option value="College / Adult">College / Adult</option>
+            </select>
+          </div>
+
+          <div class="bb-form-grid-2">
+            <div class="bb-field-group">
+              <label for="parent_name">Parent / Guardian Name <span class="req">*</span></label>
+              <input type="text" name="parent_name" id="parent_name" placeholder="Full name" value="{{ prefill_user.guardian_name or (prefill_user.name if prefill_user else '') }}" required>
+            </div>
+            <div class="bb-field-group">
+              <label for="phone">Phone Number <span class="req">*</span></label>
+              <input type="tel" name="phone" id="phone" placeholder="10-digit mobile number" value="{{ prefill_user.phone if prefill_user else '' }}" required>
+            </div>
+          </div>
+
+          <div class="bb-field-group">
+            <label for="email">Email Address <span class="req">*</span></label>
+            <input type="email" name="email" id="email" placeholder="name@example.com" value="{{ prefill_user.email if prefill_user else '' }}" required>
+          </div>
+        </div>
+
+        <!-- Delivery Options -->
+        <div class="bb-form-section">
+          <h4 class="bb-form-section-title">Delivery Options</h4>
+          
+          <div class="bb-field-group">
+            <label for="service_mode">Service Mode <span class="req">*</span></label>
+            <select name="service_mode" id="service_mode" required>
+              <option value="offline" selected>Offline (Self-Pickup): Free</option>
+              <option value="online">Online (Doorstep Delivery): +₹{{ delivery_fee_monthly }}/month</option>
+            </select>
+          </div>
+
+          <!-- Doorstep Delivery Address Fields (hidden when Offline) -->
+          <div id="doorstep-address-section" style="display: none;">
+            <div class="bb-field-group">
+              <label for="address_flat">Flat / House / Building No. <span class="req">*</span></label>
+              <input type="text" name="address_flat" id="address_flat" placeholder="e.g. Flat 3B, Sunshine Apartments">
+            </div>
+
+            <div class="bb-field-group">
+              <label for="address_street">Street / Locality <span class="req">*</span></label>
+              <input type="text" name="address_street" id="address_street" placeholder="e.g. 1st Cross Street, Gandhi Nagar">
+            </div>
+
+            <div class="bb-form-grid-2">
+              <div class="bb-field-group">
+                <label for="address_city">City <span class="req">*</span></label>
+                <input type="text" name="address_city" id="address_city" value="Chennai">
+              </div>
+              <div class="bb-field-group">
+                <label for="address_state">State <span class="req">*</span></label>
+                <input type="text" name="address_state" id="address_state" value="Tamil Nadu">
+              </div>
+            </div>
+
+            <div class="bb-form-grid-2">
+              <div class="bb-field-group">
+                <label for="address_pincode">Postal PIN Code <span class="req">*</span></label>
+                <input type="text" name="address_pincode" id="address_pincode" placeholder="6-digit PIN" maxlength="6">
+              </div>
+              <div class="bb-field-group">
+                <label for="address_country">Country</label>
+                <input type="text" name="address_country" id="address_country" value="India" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="bb-field-group">
+            <label for="referral_code">Referral / Coupon Code <small style="font-weight:normal;color:#6b7280;">(optional)</small></label>
+            <input type="text" name="referral_code" id="referral_code" placeholder="Enter referral code">
+          </div>
+        </div>
+
+        <!-- Live Total Breakdown -->
+        <div class="bb-live-summary">
+          <div class="bb-summary-row">
+            <span>Membership Plan:</span>
+            <span id="summary-plan-price">₹0</span>
+          </div>
+          <div class="bb-summary-row">
+            <span>Doorstep Logistics:</span>
+            <span id="summary-delivery-fee">₹0</span>
+          </div>
+          <div class="bb-summary-total">
+            <span>Total Payable:</span>
+            <span id="summary-total-price">₹0</span>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <button type="submit" class="bb-modal-submit-btn" id="modal-submit-btn" disabled>
+          Complete selections to continue
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Embedded JSON Data for Client Interactions -->
+<script id="plans-data" type="application/json">
+{{ plans_json|safe }}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const plansData = JSON.parse(document.getElementById('plans-data').textContent || '[]');
+  const monthlyDeliveryRate = {{ delivery_fee_monthly|int }};
+  
+  const modalOverlay = document.getElementById('subscription-modal');
+  const modalCloseBtn = document.getElementById('modal-close-btn');
+  const durationDisplay = document.getElementById('modal-duration-display');
+  const tierSelect = document.getElementById('tier-select');
+  const formMonthsInput = document.getElementById('form-months-input');
+  const serviceModeSelect = document.getElementById('service_mode');
+  const doorstepAddressSection = document.getElementById('doorstep-address-section');
+  const submitBtn = document.getElementById('modal-submit-btn');
+  const form = document.getElementById('membership-subscription-form');
+
+  const summaryPlanPrice = document.getElementById('summary-plan-price');
+  const summaryDeliveryFee = document.getElementById('summary-delivery-fee');
+  const summaryTotalPrice = document.getElementById('summary-total-price');
+
+  // Input fields for validation
+  const childName = document.getElementById('child_name');
+  const childDob = document.getElementById('child_dob');
+  const studentGrade = document.getElementById('student_grade');
+  const parentName = document.getElementById('parent_name');
+  const phone = document.getElementById('phone');
+  const email = document.getElementById('email');
+
+  const addressFlat = document.getElementById('address_flat');
+  const addressStreet = document.getElementById('address_street');
+  const addressPincode = document.getElementById('address_pincode');
+
+  let currentMonths = 2;
+
+  function openModal(months, tagline) {
+    currentMonths = parseInt(months, 10) || 2;
+    formMonthsInput.value = currentMonths;
+    durationDisplay.textContent = `Selected Duration: ${currentMonths} Months${tagline ? ' (' + tagline + ')' : ''}`;
+
+    // Filter plans for this duration
+    const matchingPlans = plansData.filter(p => p.months === currentMonths);
+    tierSelect.innerHTML = '';
+    
+    matchingPlans.forEach((p, idx) => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.dataset.amount = p.amount;
+      opt.dataset.tier = p.tier;
+      opt.dataset.limit = p.book_limit;
+      opt.dataset.totalBooks = p.total_books;
+      opt.textContent = `${p.tier} — ₹${Math.round(p.amount)} (${p.book_limit} books at a time, ${p.total_books} total books)`;
+      if (idx === 0) opt.selected = true;
+      tierSelect.appendChild(opt);
+    });
+
+    modalOverlay.classList.add('is-active');
+    document.body.style.overflow = 'hidden';
+    updateLiveTotal();
+  }
+
+  function closeModal() {
+    modalOverlay.classList.remove('is-active');
+    document.body.style.overflow = '';
+  }
+
+  // Subscribe button click handlers
+  document.querySelectorAll('.bb-btn-subscribe').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const duration = this.dataset.duration;
+      const tagline = this.dataset.tagline;
+      openModal(duration, tagline);
+    });
+  });
+
+  modalCloseBtn.addEventListener('click', closeModal);
+  modalOverlay.addEventListener('click', function(e) {
+    if (e.target === modalOverlay) closeModal();
+  });
+
+  // Toggle delivery address section based on service mode
+  serviceModeSelect.addEventListener('change', function() {
+    if (this.value === 'online') {
+      doorstepAddressSection.style.display = 'block';
+      addressFlat.required = true;
+      addressStreet.required = true;
+      addressPincode.required = true;
+    } else {
+      doorstepAddressSection.style.display = 'none';
+      addressFlat.required = false;
+      addressStreet.required = false;
+      addressPincode.required = false;
+    }
+    updateLiveTotal();
+  });
+
+  tierSelect.addEventListener('change', updateLiveTotal);
+
+  // Recalculate on any input change to update validation & live total
+  form.addEventListener('input', updateLiveTotal);
+
+  function updateLiveTotal() {
+    const selectedOption = tierSelect.options[tierSelect.selectedIndex];
+    const basePlanPrice = selectedOption ? parseFloat(selectedOption.dataset.amount || 0) : 0;
+    const isOnline = serviceModeSelect.value === 'online';
+    const deliveryFee = isOnline ? (monthlyDeliveryRate * currentMonths) : 0;
+    const grandTotal = basePlanPrice + deliveryFee;
+
+    summaryPlanPrice.textContent = `₹${Math.round(basePlanPrice).toLocaleString('en-IN')}`;
+    summaryDeliveryFee.textContent = isOnline ? `₹${Math.round(deliveryFee).toLocaleString('en-IN')} (${monthlyDeliveryRate} × ${currentMonths} mo)` : '₹0 (Free)';
+    summaryTotalPrice.textContent = `₹${Math.round(grandTotal).toLocaleString('en-IN')}`;
+
+    // Validate form
+    const isChildNameValid = childName.value.trim().length > 0;
+    const isChildDobValid = childDob.value.trim().length > 0;
+    const isGradeValid = studentGrade.value.trim().length > 0;
+    const isParentNameValid = parentName.value.trim().length > 0;
+    const isPhoneValid = phone.value.trim().replace(/\D/g, '').length >= 10;
+    const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
+
+    let isAddressValid = true;
+    if (isOnline) {
+      isAddressValid = addressFlat.value.trim().length > 0 &&
+                       addressStreet.value.trim().length > 0 &&
+                       addressPincode.value.trim().length === 6;
+    }
+
+    const allValid = isChildNameValid && isChildDobValid && isGradeValid && isParentNameValid && isPhoneValid && isEmailValid && isAddressValid && selectedOption;
+
+    if (allValid) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = `Pay ₹${Math.round(grandTotal).toLocaleString('en-IN')}`;
+    } else {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Complete selections to continue';
+    }
+  }
+
+  // Check URL parameters for direct modal opening (e.g. ?duration=3&plan_id=...)
+  const urlParams = new URLSearchParams(window.location.search);
+  const paramDuration = urlParams.get('duration');
+  const paramPlanId = urlParams.get('plan_id');
+  if (paramDuration || paramPlanId) {
+    let targetDuration = paramDuration || 2;
+    if (paramPlanId) {
+      const foundPlan = plansData.find(p => String(p.id) === String(paramPlanId));
+      if (foundPlan) targetDuration = foundPlan.months;
+    }
+    openModal(targetDuration, '');
+    if (paramPlanId) {
+      setTimeout(() => {
+        tierSelect.value = paramPlanId;
+        updateLiveTotal();
+      }, 50);
+    }
+  }
+});
+</script>
+{% endblock %}
+

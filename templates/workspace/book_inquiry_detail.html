@@ -1,0 +1,126 @@
+{% extends 'workspace/base.html' %}
+
+{% block content %}
+<div class="panel" style="max-width: 900px; margin: 0 auto 30px;">
+  <!-- Back Link -->
+  <div style="margin-bottom: 20px;">
+    <a href="/admin/book-inquiries/" style="text-decoration: none; color: var(--navy, #0b1f6b); font-size: 0.9rem; font-weight: 600;">
+      &larr; Back to all inquiries
+    </a>
+  </div>
+
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; border-bottom: 2px solid #e5e7eb; padding-bottom: 16px;">
+    <div>
+      <span style="font-size: 0.85rem; color: #6b7280; font-weight: 600;">INQUIRY #{{ inquiry.id }}</span>
+      <h2 style="margin: 4px 0 0 0; color: var(--navy, #0b1f6b);">{{ inquiry.book_title }}</h2>
+    </div>
+    <div>
+      {% if inquiry.status == 'New' %}
+        <span style="background: #dbeafe; color: #1e40af; font-size: 0.9rem; font-weight: 700; padding: 5px 14px; border-radius: 9999px;">New</span>
+      {% elif inquiry.status == 'Reviewing' %}
+        <span style="background: #fef3c7; color: #92400e; font-size: 0.9rem; font-weight: 700; padding: 5px 14px; border-radius: 9999px;">Reviewing</span>
+      {% elif inquiry.status == 'Ordered' %}
+        <span style="background: #e0e7ff; color: #3730a3; font-size: 0.9rem; font-weight: 700; padding: 5px 14px; border-radius: 9999px;">Ordered</span>
+      {% elif inquiry.status == 'Available' %}
+        <span style="background: #d1fae5; color: #065f46; font-size: 0.9rem; font-weight: 700; padding: 5px 14px; border-radius: 9999px;">Available</span>
+      {% elif inquiry.status == 'Declined' %}
+        <span style="background: #fee2e2; color: #991b1b; font-size: 0.9rem; font-weight: 700; padding: 5px 14px; border-radius: 9999px;">Declined</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Inquiry Details Grid -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+    <!-- Book Details -->
+    <div style="background: #f9fafb; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
+      <h3 style="margin-top: 0; color: var(--navy, #0b1f6b); font-size: 1.1rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">Book Request Details</h3>
+      <p style="margin: 8px 0;"><strong>Title / Subject:</strong> {{ inquiry.book_title }}</p>
+      <p style="margin: 8px 0;"><strong>Author:</strong> {{ inquiry.author or '—' }}</p>
+      <p style="margin: 8px 0;"><strong>Preferred Language:</strong> {{ inquiry.language }}</p>
+      <p style="margin: 8px 0;"><strong>Submitted:</strong> {{ inquiry.created_at }}</p>
+      {% if inquiry.notes %}
+        <div style="margin-top: 14px;">
+          <strong>Reader's Notes / Edition:</strong>
+          <div style="background: #ffffff; padding: 10px 12px; border-radius: 6px; border: 1px solid #d1d5db; margin-top: 6px; font-size: 0.95rem; white-space: pre-wrap;">{{ inquiry.notes }}</div>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Member Details -->
+    <div style="background: #f9fafb; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
+      <h3 style="margin-top: 0; color: var(--navy, #0b1f6b); font-size: 1.1rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">Member / Requester Information</h3>
+      <p style="margin: 8px 0;"><strong>Membership ID:</strong> <code>{{ inquiry.membership_id or 'Not provided' }}</code></p>
+      {% if inquiry.user_id %}
+        <p style="margin: 8px 0;"><strong>Matched Account:</strong> <a href="/admin/manage/members/{{ inquiry.user_id }}/" style="color: var(--navy); font-weight: 600;">{{ inquiry.member_name }} (#{{ inquiry.user_id }})</a></p>
+        <p style="margin: 8px 0;"><strong>Email:</strong> {{ inquiry.member_email or '—' }}</p>
+        <p style="margin: 8px 0;"><strong>Phone:</strong> {{ inquiry.member_phone or '—' }}</p>
+      {% else %}
+        <p style="margin: 8px 0;"><strong>Visitor / Contact Info:</strong> {{ inquiry.contact_info or 'None provided' }}</p>
+        <p style="margin: 8px 0; color: #6b7280; font-size: 0.85rem;"><em>No existing member account was directly linked to this submission.</em></p>
+      {% endif %}
+      <p style="margin: 8px 0; font-size: 0.85rem; color: #6b7280;"><strong>Notification Consent:</strong> Agreed</p>
+    </div>
+  </div>
+
+  <!-- Status & Admin Notes Form -->
+  <div style="background: #ffffff; border: 1px solid #d1d5db; border-radius: 8px; padding: 24px; margin-bottom: 32px;">
+    <h3 style="margin-top: 0; color: var(--navy, #0b1f6b);">Update Status &amp; Notes</h3>
+    <form method="post" action="/admin/book-inquiries/{{ inquiry.id }}/">
+      <div style="display: grid; grid-template-columns: 200px 1fr; gap: 20px; margin-bottom: 18px;">
+        <div>
+          <label style="display: block; font-weight: 600; margin-bottom: 6px;">Status</label>
+          <select name="status" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-weight: 600;">
+            {% for st in valid_statuses %}
+              <option value="{{ st }}" {% if inquiry.status == st %}selected{% endif %}>{{ st }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label style="display: block; font-weight: 600; margin-bottom: 6px;">Admin / Staff Notes</label>
+          <textarea name="admin_notes" rows="3" placeholder="Procurement updates, supplier info, tracking numbers..." style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">{{ inquiry.admin_notes }}</textarea>
+        </div>
+      </div>
+      <button type="submit" class="button button-primary" style="background: var(--maroon, #7c1d2e); color: #fff; border: none; padding: 9px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">
+        Save Changes
+      </button>
+    </form>
+  </div>
+
+  <!-- Notify Member Action (Available status) -->
+  {% if inquiry.status == 'Available' %}
+    <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 24px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+        <h3 style="margin: 0; color: #065f46; display: flex; align-items: center; gap: 8px;">
+          <svg class="bb-icon" style="width: 20px; height: 20px;"><use href="#i-check-circle"/></svg>
+          Book is Available: Notify Member
+        </h3>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('email_body_preview').value); alert('Email text copied to clipboard!');" class="button" style="padding: 6px 12px; font-size: 0.85rem;">
+            Copy Email Text
+          </button>
+          {% if recipient_email %}
+            <a href="mailto:{{ recipient_email }}?subject={{ email_subject|urlencode }}&body={{ email_body|urlencode }}" class="button" style="background: #059669; color: #fff; text-decoration: none; padding: 6px 14px; font-size: 0.85rem; font-weight: bold;">
+              Open in Mail Client &nearr;
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <p style="color: #047857; font-size: 0.9rem; margin-top: 0;">
+        Ready email template to notify the reader that their book is ready for pickup at the circulation desk.
+      </p>
+
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #065f46; margin-bottom: 4px;">Subject</label>
+        <input type="text" value="{{ email_subject }}" readonly style="width: 100%; padding: 6px 10px; background: #ffffff; border: 1px solid #a7f3d0; border-radius: 4px; font-weight: 600;">
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #065f46; margin-bottom: 4px;">Message Body</label>
+        <textarea id="email_body_preview" rows="8" readonly style="width: 100%; padding: 8px 12px; background: #ffffff; border: 1px solid #a7f3d0; border-radius: 4px; font-family: monospace; font-size: 0.9rem; line-height: 1.5;">{{ email_body }}</textarea>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
