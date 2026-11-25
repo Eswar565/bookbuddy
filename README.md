@@ -121,14 +121,41 @@ This edition has a **completely new, child-friendly library presentation**, repl
    - `COOKIE_SECURE=1`
    - `BOOK_BUDDY_DATABASE=/home/USERNAME/private/book_buddy.sqlite3`
    - `MEDIA_ROOT=/home/USERNAME/private/media`
-3. **Dependencies & Demo Data**:
+   - `USE_REACT=0` (or `1` when migrating to React frontend)
+3. **Frontend Build (React 18 + Vite)**:
+   - On deployment machine or via SSH:
+     ```bash
+     cd frontend
+     npm install
+     npm run build
+     ```
+   - This writes production assets to `frontend/dist/`.
+   - Flask serves `frontend/dist/` assets with immutable caching (`Cache-Control: public, max-age=31536000, immutable`) and handles SPA fallback for public routes. Node.js is NOT required to be running on cPanel in production.
+   - When previewing React before cutover: access `/react` on any running deployment.
+4. **Dependencies & Demo Data**:
    - Enter the Python virtualenv via SSH or terminal:
      ```bash
      source /home/USERNAME/virtualenv/bookbuddy/3.11/bin/activate
      pip install -r requirements.txt
      python tools/make_demo_data.py --target /home/USERNAME/private/book_buddy.sqlite3 --media /home/USERNAME/private/media
      ```
-4. **Restart**:
+5. **Restart**:
    - Touch `tmp/restart.txt` or click **Restart** in cPanel.
+
+## Frontend Development (React + Vite)
+
+For developing the modern React frontend locally:
+
+```bash
+# Terminal 1: Run Flask backend on :5000
+python run.py
+
+# Terminal 2: Run Vite dev server on :3000 (proxies /api, /media, /admin, /static to Flask)
+cd frontend
+npm install
+npm run dev
+```
+
+Visit `http://localhost:3000` to interact with the React frontend with full HMR and dev proxy.
 
 # bookbuddy

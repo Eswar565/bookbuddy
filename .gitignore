@@ -14,4 +14,5 @@ backups/
 *.zip
 scratch_*.py
 scratch/
+frontend/node_modules/
 

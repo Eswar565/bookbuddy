@@ -196,11 +196,14 @@ These routes are **not** rewritten into React and remain directly handled by Fla
 
 ## 8. Proposed Execution Order (Phased Rollout)
 
-1. **PHASE 1: Setup & Build Pipeline**
-   - Initialize `frontend/` with Vite + React 18 + TypeScript + React Router 6 + TanStack Query 5.
-   - Configure CSS Variables / Tokens matching `static/css/theme.css` and Inter font.
-   - Set up Vite proxy to Flask (port 5000) and production bundle serving with SPA fallback in `app.py`.
-   - Setup `react-helmet-async`, ESLint, Prettier.
+1. **PHASE 1: Setup & Build Pipeline** - **[COMPLETED]**
+   - Initialized `frontend/` with Vite 5 + React 18 (`18.3.1`) + TypeScript 5 + React Router 6 + TanStack Query 5 + `react-helmet-async` + `lucide-react`.
+   - Extracted CSS Variables / Design Tokens matching `static/css/theme.css` and single font `Inter`.
+   - Set up Vite proxy to Flask (port 5000) for `/api`, `/media`, `/static`, `/admin`.
+   - Set up production bundle serving with SPA fallback, immutable caching for `/assets/*`, and `no-cache` for `index.html` via `spa_serving.py`.
+   - Setup `react-helmet-async`, ESLint (flat config), Prettier.
+   - Verified with unit tests (`tests/test_spa_serving.py`), 100% pass rate across all 55 tests.
+   - Documented cPanel / Passenger build and deployment steps in `README.md`.
 2. **PHASE 2: Flask API Layer (`/api/v1`)**
    - Create Flask API blueprint `api_v1`.
    - Implement CSRF endpoint, auth endpoints, catalogue endpoints, checkout endpoint, memberships, events, gallery, and contact endpoints.

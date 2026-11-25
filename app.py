@@ -2038,5 +2038,8 @@ install_media_access(app, get_db, render_site, BASE_DIR)
 from site_design import install_site_design
 install_site_design(app, get_db)
 
+from spa_serving import install_spa_serving
+install_spa_serving(app, BASE_DIR)
+
 if __name__ == "__main__":
     app.run(host=os.environ.get("FLASK_HOST", "127.0.0.1"), port=int(os.environ.get("FLASK_PORT", "5000")), debug=os.environ.get("FLASK_DEBUG", "0") == "1")
