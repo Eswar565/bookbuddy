@@ -623,6 +623,19 @@ def site_context(section: str = "home") -> dict[str, Any]:
     calendar_events = {}
     for event in events:
         calendar_events.setdefault(event['event_date'], []).append({**{k:v for k,v in event.items() if k!='join_url'},'url':safe_url_for('event_detail',event_id=event['id'])})
+    # Lending subscription context — always included so library.html is safe even when
+    # rendered from routes that don't call paged_books() (e.g. if template inheritance is
+    # extended to other pages). paged_books() will overwrite these with fresh values.
+    _reader = current_user()
+    _member_active_sub: dict | None = None
+    _member_active_cnt: int = 0
+    if _reader and _reader.is_authenticated:
+        from accounts import get_active_subscription, get_active_loan_count
+        _sub_row = get_active_subscription(db, _reader.id)
+        if _sub_row:
+            _member_active_sub = dict(_sub_row)
+        _member_active_cnt = get_active_loan_count(db, _reader.id)
+
     return {
         "section": section,
         "brand": {"primary": "#0A2472", "wine": "#0A2472", "gold": "#0A2472", "cream": "#FFFFFF"},
@@ -643,6 +656,9 @@ def site_context(section: str = "home") -> dict[str, Any]:
         "cart_count": cart_count,
         "today": date.today().isoformat(),
         "current_year": date.today().year,
+        # Lending plan context — safe defaults for all pages; paged_books() overwrites for /library/
+        "member_active_sub": _member_active_sub,
+        "member_active_cnt": _member_active_cnt,
     }
 
 
