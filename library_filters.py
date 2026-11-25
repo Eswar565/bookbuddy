@@ -1,5 +1,7 @@
-"""Whitelisted, parameterized borrowing-desk filters, used by the Flask route."""
+"""Whitelisted, parameterized borrowing-desk filters and catalogue export utilities."""
+import io
 from datetime import date
+from flask import send_file, Response
 
 STATUSES = ('Requested', 'Issued', 'Returned', 'Lost', 'Damaged', 'Rejected', 'Cancelled')
 SORTS = {
@@ -58,7 +60,6 @@ def loan_conditions(filters, today):
     elif attention == 'return_requested':
         clauses.append("l.status='Issued' AND COALESCE(l.return_requested_at,'')<>''")
     if filters['q']:
-        # A contains-search, not a raw SQL fragment or operator.
         search = '%'+filters['q'].replace('\\','\\\\').replace('%','\\%').replace('_','\\_')+'%'
         clauses.append("(b.title LIKE ? ESCAPE '\\' OR u.name LIKE ? ESCAPE '\\' OR u.email LIKE ? ESCAPE '\\' OR u.phone LIKE ? ESCAPE '\\' OR CAST(l.id AS TEXT) LIKE ? ESCAPE '\\')")
         params.extend([search]*5)
@@ -76,3 +77,197 @@ JOINED_LOANS = ('FROM lending_loans l JOIN books b ON b.id=l.book_id '
 def loan_query(filters, today):
     where, params = loan_conditions(filters, today)
     return JOINED_LOANS + where, params, SORTS[filters['sort']]
+
+
+# ---------------------------------------------------------------------------
+# Catalogue Filtering & Export
+# ---------------------------------------------------------------------------
+
+def get_filtered_books_for_export(db, args) -> list[dict]:
+    """Retrieve all filtered books matching the request query params (without pagination limit)."""
+    search = str(args.get("q", "")).strip()[:120]
+    collection = str(args.get("collection", "")).strip()[:120]
+    filters = ["archived=0"]
+    params = []
+
+    if search:
+        filters.append("(LOWER(title) LIKE ? ESCAPE '!' OR LOWER(author) LIKE ? ESCAPE '!' OR LOWER(description) LIKE ? ESCAPE '!')")
+        pattern = "%" + search.lower().replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%"
+        params.extend([pattern] * 3)
+
+    if collection:
+        filters.append("collection = ?")
+        params.append(collection)
+
+    chosen = {k: str(args.get(k, "")).strip()[:120] for k in ['language', 'age_group', 'author', 'product_type', 'availability', 'new', 'sort', 'audience']}
+    if chosen['audience'] in {'adult', 'kids'}:
+        filters.append("audience IN (?, 'all')")
+        params.append(chosen['audience'])
+
+    for key in ['language', 'age_group', 'author', 'product_type']:
+        if chosen[key]:
+            filters.append('LOWER(' + key + ') = LOWER(?)')
+            params.append(chosen[key])
+
+    if chosen['availability'] == 'available':
+        filters.append("(stock > 0)")
+    elif chosen['availability'] == 'waitlist':
+        filters.append("(stock <= 0)")
+
+    if chosen['new'] == '1':
+        filters.append('is_new_arrival=1')
+
+    ordering = {
+        'newest': 'is_new_arrival DESC, id DESC',
+        'title': 'title COLLATE NOCASE ASC, id',
+        'author': 'author COLLATE NOCASE ASC, id',
+        'price-low': 'price ASC, id',
+        'price-high': 'price DESC, id'
+    }.get(chosen['sort'], 'is_new_arrival DESC, id DESC')
+
+    where = f" WHERE {' AND '.join(filters)}" if filters else ""
+    rows = db.execute(
+        "SELECT id, title, author, collection, language, age_group, audience, stock, is_new_arrival FROM books" + where + " ORDER BY " + ordering,
+        params
+    ).fetchall()
+
+    books = []
+    for r in rows:
+        b = dict(r)
+        b["availability"] = "Available" if (int(b.get("stock") or 0) > 0) else "Waitlist"
+        b["reader_type"] = (b.get("audience") or b.get("age_group") or "All readers").title()
+        b["category"] = b.get("collection") or "General"
+        books.append(b)
+    return books
+
+
+def export_books_excel(books: list[dict]) -> Response:
+    """Generate and stream .xlsx file using openpyxl."""
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Book Catalogue"
+
+    headers = ["Title", "Author", "Category", "Language", "Reader Type", "Availability"]
+    ws.append(headers)
+
+    header_fill = PatternFill(start_color="061446", end_color="061446", fill_type="solid")
+    header_font = Font(name="Arial", size=11, bold=True, color="FFFFFF")
+    for cell in ws[1]:
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="left", vertical="center")
+
+    thin_border = Border(
+        left=Side(style='thin', color='E2E8F0'),
+        right=Side(style='thin', color='E2E8F0'),
+        top=Side(style='thin', color='E2E8F0'),
+        bottom=Side(style='thin', color='E2E8F0')
+    )
+    alt_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
+
+    for idx, b in enumerate(books, start=2):
+        row_data = [
+            b.get("title", ""),
+            b.get("author", ""),
+            b.get("category", ""),
+            b.get("language", ""),
+            b.get("reader_type", ""),
+            b.get("availability", "Available")
+        ]
+        ws.append(row_data)
+        for cell in ws[idx]:
+            cell.border = thin_border
+            cell.font = Font(name="Arial", size=10)
+            if idx % 2 == 1:
+                cell.fill = alt_fill
+
+    for col in ws.columns:
+        max_len = max(len(str(cell.value or "")) for cell in col)
+        col_letter = openpyxl.utils.get_column_letter(col[0].column)
+        ws.column_dimensions[col_letter].width = max(max_len + 4, 14)
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    return send_file(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name="book_catalogue.xlsx"
+    )
+
+
+def export_books_pdf(books: list[dict]) -> Response:
+    """Generate and stream a clean, readable PDF table using PyMuPDF (fitz)."""
+    import fitz
+
+    doc = fitz.open()
+    cols = [
+        ('Title', 160),
+        ('Author', 100),
+        ('Category', 80),
+        ('Language', 60),
+        ('Reader Type', 65),
+        ('Availability', 60),
+    ]
+    total_w = sum(w for _, w in cols)
+    margin_x = 35
+    row_h = 20
+    header_h = 24
+
+    def add_page():
+        p = doc.new_page(width=595, height=842)
+        # Title branding
+        p.insert_text((margin_x, 40), 'Book Buddy · Library Book Catalogue', fontsize=14, fontname='helv', color=(0.02, 0.08, 0.27))
+        # Header rect
+        p.draw_rect(fitz.Rect(margin_x, 55, margin_x + total_w, 55 + header_h), color=(0.02, 0.08, 0.27), fill=(0.02, 0.08, 0.27))
+        x = margin_x
+        for title, w in cols:
+            p.insert_text((x + 4, 71), title, fontsize=9, fontname='helv', color=(1, 1, 1))
+            x += w
+        return p
+
+    p = add_page()
+    y = 55 + header_h
+    page_num = 1
+
+    for i, b in enumerate(books):
+        if y + row_h > 800:
+            p.insert_text((margin_x, 820), f'Page {page_num}', fontsize=8, color=(0.4, 0.4, 0.4))
+            p = add_page()
+            page_num += 1
+            y = 55 + header_h
+
+        bg = (0.97, 0.98, 0.99) if i % 2 == 1 else (1, 1, 1)
+        p.draw_rect(fitz.Rect(margin_x, y, margin_x + total_w, y + row_h), color=(0.9, 0.9, 0.9), fill=bg)
+
+        row_vals = [
+            str(b.get('title', ''))[:30],
+            str(b.get('author', ''))[:18],
+            str(b.get('category', ''))[:14],
+            str(b.get('language', ''))[:10],
+            str(b.get('reader_type', ''))[:12],
+            str(b.get('availability', 'Available'))[:12]
+        ]
+        x = margin_x
+        for val, (_, w) in zip(row_vals, cols):
+            p.insert_text((x + 4, y + 14), val, fontsize=8, fontname='helv', color=(0.1, 0.1, 0.1))
+            x += w
+        y += row_h
+
+    p.insert_text((margin_x, 820), f'Page {page_num}', fontsize=8, color=(0.4, 0.4, 0.4))
+    pdf_bytes = doc.tobytes()
+
+    output = io.BytesIO(pdf_bytes)
+    output.seek(0)
+
+    return send_file(
+        output,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name="book_catalogue.pdf"
+    )

@@ -1,0 +1,63 @@
+{% extends 'site/base.html' %}
+{% block title %}Our Collaborators · Community & Creative Partners · Book Buddy{% endblock %}
+
+{% block body %}
+<main class="collaborators-page">
+  <div class="bb8-container">
+    <header class="collaborators-header">
+      <span class="gallery-badge">Partnerships &amp; Community</span>
+      <h1>Our Collaborators</h1>
+      <p>Stories flourish when hands join together. We are honored to partner with passionate educators, storytellers, libraries, and creative organizations who help make Book Buddy a warm and welcoming home for curiosity.</p>
+    </header>
+
+    {% for section in sections %}
+    <section class="collab-section" id="{{ section.slug }}">
+      <div class="collab-section-header">
+        <h2>{{ section.title }}</h2>
+        <p>{{ section.description }}</p>
+      </div>
+
+      {% if section.partners %}
+      <div class="collab-cards-grid">
+        {% for partner in section.partners %}
+        <div class="collab-card">
+          {% if partner.image %}
+          <img src="{{ partner.image }}" alt="{{ partner.name }}" class="collab-avatar" loading="lazy">
+          {% else %}
+          <div class="collab-avatar-placeholder" aria-hidden="true">
+            {{ partner.name[:1]|upper }}
+          </div>
+          {% endif %}
+          <h3 class="collab-name">{{ partner.name }}</h3>
+          <p class="collab-brief">{{ partner.brief }}</p>
+          {% if partner.link %}
+          <a href="{{ partner.link }}" target="_blank" rel="noopener noreferrer" class="collab-link">
+            Visit Partner <span aria-hidden="true">&rarr;</span>
+          </a>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="collab-empty-box">
+        <p style="font-size:15px; font-weight:600; color:var(--navy); margin:0 0 6px;">Partnerships in progress</p>
+        <p style="margin:0 0 16px; color:var(--text-muted);">Coming soon: We are actively connecting with collaborators in this space. Are you interested in working together?</p>
+        <a href="/work-with-us/" class="btn-export" style="font-size:13px; font-weight:700; background:var(--navy); color:#fff; border-color:var(--navy); display:inline-flex;">
+          Become a Partner &rarr;
+        </a>
+      </div>
+      {% endif %}
+    </section>
+    {% endfor %}
+
+    <!-- Bottom Collaborate Callout -->
+    <div style="text-align:center; margin-top:40px; padding:32px; background:var(--surface-card); border-radius:var(--radius-lg); border:1px solid var(--border-color); max-width:860px; margin-left:auto; margin-right:auto;">
+      <h3 style="font-size:20px; font-weight:700; color:var(--navy); margin:0 0 8px;">Want to collaborate with Book Buddy?</h3>
+      <p style="color:var(--text-muted); font-size:15px; margin:0 0 20px;">Whether you are an author, educator, community organizer or artist, we would love to build something meaningful together.</p>
+      <a href="/work-with-us/" class="btn-book-event" style="padding:10px 28px; font-size:15px;">
+        Reach Out to Collaborate
+      </a>
+    </div>
+  </div>
+</main>
+{% endblock %}

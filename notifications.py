@@ -7,6 +7,49 @@ from management import MODELS
 from library_core import IMPORTABLE
 from resources import today_ist
 
+
+def calendar_context(db_conn, month=None, category=None):
+    today = today_ist()
+    if month is None:
+        try:
+            month = request.args.get('month', today[:7])
+        except RuntimeError:
+            month = today[:7]
+    if category is None:
+        try:
+            category = request.args.get('category', '')
+        except RuntimeError:
+            category = ''
+    if category not in {'reading-circle', 'contest'}:
+        category = ''
+    try:
+        y, m = map(int, month.split('-'))
+        assert 2000 <= y <= 2100 and 1 <= m <= 12
+    except (ValueError, AssertionError, AttributeError):
+        y, m = map(int, today[:7].split('-'))
+    key = f'{y}-{m:02d}'
+    sql = 'SELECT id,title,event_date,event_time,location,fee,category FROM events WHERE is_active=1 AND event_date LIKE ?'
+    args = [key + '%']
+    if category in {'reading-circle', 'contest'}:
+        sql += ' AND category=?'
+        args.append(category)
+    records = [dict(r) for r in db_conn.execute(sql + ' ORDER BY event_date,event_time', args)]
+    prev = date(y - 1, 12, 1) if m == 1 else date(y, m - 1, 1)
+    nxt = date(y + 1, 1, 1) if m == 12 else date(y, m + 1, 1)
+    return {
+        'month': key,
+        'label': date(y, m, 1).strftime('%B %Y'),
+        'weeks': calendar.Calendar(firstweekday=0).monthdayscalendar(y, m),
+        'prev': prev.strftime('%Y-%m'),
+        'next': nxt.strftime('%Y-%m'),
+        'category': category,
+        'events': records,
+        'today': today,
+        'prev_enabled': y > 2000 or m > 1,
+        'next_enabled': y < 2100 or m < 12
+    }
+
+
 def install_release10(app,db,render,admin):
     with app.app_context():
         import os
@@ -74,27 +117,19 @@ def install_release10(app,db,render,admin):
         return inner
     def unread_count():return db().execute('SELECT COUNT(*) FROM admin_notifications n WHERE NOT EXISTS (SELECT 1 FROM notification_reads r WHERE r.notification_id=n.id AND r.admin_id=?)',(session['admin_id'],)).fetchone()[0]
     def latest(limit=8):return [dict(r) for r in db().execute('SELECT n.*,EXISTS(SELECT 1 FROM notification_reads r WHERE r.notification_id=n.id AND r.admin_id=?) is_read FROM admin_notifications n ORDER BY n.id DESC LIMIT ?',(session['admin_id'],limit))]
-    def calendar_context():
-        month=request.args.get('month',today_ist()[:7]);category=request.args.get('category','')
-        if category not in {'reading-circle','contest'}:category=''
-        try:y,m=map(int,month.split('-'));assert 2000<=y<=2100 and 1<=m<=12
-        except (ValueError,AssertionError):y,m=map(int,today_ist()[:7].split('-'))
-        key=f'{y}-{m:02d}';sql='SELECT id,title,event_date,event_time,location,fee,category FROM events WHERE is_active=1 AND event_date LIKE ?';args=[key+'%']
-        if category in {'reading-circle','contest'}:sql+=' AND category=?';args.append(category)
-        records=[dict(r) for r in db().execute(sql+' ORDER BY event_date,event_time',args)]
-        prev=date(y-1,12,1) if m==1 else date(y,m-1,1);nxt=date(y+1,1,1) if m==12 else date(y,m+1,1)
-        return {'month':key,'label':date(y,m,1).strftime('%B %Y'),'weeks':calendar.Calendar(firstweekday=0).monthdayscalendar(y,m),'prev':prev.strftime('%Y-%m'),'next':nxt.strftime('%Y-%m'),'category':category,'events':records,'today':today_ist(),'prev_enabled':y>2000 or m>1,'next_enabled':y<2100 or m<12}
+    def _get_calendar_context():
+        return calendar_context(db())
     @app.context_processor
     def extras10():
         path=request.path.strip('/');first=path.split('/')[0]
         data={}
         if not path:
-            data['home_calendar']=calendar_context();data['home_upcoming']=[dict(r) for r in db().execute('SELECT id,title,event_date,event_time,location,fee,category FROM events WHERE is_active=1 AND event_date>=? ORDER BY event_date,event_time LIMIT 4',(today_ist(),))]
+            data['home_calendar']=_get_calendar_context();data['home_upcoming']=[dict(r) for r in db().execute('SELECT id,title,event_date,event_time,location,fee,category FROM events WHERE is_active=1 AND event_date>=? ORDER BY event_date,event_time LIMIT 4',(today_ist(),))]
         if admin():data.update(admin_notification_count=unread_count(),admin_latest_notifications=latest())
         return data
     @app.get('/home-calendar/')
     def home_calendar10():
-        response=app.make_response(render_template('site/calendar.html',home_calendar=calendar_context()));response.headers['Cache-Control']='no-store';response.headers['X-Robots-Tag']='noindex';return response
+        response=app.make_response(render_template('site/calendar.html',home_calendar=_get_calendar_context()));response.headers['Cache-Control']='no-store';response.headers['X-Robots-Tag']='noindex';return response
     @app.get('/admin/notifications/feed/')
     def notification_feed10():
         if not admin():return jsonify(error='Sign in required'),401

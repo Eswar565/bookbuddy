@@ -21,14 +21,25 @@ def install_polish(app, db):
         data=settings(); path=request.path.strip('/'); desc=data['seo_description']
         page=db().execute('SELECT summary FROM cms_pages WHERE slug=?',(path,)).fetchone()
         if page and page[0]: desc=page[0]
-        descriptions={'library':'Browse the Book Buddy lending-library catalogue. Explore collections, check available copies and request to borrow with your account.','membership':'Choose your Book Buddy membership tier. Explore Solo Explorer and Family Pack plans with doorstep delivery or self-pickup in Chennai.','contact':data.get('contact_address','Contact Book Buddy.'),'events':'Discover upcoming Book Buddy reading circles, contests and community library events.','publications':'Read Book Buddy newspapers and magazines, and discover our community publications.','podcasts':'Listen to podcasts from the Book Buddy community.'}
+        descriptions={
+            'library':'Browse the Book Buddy lending-library catalogue. Explore collections, check available copies and request to borrow with your account.',
+            'membership':'Choose your Book Buddy membership tier. Explore Solo Explorer and Family Pack plans with doorstep delivery or self-pickup in Chennai.',
+            'contact':data.get('contact_address','Contact Book Buddy lending library in Chennai.'),
+            'events':'Discover Book Buddy upcoming and past events, reading circles, contests and community library gatherings.',
+            'community':'Join the Book Buddy reading community: reading circles, creative contests, author workshops, and student contributions.',
+            'community/media':'Read Book Buddy community newspapers, literary magazines, and listen to podcasts.',
+            'collaborators':'Meet our library partners, storytellers, authors, community organisations, and creative partners.',
+            'gallery':'A glimpse into Book Buddy: Reading Moments, Events & Workshops, Our Space, and Community Events.',
+            'visit-us':'Visit Book Buddy library in Saligramam, Chennai. Check operating hours, library rules, and directions.',
+            'how-to-borrow':'Learn how to borrow books from Book Buddy with easy doorstep delivery or in-library pickup.'
+        }
         desc=descriptions.get(path,desc)
-        base=origin(data); private=path not in {'','about','contact','membership','membership-options','how-to-borrow','plans'}
+        base=origin(data); private=path not in {'','about','contact','membership','membership-options','how-to-borrow','plans','community','community/media','collaborators','gallery','visit-us','events'}
         return {'seo_description':desc[:300],'canonical_url':base+request.path,'seo_robots':'noindex,nofollow' if private or request.args else 'index,follow','structured_data':{'@context':'https://schema.org','@type':'Library','name':'Book Buddy','url':base,'telephone':data.get('contact_phone',''),'email':data.get('contact_email',''),'address':data.get('contact_address','')}}
     @app.get('/sitemap.xml')
     def sitemap_v7():
         data=settings(); base=origin(data)
-        paths={'/','/about/','/contact/','/library/','/membership/','/events/','/reading-circles/','/contests/','/publications/','/podcasts/','/gallery/','/membership-options/','/how-to-borrow/'}
+        paths={'/','/about/','/contact/','/library/','/membership/','/events/','/community/','/community/media/','/collaborators/','/gallery/','/how-to-borrow/','/visit-us/'}
         xml='<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join('<url><loc>'+escape(base+path)+'</loc></url>' for path in sorted(paths))+'</urlset>'
         return Response(xml,mimetype='application/xml')
     def robots():

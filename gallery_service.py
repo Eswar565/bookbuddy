@@ -99,21 +99,92 @@ def save_gallery_settings(db, pill: str, heading: str):
     c.commit()
 
 
+GALLERY_CATEGORIES = {
+    "reading-moments": {
+        "slug": "reading-moments",
+        "title": "Reading Moments",
+        "short_line": "Joyful reading corners, book discoveries, and curious young minds exploring stories.",
+        "cover_image": "/static/img/gallery/kids_1.jpg",
+        "cta_text": "Explore Book Catalogue",
+        "cta_link": "/library/",
+        "cta_desc": "Discover thousands of curated books waiting for you on our shelves."
+    },
+    "events-workshops": {
+        "slug": "events-workshops",
+        "title": "Events & Workshops",
+        "short_line": "Hands-on creative sessions, storytelling circles, and lively interactive workshops.",
+        "cover_image": "/static/img/gallery/kids_6.jpg",
+        "cta_text": "View Events Calendar",
+        "cta_link": "/events/",
+        "cta_desc": "Check out upcoming workshops, reading circles, and community contests."
+    },
+    "our-space": {
+        "slug": "our-space",
+        "title": "Our Space",
+        "short_line": "Warm wooden bookshelves, cozy reading corners, and child-friendly library nooks.",
+        "cover_image": "/static/img/art/02-book-shelves.jpg",
+        "cta_text": "Plan Your Visit",
+        "cta_link": "/visit-us/",
+        "cta_desc": "Step into our welcoming library space in Saligramam, Chennai."
+    },
+    "community-events": {
+        "slug": "community-events",
+        "title": "Community Events",
+        "short_line": "Gatherings, celebrations, and shared moments bringing book lovers together.",
+        "cover_image": "/static/img/gallery/kids_2.jpg",
+        "cta_text": "Join Our Community",
+        "cta_link": "/community/",
+        "cta_desc": "Be part of our vibrant reading circles, volunteer programs, and book exchanges."
+    }
+}
+
+DEFAULT_CATEGORY_PHOTOS = {
+    "reading-moments": [
+        {"image_path": "/static/img/gallery/kids_1.jpg", "alt_text": "Young readers sharing picture books at Book Buddy"},
+        {"image_path": "/static/img/gallery/kids_2.jpg", "alt_text": "Students reading together at the study desk"},
+        {"image_path": "/static/img/gallery/kids_5.jpg", "alt_text": "Young readers exploring illustrated classics"}
+    ],
+    "events-workshops": [
+        {"image_path": "/static/img/gallery/kids_3.jpg", "alt_text": "Storytelling and picture book section"},
+        {"image_path": "/static/img/gallery/kids_6.jpg", "alt_text": "Weekend reading circle and workshop area"}
+    ],
+    "our-space": [
+        {"image_path": "/static/img/gallery/kids_4.jpg", "alt_text": "Curated novel and non-fiction collection"},
+        {"image_path": "/static/img/gallery/kids_7.jpg", "alt_text": "Quiet reading nooks for comfortable study"},
+        {"image_path": "/static/img/gallery/kids_8.jpg", "alt_text": "Library reception and circulation desk"}
+    ],
+    "community-events": [
+        {"image_path": "/static/img/gallery/kids_2.jpg", "alt_text": "Community book discussion table"},
+        {"image_path": "/static/img/gallery/kids_6.jpg", "alt_text": "Family weekend gathering at the library"}
+    ]
+}
+
+
+def ensure_gallery_category_column(db):
+    try:
+        cols = {r[1] for r in db().execute("PRAGMA table_info(gallery_items)").fetchall()}
+        if "category" not in cols:
+            db().execute("ALTER TABLE gallery_items ADD COLUMN category TEXT NOT NULL DEFAULT 'reading-moments'")
+            db().commit()
+    except Exception:
+        pass
+
+
 def get_public_gallery(db) -> tuple[dict, list[dict]]:
     """Returns (settings, items) where every item has an existing file on disk and optimized thumbnail."""
+    ensure_gallery_category_column(db)
     settings = get_gallery_settings(db)
     rows = db().execute(
-        "SELECT id, image_path, alt_text, position, is_active FROM gallery_items WHERE (is_active=1 OR is_active IS NULL) ORDER BY position, id"
+        "SELECT id, image_path, alt_text, position, is_active, COALESCE(category, 'reading-moments') FROM gallery_items WHERE (is_active=1 OR is_active IS NULL) ORDER BY position, id"
     ).fetchall()
 
     valid_items = []
     for r in rows:
-        gid, img_path, alt_text, pos, active = r
+        gid, img_path, alt_text, pos, active, cat = r
         if not img_path:
             continue
         disk_path = resolve_disk_path(img_path)
         if not img_path.startswith("http") and (not disk_path or not os.path.exists(disk_path)):
-            # Broken image file - exclude from public view!
             continue
 
         thumb = ensure_thumbnail(img_path)
@@ -123,21 +194,59 @@ def get_public_gallery(db) -> tuple[dict, list[dict]]:
             "thumbnail_path": thumb or img_path,
             "alt_text": alt_text or f"Book Buddy gallery photo {gid}",
             "position": pos,
+            "category": cat or "reading-moments",
         })
 
     return settings, valid_items
 
 
-def get_admin_gallery(db) -> tuple[dict, list[dict]]:
-    """Returns (settings, items) with file_exists, test_data hints, and thumbnails for admin manager."""
-    settings = get_gallery_settings(db)
+def get_category_photos(db, category_slug: str) -> list[dict]:
+    """Retrieve active photos for a given category slug, falling back to default photos if empty."""
+    ensure_gallery_category_column(db)
     rows = db().execute(
-        "SELECT id, title, description, image_path, alt_text, position, is_active FROM gallery_items ORDER BY position, id"
+        "SELECT id, image_path, thumbnail_path, alt_text FROM gallery_items WHERE (is_active=1 OR is_active IS NULL) AND category=? ORDER BY position, id",
+        (category_slug,)
     ).fetchall()
 
     items = []
     for r in rows:
-        gid, title, desc, img_path, alt_text, pos, active = r
+        gid, img_path, thumb_path, alt_text = r
+        if not img_path:
+            continue
+        disk_path = resolve_disk_path(img_path)
+        if not img_path.startswith("http") and (not disk_path or not os.path.exists(disk_path)):
+            continue
+        thumb = thumb_path or ensure_thumbnail(img_path)
+        items.append({
+            "id": gid,
+            "image_path": img_path if img_path.startswith(("/", "http")) else "/" + img_path,
+            "thumbnail_path": thumb or img_path,
+            "alt_text": alt_text or f"Book Buddy {category_slug} photo {gid}",
+        })
+
+    if not items and category_slug in DEFAULT_CATEGORY_PHOTOS:
+        for idx, fallback in enumerate(DEFAULT_CATEGORY_PHOTOS[category_slug], start=1):
+            items.append({
+                "id": f"default-{idx}",
+                "image_path": fallback["image_path"],
+                "thumbnail_path": fallback["image_path"],
+                "alt_text": fallback["alt_text"],
+            })
+
+    return items
+
+
+def get_admin_gallery(db) -> tuple[dict, list[dict]]:
+    """Returns (settings, items) with file_exists, test_data hints, thumbnails and category for admin manager."""
+    ensure_gallery_category_column(db)
+    settings = get_gallery_settings(db)
+    rows = db().execute(
+        "SELECT id, title, description, image_path, alt_text, position, is_active, COALESCE(category, 'reading-moments') FROM gallery_items ORDER BY position, id"
+    ).fetchall()
+
+    items = []
+    for r in rows:
+        gid, title, desc, img_path, alt_text, pos, active, cat = r
         disk_path = resolve_disk_path(img_path) if img_path else ""
         exists = os.path.exists(disk_path) if img_path and not img_path.startswith("http") else bool(img_path)
         
@@ -159,6 +268,7 @@ def get_admin_gallery(db) -> tuple[dict, list[dict]]:
             "alt_text": alt_text or "",
             "position": pos,
             "is_active": bool(active),
+            "category": cat or "reading-moments",
             "file_exists": exists,
             "is_test_data": is_test,
             "test_hint": ", ".join(test_reasons),
@@ -167,16 +277,16 @@ def get_admin_gallery(db) -> tuple[dict, list[dict]]:
     return settings, items
 
 
-def add_gallery_photos(db, file_storages) -> list[str]:
-    """Saves multiple uploaded photos, validates them, creates thumbnails and DB records.
-    Returns list of error messages (if any).
-    """
+def add_gallery_photos(db, file_storages, category: str = "reading-moments") -> list[str]:
+    """Saves multiple uploaded photos, validates them, creates thumbnails and DB records with category."""
+    ensure_gallery_category_column(db)
     errors = []
     allowed_exts = {".jpg", ".jpeg", ".png", ".webp"}
     max_size = 15 * 1024 * 1024  # 15 MB
 
+    valid_category = category if category in GALLERY_CATEGORIES else "reading-moments"
+
     c = db()
-    # Find current max position
     cur_pos = c.execute("SELECT COALESCE(MAX(position), 0) FROM gallery_items").fetchone()[0]
 
     for f in file_storages:
@@ -189,7 +299,6 @@ def add_gallery_photos(db, file_storages) -> list[str]:
             continue
 
         try:
-            # Check file size
             f.seek(0, os.SEEK_END)
             size = f.tell()
             f.seek(0)
@@ -197,7 +306,6 @@ def add_gallery_photos(db, file_storages) -> list[str]:
                 errors.append(f"'{name}': File is too large ({size // (1024*1024)}MB). Maximum is 15MB.")
                 continue
 
-            # Verify image integrity with Pillow
             with Image.open(f) as img:
                 img.verify()
                 width, height = img.size
@@ -206,30 +314,34 @@ def add_gallery_photos(db, file_storages) -> list[str]:
                     continue
             f.seek(0)
 
-            # Save file
             new_id = uuid.uuid4().hex[:16]
             saved_filename = f"{new_id}{ext}"
             saved_disk_path = os.path.join(UPLOAD_DIR, saved_filename)
             f.save(saved_disk_path)
             web_path = f"/media/admin/gallery/{saved_filename}"
 
-            # Generate thumbnail
             thumb_path = ensure_thumbnail(web_path)
-
             cur_pos += 1
-            # Clean title from filename for internal DB constraint
             base_title = os.path.splitext(name)[0].replace("-", " ").replace("_", " ").title()
-            default_alt = f"Book Buddy gallery photo - {base_title}"
+            default_alt = f"Book Buddy {valid_category.replace('-', ' ').title()} - {base_title}"
 
             c.execute(
-                "INSERT INTO gallery_items (title, description, image_path, alt_text, page_slug, position, is_active, thumbnail_path) VALUES (?, '', ?, ?, 'all', ?, 1, ?)",
-                (base_title, web_path, default_alt, cur_pos, thumb_path),
+                "INSERT INTO gallery_items (title, description, image_path, alt_text, page_slug, position, is_active, thumbnail_path, category) VALUES (?, '', ?, ?, 'all', ?, 1, ?, ?)",
+                (base_title, web_path, default_alt, cur_pos, thumb_path, valid_category),
             )
         except Exception as e:
             errors.append(f"'{name}': Failed to process image ({e}).")
 
     c.commit()
     return errors
+
+
+def update_gallery_item_category(db, gid: int, category: str):
+    ensure_gallery_category_column(db)
+    valid_category = category if category in GALLERY_CATEGORIES else "reading-moments"
+    c = db()
+    c.execute("UPDATE gallery_items SET category = ? WHERE id = ?", (valid_category, gid))
+    c.commit()
 
 
 def reorder_gallery(db, ordered_ids: list[int]):

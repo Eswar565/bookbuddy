@@ -76,6 +76,12 @@
     <h3 style="margin:0 0 8px 0; font-size:15px;">Add photos to gallery</h3>
     <p class="hint" style="margin:0 0 12px 0;">Select one or multiple images (JPG, PNG, WebP · max 15MB each). WebP thumbnails (~800px) are generated automatically.</p>
     <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+      <select name="category" style="padding:8px 12px; border-radius:6px; border:1px solid #cbd5e1; font-size:13px; font-weight:600; background:#fff;">
+        <option value="reading-moments">Category: Reading Moments</option>
+        <option value="events-workshops">Category: Events &amp; Workshops</option>
+        <option value="our-space">Category: Our Space</option>
+        <option value="community-events">Category: Community Events</option>
+      </select>
       <input type="file" name="photos" multiple accept=".jpg,.jpeg,.png,.webp,image/*" required style="flex:1; min-width:240px;">
       <button type="submit" class="button"><svg class="bb-icon" style="width:14px;height:14px;margin-right:6px;"><use href="#i-upload"/></svg> Upload photos</button>
     </div>
@@ -118,6 +124,15 @@
           <!-- Alt text input -->
           <div>
             <input type="text" id="alt_{{ item.id }}" value="{{ item.alt_text or '' }}" placeholder="Alt text for screen readers" style="width:100%; font-size:12px; padding:4px 8px;">
+          </div>
+          <!-- Category selector -->
+          <div>
+            <select id="cat_{{ item.id }}" onchange="var form = document.createElement('form'); form.method='POST'; form.action='/admin/about-editor/#gallery'; form.innerHTML='<input type=hidden name=csrf_token value=\'{{ workspace_token() }}\'><input type=hidden name=gallery_action value=update_category><input type=hidden name=item_id value=\'{{ item.id }}\'><input type=hidden name=category value=\'' + this.value + '\'>'; document.body.appendChild(form); form.submit();" style="width:100%; font-size:12px; padding:4px 6px; border:1px solid #cbd5e1; border-radius:4px; background:#fff;">
+              <option value="reading-moments" {% if item.category == 'reading-moments' %}selected{% endif %}>Reading Moments</option>
+              <option value="events-workshops" {% if item.category == 'events-workshops' %}selected{% endif %}>Events &amp; Workshops</option>
+              <option value="our-space" {% if item.category == 'our-space' %}selected{% endif %}>Our Space</option>
+              <option value="community-events" {% if item.category == 'community-events' %}selected{% endif %}>Community Events</option>
+            </select>
           </div>
           <div style="display:flex; gap:6px; margin-top:auto; padding-top:8px; border-top:1px solid #f1f5f9;">
             <button type="button" class="button button-small secondary" onclick="var form = document.createElement('form'); form.method='POST'; form.action='/admin/about-editor/#gallery'; form.innerHTML='<input type=hidden name=csrf_token value=\'{{ workspace_token() }}\'><input type=hidden name=gallery_action value=update_alt><input type=hidden name=item_id value=\'{{ item.id }}\'><input type=hidden name=alt_text value=\'' + encodeURIComponent(document.getElementById('alt_{{ item.id }}').value) + '\'>'; document.body.appendChild(form); form.submit();" style="flex:1;">Save alt</button>

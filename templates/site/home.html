@@ -147,7 +147,7 @@
               {{ content.comm_card2_desc or 'Interactive, narrative-driven sessions focused on imagination, voice expression, and communication skills.' }}
             </p>
           </div>
-          <a href="{{ content.comm_card2_url or '/reading-circles/' }}" class="bb8-card-btn-pill">
+          <a href="{{ content.comm_card2_url or '/events/?type=reading-circle' }}" class="bb8-card-btn-pill">
             {{ content.comm_card2_btn or 'View Schedule' }}
             <svg class="bb-icon" style="width:14px;height:14px;" aria-hidden="true"><use href="#i-arrow-right"/></svg>
           </a>
@@ -183,7 +183,7 @@
             {{ content.pub_news_desc or "This month: how we're expanding library collections, reading tips from educators, and comic strips from our Friday reading circle." }}
           </p>
           <div class="bb8-pub-actions">
-            <a href="{{ sec_pub.url or content.pub_news_url or '/newspaper/' }}" class="bb8-btn-primary">
+            <a href="{{ sec_pub.url or content.pub_news_url or '/community/media/?tab=newspapers' }}" class="bb8-btn-primary">
               <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true"><use href="#i-newspaper"/></svg>
               {{ sec_pub.button_label or content.pub_news_btn or 'Read the Newspaper' }}
             </a>

@@ -133,33 +133,33 @@ def install_release9(app,db,render,admin,root):
     def v9_dispatch():
         if request.method!='GET':return None
         path=request.path.strip('/')
-        if path=='gallery':
-            return redirect('/about/#gallery', code=301)
-        if path in {'newspaper','news-paper','news'} or (path=='publications' and request.args.get('kind')=='news'):
-            settings = {r['content_key']: r['content_value'] for r in db().execute('SELECT content_key, content_value FROM site_content')}
-            pubs = rows("SELECT * FROM publications WHERE (is_active=1 OR is_active IS NULL) AND kind='news' ORDER BY position ASC, published_on DESC, id DESC")
-            return render('newspaper', 'publications', publications=pubs, media_settings=settings)
-        if path in {'magazine'} or (path=='publications' and request.args.get('kind')=='magazine'):
-            settings = {r['content_key']: r['content_value'] for r in db().execute('SELECT content_key, content_value FROM site_content')}
-            pubs = rows("SELECT * FROM publications WHERE (is_active=1 OR is_active IS NULL) AND kind='magazine' ORDER BY position ASC, published_on DESC, id DESC")
-            return render('magazine', 'publications', publications=pubs, media_settings=settings)
-        if path in {'podcasts','podcast'} or (path=='publications' and request.args.get('kind')=='podcast'):
-            settings = {r['content_key']: r['content_value'] for r in db().execute('SELECT content_key, content_value FROM site_content')}
-            pubs = rows("SELECT * FROM publications WHERE (is_active=1 OR is_active IS NULL) AND kind='podcast' ORDER BY position ASC, published_on DESC, id DESC")
-            return render('podcasts', 'publications', publications=pubs, media_settings=settings)
+        if path=='gallery' or path.startswith('gallery/'):
+            return None
+        if path in {'newspaper','news-paper','news'}:
+            return redirect('/community/media/?tab=newspapers', code=301)
+        if path in {'magazine'}:
+            return redirect('/community/media/?tab=magazines', code=301)
+        if path in {'podcasts','podcast'}:
+            return redirect('/community/media/?tab=podcasts', code=301)
         if path=='publications':
-            access_filter = request.args.get('access')
-            if access_filter in {'free', 'paid'}:
-                sql = "SELECT * FROM publications WHERE (is_active=1 OR is_active IS NULL) AND is_paid=?"
-                pubs = rows(sql + " ORDER BY position ASC, published_on DESC, id DESC", (int(access_filter=='paid'),))
-                return render('media_catalogue', 'publications', publications=pubs, selected_kind=request.args.get('kind', ''))
-            requested_kind = request.args.get('kind')
-            if requested_kind:
-                abort(404)
-            settings = {r['content_key']: r['content_value'] for r in db().execute('SELECT content_key, content_value FROM site_content')}
-            pubs = rows("SELECT * FROM publications WHERE (is_active=1 OR is_active IS NULL) AND kind='news' ORDER BY position ASC, published_on DESC, id DESC")
-            return render('newspaper', 'publications', publications=pubs, media_settings=settings)
-        if path in {'events','reading-circles','contests','calendar'}:return event_listing(path)
+            kind = request.args.get('kind', '').strip().lower()
+            if kind in {'news', 'newspaper'}:
+                return redirect('/community/media/?tab=newspapers', code=301)
+            elif kind == 'magazine':
+                return redirect('/community/media/?tab=magazines', code=301)
+            elif kind == 'podcast':
+                return redirect('/community/media/?tab=podcasts', code=301)
+            qs = request.query_string.decode('utf-8')
+            suffix = f"?{qs}" if qs else ""
+            return redirect(f'/community/media/{suffix}', code=301)
+        if path in {'reading-circles','reading-circle'}:
+            return redirect('/events/?type=reading-circle', code=301)
+        if path in {'contests','contest'}:
+            return redirect('/events/?type=contest', code=301)
+        if path=='calendar':
+            return redirect('/events/', code=301)
+        if path=='events':
+            return None
     funcs=app.before_request_funcs[None];funcs.remove(v9_dispatch);idx=next(i for i,f in enumerate(funcs) if f.__name__=='access_and_publishing');funcs.insert(idx+1,v9_dispatch)
 
     def event_listing(path):

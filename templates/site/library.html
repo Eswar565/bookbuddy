@@ -1,37 +1,410 @@
 {% extends 'site/base.html' %}
-{% block title %}Library Catalogue · Book Buddy{% endblock %}
+{% block title %}Book Catalogue · Lending Library · Book Buddy{% endblock %}
+
 {% block body %}
 <main class="section bb-catalogue-page">
-  <div class="container bb-catalogue-container">
-    <div class="bb-catalogue-heading">
+  <div class="bb8-container" style="max-width:1280px; margin:0 auto; padding:0 20px;">
+    <!-- Page Header -->
+    <div class="bb-catalogue-heading" style="margin-bottom:24px;">
       <div>
-        <p class="bb-catalogue-eyebrow">THE BOOK BUDDY LIBRARY</p>
-        <h2>Discover your next read</h2>
-        <p>Browse the collection, find a favourite, and discover something new.</p>
+        <span class="gallery-badge">The Book Buddy Library</span>
+        <h1 style="font-size:clamp(26px, 4vw, 36px); font-weight:800; color:var(--navy); margin:8px 0;">Discover your next read</h1>
+        <p style="color:var(--text-muted); font-size:15px; margin:0;">Browse through our curated collection of illustrated picture books, chapter novels, non-fiction, and classics.</p>
       </div>
-      <a class="bb-catalogue-basket" href="/members/dashboard/">My borrowed books</a>
+      <a class="bb-catalogue-basket" href="/members/dashboard/">
+        <svg class="bb-icon" style="width:16px;height:16px;margin-right:6px;"><use href="#i-book"/></svg> My Borrowed Books
+      </a>
     </div>
-    <nav class="catalogue-quick" aria-label="Reader and language filters"><div><strong>Readers</strong>{% for value,label in [('', 'All'),('adult','Adults'),('kids','Kids')] %}<a href="{{ catalogue_url(audience=value,page=1) }}" {% if filters23.audience==value %}aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}</div><div><strong>Language</strong>{% for value,label in [('', 'All'),('Tamil','Tamil'),('English','English'),('Hindi','Hindi')] %}<a href="{{ catalogue_url(language=value,page=1) }}" {% if filters23.language|lower==value|lower %}aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}</div></nav>
-    <div class="catalogue-layout"><aside class="catalogue-sidebar"><details open><summary><svg class="icon" aria-hidden="true"><use href="#i-sliders"></use></svg> Refine your search</summary><form action="/library/" method="get"><label for="catalogue-search">Title, author or topic</label><input id="catalogue-search" type="search" name="q" value="{{ query }}" placeholder="Search books"><label for="reader-audience">Readers</label><select id="reader-audience" name="audience">{% for value,label in [('', 'All readers'),('adult','Adults'),('kids','Kids')] %}<option value="{{ value }}" {{ 'selected' if filters23.audience==value }}>{{ label }}</option>{% endfor %}</select><label for="book-collection">Collection</label><select id="book-collection" name="collection"><option value="">All collections</option>{% for c in collections %}<option {{ 'selected' if c==selected_collection }}>{{ c }}</option>{% endfor %}</select>{% for key,label in [('language','Language'),('age_group','Age range'),('author','Author'),('product_type','Format')] %}<label for="filter-{{ key }}">{{ label }}</label><select id="filter-{{ key }}" name="{{ key }}"><option value="">All</option>{% for value in filter_options[key] %}<option {{ 'selected' if value==filters23[key] }}>{{ value }}</option>{% endfor %}</select>{% endfor %}<label for="book-stock">Availability</label><select id="book-stock" name="availability"><option value="">All books</option><option value="available" {{ 'selected' if filters23.availability=='available' }}>Available</option><option value="waitlist" {{ 'selected' if filters23.availability=='waitlist' }}>Waitlist</option></select><label for="book-sort">Sort by</label><select id="book-sort" name="sort">{% for value,label in [('newest','Newest first'),('title','Title A–Z'),('author','Author A–Z')] %}<option value="{{ value }}" {{ 'selected' if filters23.sort==value }}>{{ label }}</option>{% endfor %}</select><label><input type="checkbox" name="new" value="1" {{ 'checked' if filters23.new=='1' }}> New arrivals only</label><button type="submit">Apply filters</button><a href="/library/">Reset filters</a></form></details></aside><section class="catalogue-main" aria-label="Search results">
-    <div class="bb-catalogue-results" role="status">
-      <span>{{ catalogue_count }} {{ 'book' if catalogue_count == 1 else 'books' }} found</span>
-      {% if catalogue_pages > 1 %}<span>Page {{ catalogue_page }} of {{ catalogue_pages }}</span>{% endif %}
-    </div>
-    {% if books %}
-      <div class="bb-book-grid" aria-label="Library books">
-        {% for book in books %}{% include 'site/_compact_book_card.html' %}{% endfor %}
+
+    <!-- Quick Readers & Language Row with Export Buttons -->
+    <nav class="catalogue-quick" aria-label="Quick filters and export" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:16px; background:var(--surface-card); padding:14px 20px; border-radius:var(--radius-lg); border:1px solid var(--border-color); margin-bottom:20px; box-shadow:var(--shadow-sm);">
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <strong style="color:var(--navy); font-size:13px; font-weight:700;">Readers:</strong>
+        {% for value, label in [('', 'All'), ('adult', 'Adults'), ('kids', 'Kids')] %}
+        <a href="{{ catalogue_url(audience=value, page=1) }}"
+           class="btn-export {% if filters23.audience == value %}btn-excel{% endif %}"
+           style="font-size:13px; {% if filters23.audience == value %}background:var(--navy); color:#fff; border-color:var(--navy); font-weight:700;{% endif %}"
+           {% if filters23.audience == value %}aria-current="page"{% endif %}>
+          {{ label }}
+        </a>
+        {% endfor %}
+
+        <!-- Download as Excel and Download as PDF placed right after Kids -->
+        <span class="catalogue-export-group">
+          <a href="{{ export_url(format='xlsx') }}" class="btn-export btn-excel" title="Download currently filtered list as Excel spreadsheet">
+            <svg class="bb-icon" style="width:14px;height:14px;" aria-hidden="true"><use href="#i-download"/></svg> Download as Excel
+          </a>
+          <a href="{{ export_url(format='pdf') }}" class="btn-export btn-pdf" title="Download currently filtered list as PDF document">
+            <svg class="bb-icon" style="width:14px;height:14px;" aria-hidden="true"><use href="#i-download"/></svg> Download as PDF
+          </a>
+        </span>
       </div>
-    {% else %}
-      <div class="bb-catalogue-empty"><h2>No matching books</h2><p>Try another title, author or collection.</p><a href="{{ url_for('modern_library') }}">View all books</a></div>
-    {% endif %}
-    {% if catalogue_pages > 1 %}
-      <nav class="bb-catalogue-pages" aria-label="Catalogue pagination">
-        {% if catalogue_page > 1 %}<a href="{{ catalogue_url(page=catalogue_page-1) }}"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg> Previous</a>{% else %}<span class="bb-page-disabled"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg> Previous</span>{% endif %}
-        <span>Page {{ catalogue_page }} / {{ catalogue_pages }}</span>
-        {% if catalogue_page < catalogue_pages %}<a href="{{ catalogue_url(page=catalogue_page+1) }}">Next <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"></use></svg></a>{% else %}<span class="bb-page-disabled">Next <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"></use></svg></span>{% endif %}
-      </nav>
-    {% endif %}
-    </section></div>
+
+      <div class="catalogue-language-group" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <!-- Checkout button immediately BEFORE the "Language:" group -->
+        <button type="button" id="bb-filter-checkout-btn" class="btn-filter-checkout js-checkout-trigger" aria-label="Open borrow cart checkout" aria-haspopup="dialog">
+          <svg class="bb-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          <span>Checkout</span>
+          <span class="bb-cart-badge js-cart-badge" id="bb-filter-cart-badge" style="display:none;">0</span>
+        </button>
+
+        <strong style="color:var(--navy); font-size:13px; font-weight:700;">Language:</strong>
+        {% for value, label in [('', 'All'), ('English', 'English'), ('Tamil', 'Tamil'), ('Hindi', 'Hindi')] %}
+        <a href="{{ catalogue_url(language=value, page=1) }}"
+           class="btn-export {% if filters23.language|lower == value|lower %}btn-excel{% endif %}"
+           style="font-size:13px; {% if filters23.language|lower == value|lower %}background:var(--navy); color:#fff; border-color:var(--navy); font-weight:700;{% endif %}"
+           {% if filters23.language|lower == value|lower %}aria-current="page"{% endif %}>
+          {{ label }}
+        </a>
+        {% endfor %}
+      </div>
+    </nav>
+
+    <!-- Mobile Filter Drawer Toggle Button -->
+    <button type="button" class="mobile-filter-toggle-btn" id="filter-drawer-toggle" aria-expanded="false" aria-controls="catalogue-sidebar">
+      <svg class="bb-icon" style="width:16px;height:16px;"><use href="#i-sliders"/></svg>
+      <span>Filter &amp; Sort Catalogue</span>
+    </button>
+
+    <!-- Main Layout: Sidebar Filters + Books Grid -->
+    <div class="catalogue-layout">
+      <!-- Filter Panel (Collapses to drawer on mobile) -->
+      <aside class="catalogue-sidebar" id="catalogue-sidebar">
+        <div class="catalogue-filter-bar">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3 style="font-size:16px; font-weight:700; color:var(--navy); margin:0; display:flex; align-items:center; gap:6px;">
+              <svg class="bb-icon" style="width:16px;height:16px;"><use href="#i-sliders"/></svg> Refine Catalogue
+            </h3>
+            <a href="/library/" class="filter-clear-all" style="font-size:12px;">Reset All</a>
+          </div>
+
+          <form action="/library/" method="get" id="catalogue-filter-form">
+            <!-- Search Title/Author -->
+            <div style="margin-bottom:14px;">
+              <label for="filter-q" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Title, Author or Topic</label>
+              <input id="filter-q" type="search" name="q" value="{{ query }}" placeholder="Search by title or author..." style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); box-sizing:border-box;">
+            </div>
+
+            <!-- Age Group -->
+            <div style="margin-bottom:14px;">
+              <label for="filter-age_group" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Age Group</label>
+              <select id="filter-age_group" name="age_group" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
+                <option value="">All age groups</option>
+                {% for value in filter_options['age_group'] %}
+                <option value="{{ value }}" {% if value == filters23.age_group %}selected{% endif %}>{{ value }} yrs</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Reader Type -->
+            <div style="margin-bottom:14px;">
+              <label for="filter-audience" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Reader Type</label>
+              <select id="filter-audience" name="audience" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
+                <option value="">All readers</option>
+                <option value="kids" {% if filters23.audience == 'kids' %}selected{% endif %}>Children &amp; Young Readers</option>
+                <option value="adult" {% if filters23.audience == 'adult' %}selected{% endif %}>Adults &amp; Parents</option>
+              </select>
+            </div>
+
+            <!-- Language -->
+            <div style="margin-bottom:14px;">
+              <label for="filter-language" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Language</label>
+              <select id="filter-language" name="language" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
+                <option value="">All languages</option>
+                {% for value in filter_options['language'] %}
+                <option value="{{ value }}" {% if value == filters23.language %}selected{% endif %}>{{ value }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Genre / Category -->
+            <div style="margin-bottom:14px;">
+              <label for="filter-collection" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Genre / Category</label>
+              <select id="filter-collection" name="collection" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
+                <option value="">All categories</option>
+                {% for c in collections %}
+                <option value="{{ c }}" {% if c == selected_collection %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Author -->
+            <div style="margin-bottom:14px;">
+              <label for="filter-author" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Author</label>
+              <select id="filter-author" name="author" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
+                <option value="">All authors</option>
+                {% for value in filter_options['author'] %}
+                <option value="{{ value }}" {% if value == filters23.author %}selected{% endif %}>{{ value }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Availability -->
+            <div style="margin-bottom:14px;">
+              <label for="filter-availability" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Availability</label>
+              <select id="filter-availability" name="availability" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
+                <option value="">All collection</option>
+                <option value="available" {% if filters23.availability == 'available' %}selected{% endif %}>Available Now</option>
+                <option value="waitlist" {% if filters23.availability == 'waitlist' %}selected{% endif %}>On Loan / Waitlist</option>
+              </select>
+            </div>
+
+            <!-- Sort By -->
+            <div style="margin-bottom:16px;">
+              <label for="filter-sort" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Sort By</label>
+              <select id="filter-sort" name="sort" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
+                <option value="newest" {% if filters23.sort == 'newest' %}selected{% endif %}>Newest Arrivals</option>
+                <option value="title" {% if filters23.sort == 'title' %}selected{% endif %}>Title (A–Z)</option>
+                <option value="author" {% if filters23.sort == 'author' %}selected{% endif %}>Author (A–Z)</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom:16px;">
+              <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-main); cursor:pointer;">
+                <input type="checkbox" name="new" value="1" {% if filters23.new == '1' %}checked{% endif %}>
+                <span>New arrivals only</span>
+              </label>
+            </div>
+
+            <button type="submit" class="btn-book-event" style="width:100%; justify-content:center; padding:10px; font-size:14px;">
+              Apply Filters
+            </button>
+          </form>
+        </div>
+      </aside>
+
+      <!-- Main Catalogue Books Column -->
+      <section class="catalogue-main" aria-label="Book search results">
+        <!-- Active Filter Chips Bar (No total books count) -->
+        {% if active_chips %}
+        <div class="filter-active-chips" style="margin-top:0; margin-bottom:20px; border-top:none; background:var(--surface-card); padding:12px 16px; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+          <span style="font-size:12px; font-weight:700; color:var(--text-muted); margin-right:4px;">Active Filters:</span>
+          {% for chip in active_chips %}
+          <span class="filter-chip">
+            <span>{{ chip.label }}</span>
+            <a href="{{ chip.remove_url }}" class="filter-chip-remove" aria-label="Remove {{ chip.label }} filter">&times;</a>
+          </span>
+          {% endfor %}
+          <a href="/library/" class="filter-clear-all">Clear All</a>
+        </div>
+        {% endif %}
+
+        <!-- Book Cards Grid -->
+        {% if books %}
+          <div class="bb-book-grid" aria-label="Library books">
+            {% for book in books %}
+              {% include 'site/_compact_book_card.html' %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="bb-catalogue-empty" style="background:var(--surface-card); padding:48px 24px; text-align:center; border-radius:var(--radius-lg); border:1px dashed var(--border-color);">
+            <h2 style="font-size:20px; font-weight:700; color:var(--navy); margin:0 0 8px;">No matching titles</h2>
+            <p style="color:var(--text-muted); margin:0 0 20px;">Try adjusting your filters or search keywords to discover other wonderful titles.</p>
+            <a href="/library/" class="btn-export">Reset All Filters</a>
+          </div>
+        {% endif %}
+
+        <!-- Pagination (Keeps all query string filters in sync) -->
+        {% if catalogue_pages > 1 %}
+          <nav class="bb-catalogue-pages" aria-label="Catalogue pagination" style="display:flex; justify-content:center; align-items:center; gap:16px; margin-top:36px;">
+            {% if catalogue_page > 1 %}
+              <a href="{{ catalogue_url(page=catalogue_page-1) }}" class="btn-export">
+                &larr; Previous
+              </a>
+            {% else %}
+              <span class="btn-export" style="opacity:0.5; cursor:not-allowed;">&larr; Previous</span>
+            {% endif %}
+
+            <span style="font-size:14px; font-weight:600; color:var(--text-muted);">
+              Page {{ catalogue_page }} of {{ catalogue_pages }}
+            </span>
+
+            {% if catalogue_page < catalogue_pages %}
+              <a href="{{ catalogue_url(page=catalogue_page+1) }}" class="btn-export">
+                Next &rarr;
+              </a>
+            {% else %}
+              <span class="btn-export" style="opacity:0.5; cursor:not-allowed;">Next &rarr;</span>
+            {% endif %}
+          </nav>
+        {% endif %}
+      </section>
+    </div>
   </div>
 </main>
+
+<!-- Floating Checkout Button (Mobile fallback when filter row is scrolled out of view) -->
+<div id="bb-floating-checkout" class="bb-floating-checkout" style="display:none;">
+  <button type="button" id="bb-checkout-trigger" class="btn-floating-checkout js-checkout-trigger" aria-label="Open borrow cart checkout" aria-haspopup="dialog">
+    <svg class="bb-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <path d="M16 10a4 4 0 0 1-8 0"></path>
+    </svg>
+    <span>Checkout</span>
+    <span id="bb-floating-cart-badge" class="bb-cart-badge js-cart-badge">0</span>
+  </button>
+</div>
+
+<!-- Accessible Checkout Modal ("Request Your Books") -->
+<div id="bb-checkout-modal" class="bb-modal" role="dialog" aria-modal="true" aria-labelledby="bb-checkout-title" style="display:none;">
+  <div class="bb-modal-backdrop" id="bb-modal-backdrop"></div>
+  <div class="bb-modal-dialog" id="bb-modal-dialog" tabindex="-1">
+    <div class="bb-modal-header" style="background:#0a2472 !important; color:#ffffff !important; padding:16px 20px; display:flex; align-items:center; justify-content:space-between; border-top-left-radius:10px; border-top-right-radius:10px;">
+      <div>
+        <h2 id="bb-checkout-title" class="bb-modal-title" style="color:#ffffff !important; margin:0; font-size:1.15rem; font-weight:700;">Request Your Books</h2>
+        <span class="sr-only" style="display:none;">Confirm your request</span>
+      </div>
+      <button type="button" class="bb-modal-close" id="bb-modal-close-btn" aria-label="Close dialog" style="color:#ffffff !important; background:transparent !important; border:none; font-size:26px; font-weight:700; line-height:1; cursor:pointer; padding:0 4px; opacity:0.9;">&times;</button>
+    </div>
+
+    <div class="bb-modal-body">
+      <!-- Selected Items Section -->
+      <div class="bb-modal-items-heading">Selected Items:</div>
+      <div class="bb-modal-items-box">
+        <div id="bb-modal-items-list" class="bb-modal-items-list" role="list">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- Plan limits apply Info Box -->
+      <div id="bb-plan-limits-box" class="bb-modal-info-box">
+        <div>
+          <strong>Plan Limits Apply:</strong> Solo Explorer (2 books), Family Pack (4 books). Exceeding limits requires plan upgrade or return of previous books.
+        </div>
+        {% if user.is_authenticated and member_active_sub %}
+          <div style="margin-top:6px; font-weight:600;">
+            Your plan: {{ member_active_sub.name }} ({{ member_active_sub.book_limit }} books at a time). Remaining slots: <span id="bb-remaining-val">{{ [0, member_active_sub.book_limit|int - member_active_cnt|int]|max }}</span>.
+          </div>
+          <div id="bb-limit-error" style="display:none; margin-top:6px; font-weight:600; color:#b91c1c;"></div>
+        {% elif user.is_authenticated %}
+          <div style="margin-top:6px;">
+            No active membership plan found. An active plan is required to request books.
+            <div style="margin-top:4px;">
+              <a href="/membership-options/" style="color:var(--navy); font-weight:700; text-decoration:underline;">Explore Membership Plans &rarr;</a>
+            </div>
+          </div>
+        {% else %}
+          <div style="margin-top:6px;">
+            Log in to request books. Your selected books will remain saved in your cart.
+          </div>
+        {% endif %}
+      </div>
+
+      {% if not user.is_authenticated %}
+        <div style="margin-top:16px;">
+          <a href="/accounts/login/?next=/library/" class="btn-modal-login">
+            Log in to request books &rarr;
+          </a>
+        </div>
+      {% else %}
+        <form id="bb-checkout-form" method="post" action="/library/checkout/">
+          <div class="bb-form-group">
+            <label for="req-name" class="bb-form-label">Full Name</label>
+            <input type="text" id="req-name" name="name" value="{{ user.name or '' }}" required placeholder="Enter your full name" class="bb-form-input">
+          </div>
+
+          <div class="bb-form-group">
+            <label for="req-member-id" class="bb-form-label">Membership ID</label>
+            <input type="text" id="req-member-id" name="membership_id" value="{% if member_active_sub %}SUB-{{ member_active_sub.id }}{% else %}MEM-{{ user.id }}{% endif %}" readonly class="bb-form-input is-readonly" placeholder="Membership ID">
+          </div>
+
+          <div class="bb-form-group">
+            <label for="req-phone" class="bb-form-label">Contact Number</label>
+            <input type="tel" id="req-phone" name="phone" value="{{ user.phone or '' }}" required placeholder="10-digit mobile number" class="bb-form-input">
+          </div>
+
+          <div class="bb-form-group">
+            <label for="req-delivery-mode" class="bb-form-label">Delivery Mode</label>
+            <select id="req-delivery-mode" name="delivery_mode" class="bb-form-select">
+              <option value="offline" selected>Offline (Self-Pickup at {{ delivery_settings.membership_pickup_address }})</option>
+              <option value="online">Online (Doorstep Delivery +₹{{ delivery_settings.membership_delivery_fee_monthly }}/mo)</option>
+            </select>
+            <small id="delivery-mode-hint" style="display:block; font-size:11px; color:var(--text-muted); margin-top:5px;">
+              Self-pickup at {{ delivery_settings.membership_pickup_address }}
+            </small>
+          </div>
+
+          <div class="bb-form-group" id="delivery-address-group" style="display:none;">
+            <label for="req-address" class="bb-form-label">Delivery Address <span style="color:#b91c1c;">*</span></label>
+            <textarea id="req-address" name="address" rows="3" placeholder="Enter flat/door no, street, area, pincode..." class="bb-form-textarea">{{ user.address or '' }}</textarea>
+            <small id="delivery-online-hint" style="display:block; font-size:11px; color:var(--text-muted); margin-top:5px;">
+              Delivery area: {{ delivery_settings.membership_delivery_area }} · Schedule: {{ delivery_settings.membership_delivery_day }}
+            </small>
+          </div>
+
+          <div id="bb-modal-submit-error" style="display:none; padding:10px 14px; background:#fee2e2; color:#991b1b; border-radius:6px; font-size:13px; margin-bottom:14px;"></div>
+
+          <div class="bb-modal-actions">
+            <button type="button" class="btn-modal-cancel" id="bb-modal-cancel-btn">Cancel</button>
+            <button type="submit" class="btn-modal-confirm" id="bb-modal-submit-btn" {% if not member_active_sub %}disabled{% endif %}>
+              Confirm Request
+            </button>
+          </div>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Inline Toast Feedback -->
+<div id="bb-cart-toast" class="bb-cart-toast" style="display:none;" role="status" aria-live="polite"></div>
+
+<!-- Configuration element for JS -->
+<div id="borrow-cart-config"
+  data-is-logged-in="{{ '1' if user.is_authenticated else '0' }}"
+  data-has-plan="{{ '1' if member_active_sub else '0' }}"
+  data-plan-name="{{ member_active_sub.name|default('')|e }}"
+  data-plan-limit="{{ member_active_sub.book_limit|default(2) }}"
+  data-active-loans="{{ member_active_cnt|default(0) }}"
+  data-remaining-slots="{{ [0, member_active_sub.book_limit|int - member_active_cnt|int]|max if member_active_sub else 0 }}"
+  data-pickup-addr="{{ delivery_settings.membership_pickup_address|e }}"
+  data-delivery-area="{{ delivery_settings.membership_delivery_area|e }}"
+  data-delivery-fee="{{ delivery_settings.membership_delivery_fee_monthly|e }}"
+  data-csrf-token="{{ session.get('csrf_token', '') or workspace_token() }}">
+</div>
+
+<script src="{{ url_for('static', filename='js/borrow-cart.js') }}?v=1.3"></script>
+<script>
+  // Automation helper for capturing test states
+  try {
+    var urlParams = new URLSearchParams(window.location.search);
+    var testModal = urlParams.get('test_modal');
+    if (testModal && window.BookBuddyCart) {
+      if (testModal === '0') {
+        window.BookBuddyCart.clear();
+      } else if (testModal === '1' || testModal === 'online' || testModal === 'offline') {
+        window.BookBuddyCart.clear();
+        window.BookBuddyCart.add({ id: 7, title: "The Ocean Song: Whispers from the Deep Marine Trenches", author: "Marina Althaus" });
+      } else if (testModal === 'overlimit') {
+        window.BookBuddyCart.clear();
+        window.BookBuddyCart.add({ id: 1, title: "The Secret Life of the Starlight Wanderer", author: "Eliza Montgomery-Smith" });
+        window.BookBuddyCart.add({ id: 2, title: "The Little Clockmaker of Bern", author: "Claire V. Dupont" });
+        window.BookBuddyCart.add({ id: 7, title: "The Ocean Song: Whispers from the Deep Marine Trenches", author: "Marina Althaus" });
+      }
+      window.addEventListener('DOMContentLoaded', function () {
+        setTimeout(function () {
+          var trigger = document.getElementById('bb-filter-checkout-btn') || document.getElementById('bb-checkout-trigger');
+          if (trigger) trigger.click();
+          var deliverySelect = document.getElementById('req-delivery-mode');
+          if (testModal === 'online' && deliverySelect) {
+            deliverySelect.value = 'online';
+            deliverySelect.dispatchEvent(new Event('change'));
+            setTimeout(function() {
+              var bodyEl = document.querySelector('.bb-modal-body');
+              if (bodyEl) bodyEl.scrollTop = 320;
+            }, 50);
+          } else if (testModal === 'offline' && deliverySelect) {
+            deliverySelect.value = 'offline';
+            deliverySelect.dispatchEvent(new Event('change'));
+          }
+        }, 150);
+      });
+    }
+  } catch (e) {}
+</script>
 {% endblock %}

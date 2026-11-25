@@ -182,11 +182,19 @@ def install_about_editor(app, db, current_admin):
                     flash('Gallery settings saved successfully.', 'success')
                 elif gallery_action == 'upload':
                     files = request.files.getlist('photos')
-                    errs = gallery_service.add_gallery_photos(db, files)
+                    category = request.form.get('category', 'reading-moments')
+                    errs = gallery_service.add_gallery_photos(db, files, category=category)
                     if errs:
                         for err in errs: flash(err, 'danger')
                     else:
                         flash(f'Uploaded {len(files)} photo(s) successfully.', 'success')
+                elif gallery_action == 'update_category':
+                    try:
+                        gid = int(request.form.get('item_id', '0'))
+                        cat = request.form.get('category', 'reading-moments')
+                        gallery_service.update_gallery_item_category(db, gid, cat)
+                        flash('Photo category updated.', 'success')
+                    except ValueError: pass
                 elif gallery_action == 'reorder':
                     pos_dict = {}
                     for key in request.form:

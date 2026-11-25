@@ -1,12 +1,71 @@
-<article class="bb-book-card bb16-book-card">
-  <a class="bb-book-cover" href="{{ url_for('book_detail',book_id=book.id) }}" aria-label="Read about {{ book.title }}">
-    {% if book.image_path %}<img src="{{ book.image_path }}" alt="Cover: {{ book.title }}" loading="lazy" decoding="async">
-    {% else %}<span class="bb-book-cover-placeholder sb-cover-art"><img src="/static/img/art/book-cover-{{ (book.id % 4) + 1 }}.png" alt="Colorful decorative book cover" width="288" height="373" loading="lazy"></span>{% endif %}
-  </a>
-  <div class="bb-book-info"><div class="bb-book-tags"><span class="bb-book-category">{{ book.collection or 'Library' }}</span>{% if book.age_group %}<span class="bb-book-age">Ages {{ book.age_group }}</span>{% endif %}</div>
-    <h2 class="bb-book-title"><a href="{{ url_for('book_detail',book_id=book.id) }}">{{ book.title }}</a></h2><p class="bb-book-author">{{ book.author or 'Author not listed' }}</p>
-    <div class="bb-book-purchase bb16-card-actions"><span class="bb16-availability">{{ book.stock }} available</span>
-    {% if user.is_authenticated %}<form method="post" action="{{ url_for('request_book16',book_id=book.id) }}"><button class="bb-book-action" type="submit" {% if member_loans_count >= borrowing_policy18.book_limit %}disabled{% endif %}>{{ 'Join waitlist' if book.stock|int < 1 else 'Request book' }}</button></form>{% else %}<a class="bb-book-action" href="/accounts/login/?next=/library/{{ book.id }}/">Sign in to request</a>{% endif %}</div>
-    <a href="{{ url_for('book_detail',book_id=book.id) }}" class="bb16-micro-link">View book details</a>
+<article class="bb-book-card" data-book-id="{{ book.id }}">
+  <!-- 1. Cover area: rounded (10px), fixed 3:4 aspect-ratio, max-height 210px, object-fit:cover, bg #e1e6f0 -->
+  <div class="bb-card-cover-wrap">
+    <a href="{{ url_for('book_detail', book_id=book.id) }}" class="bb-card-cover-link" aria-label="View details for {{ book.title }}">
+      {% if book.image_path %}
+        <img src="{{ book.image_path }}"
+             alt="Cover: {{ book.title }}"
+             class="bb-card-cover-img"
+             loading="lazy"
+             decoding="async"
+             onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+        <div class="bb-card-no-cover" style="display:none;" aria-hidden="true">
+          <span>No Cover</span>
+        </div>
+      {% else %}
+        <div class="bb-card-no-cover" aria-hidden="true">
+          <span>No Cover</span>
+        </div>
+      {% endif %}
+    </a>
+
+    <!-- 2. Wishlist heart: 30px white circle top-right (absolute, 6px offset), outline heart inline SVG -->
+    <button type="button"
+            class="bb-card-wishlist js-wishlist-btn"
+            data-book-id="{{ book.id }}"
+            aria-label="Add to wishlist"
+            aria-pressed="false">
+      <svg class="bb-icon-heart" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- 3. Title: bold navy (#0a2472), 0.9rem, single line ellipsis, title attribute -->
+  <h2 class="bb-book-title" title="{{ book.title|e }}"><a href="{{ url_for('book_detail', book_id=book.id) }}">{{ book.title }}</a></h2>
+
+  <!-- 4. Author: maroon (#7b1230), 0.8rem, single line ellipsis -->
+  <p class="bb-book-author" title="{{ (book.author or 'Author not listed')|e }}">{{ book.author or 'Author not listed' }}</p>
+
+  <!-- 5. Bottom row: margin-top: auto -->
+  <div class="bb-card-bottom-row">
+    {% set is_active_loan = active_book_ids and (book.id in active_book_ids) %}
+    {% if book.stock|int < 1 %}
+      <!-- BUG FIX: Single grey "Unavailable" pill, NO Add button -->
+      <span class="bb-avail-pill is-unavailable">Unavailable</span>
+    {% else %}
+      <span class="bb-avail-pill">Available: {{ book.stock }}</span>
+      {% if is_active_loan %}
+        <button type="button" class="btn-cart-add btn-cart-disabled" disabled aria-disabled="true" title="Already in your active requests or loans">
+          Active Request
+        </button>
+      {% else %}
+        <button type="button"
+                class="btn-cart-add js-cart-btn"
+                data-add-to-cart
+                data-book-id="{{ book.id }}"
+                data-title="{{ book.title|e }}"
+                data-book-title="{{ book.title|e }}"
+                data-author="{{ (book.author or 'Author not listed')|e }}"
+                data-book-author="{{ (book.author or 'Author not listed')|e }}"
+                data-available="{{ book.stock|int }}"
+                aria-pressed="false">
+          <svg class="cart-check-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span class="cart-btn-label">Add</span>
+        </button>
+      {% endif %}
+    {% endif %}
   </div>
 </article>

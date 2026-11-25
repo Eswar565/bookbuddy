@@ -1,0 +1,31 @@
+{% extends 'site/base.html' %}
+{% block title %}Gallery · Little Moments, Growing Community · Book Buddy{% endblock %}
+
+{% block body %}
+<main class="gallery-hub">
+  <div class="bb8-container">
+    <header class="gallery-hub-header">
+      <span class="gallery-badge">A Glimpse into Book Buddy</span>
+      <h1>Little moments. Meaningful experiences. A growing community.</h1>
+      <p>Take a look at what happens when people come together at Book Buddy — from shared stories and creative workshops to welcoming nooks and lively community circles.</p>
+    </header>
+
+    <div class="gallery-category-grid">
+      {% for cat in categories %}
+      <a href="/gallery/{{ cat.slug }}/" class="gallery-cat-card">
+        <div class="gallery-cat-image-wrap">
+          <img src="{{ cat.cover_image }}" alt="{{ cat.title }}" loading="lazy" decoding="async">
+        </div>
+        <div class="gallery-cat-content">
+          <h2>
+            <span>{{ cat.title }}</span>
+            <span class="arrow-icon" aria-hidden="true">&rarr;</span>
+          </h2>
+          <p>{{ cat.short_line }}</p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</main>
+{% endblock %}

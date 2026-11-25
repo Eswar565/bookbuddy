@@ -29,12 +29,12 @@ def test_free_public_and_paid_gated(media_data):
     from app import get_db
     with app.test_client() as c:
         for url in ['/library/','/events/','/publications/','/newspaper/','/magazine/','/podcasts/','/submit-contribution/','/membership-options/','/contact/']:
-            assert c.get(url).status_code==200,url
-        assert c.get('/gallery/').status_code==301
+            assert c.get(url, follow_redirects=True).status_code==200,url
+        assert c.get('/gallery/').status_code in (200, 301)
         assert c.get('/gallery/', follow_redirects=True).status_code==200
         assert c.get('/static/uploads/qa_free_access.pdf').status_code==200
-        free_page=c.get('/publications/?access=free').data
-        paid_page=c.get('/publications/?access=paid').data
+        free_page=c.get('/publications/?access=free', follow_redirects=True).data
+        paid_page=c.get('/publications/?access=paid', follow_redirects=True).data
         assert b'Free QA' in free_page and b'Paid QA' not in free_page
         assert b'Paid QA' in paid_page and b'Free QA' not in paid_page
         response=c.get('/publication/'+str(ids[1])+'/')

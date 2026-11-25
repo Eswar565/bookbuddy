@@ -34,14 +34,116 @@
     <div class="bb34-filter-actions"><button type="submit" class="bb34-primary"><svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-filter"/></svg> Apply filters</button><a class="bb34-export" href="{{ url_for('admin_lending16', status=status, q=filters.q, from_date=filters.from_date, to_date=filters.to_date, attention=filters.attention, sort=filters.sort, export='csv') }}"><svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-file-csv"/></svg> Export filtered CSV</a></div>
   </form>
 </section>
+
+{% if grouped_requests and (not status or status == 'Requested') %}
+<section class="bb34-filter-panel" style="margin-bottom:24px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:20px;" aria-label="Grouped borrow requests">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+    <div>
+      <h3 style="margin:0; font-size:18px; color:#0f172a; font-weight:700;">Grouped Borrow Requests (Cart Batches)</h3>
+      <p style="margin:4px 0 0; font-size:13px; color:#64748b;">Multi-book requests placed via borrow cart. Review member, delivery mode, and approve/issue or reject.</p>
+    </div>
+    <span class="bb34-tab-count" style="font-size:14px; padding:4px 12px; background:#0A2472; color:#fff; border-radius:12px;">{{ grouped_requests|length }} batch{{ '' if grouped_requests|length == 1 else 'es' }}</span>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:16px;">
+    {% for gr in grouped_requests %}
+    <div style="background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:16px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+        <div>
+          <strong style="font-size:15px; color:#0A2472;">Batch Request #{{ gr.id }}</strong>
+          <span style="display:inline-block; margin-left:8px; font-size:12px; padding:2px 8px; border-radius:10px; font-weight:600; {% if gr.status=='Requested' %}background:#fef3c7; color:#92400e;{% elif gr.status=='Issued' %}background:#dcfce7; color:#166534;{% elif gr.status=='Rejected' %}background:#fee2e2; color:#991b1b;{% else %}background:#f1f5f9; color:#475569;{% endif %}">{{ gr.status }}</span>
+          <div style="font-size:13px; color:#334155; margin-top:4px;">
+            <strong>{{ gr.contact_name or gr.member_name }}</strong> ·
+            <span>{{ gr.email }}</span> ·
+            <span>Phone: {{ gr.contact_phone or gr.member_phone }}</span>
+          </div>
+          <div style="font-size:12px; color:#64748b; margin-top:2px;">
+            Plan: <strong>{{ gr.plan_name or 'Membership' }}</strong> · Submitted {{ (gr.created_at or '')[:16] }}
+          </div>
+        </div>
+
+        <div style="text-align:right; font-size:13px;">
+          {% if gr.delivery_mode == 'online' %}
+          <div style="display:inline-block; padding:4px 10px; background:#eff6ff; color:#1d4ed8; border-radius:4px; font-weight:600; margin-bottom:4px;">
+            Doorstep Delivery (+₹350)
+          </div>
+          <div style="max-width:280px; font-size:12px; color:#475569; word-break:break-word;">
+            <strong>Address:</strong> {{ gr.delivery_address or 'Not provided' }}
+          </div>
+          {% else %}
+          <div style="display:inline-block; padding:4px 10px; background:#f0fdf4; color:#15803d; border-radius:4px; font-weight:600;">
+            Offline Self-Pickup (Free)
+          </div>
+          <div style="font-size:12px; color:#64748b; margin-top:4px;">Library Pickup</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Books list in this batch -->
+      <div style="margin-bottom:12px;">
+        <span style="font-size:12px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px;">Requested Books ({{ gr.books|length }}):</span>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;">
+          {% for b in gr.books %}
+          <div style="display:flex; align-items:center; gap:8px; padding:6px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:4px; font-size:13px;">
+            <strong>{{ b.title }}</strong>
+            <span style="color:#64748b; font-size:11px;">({{ b.stock }} stock)</span>
+            <span style="font-size:11px; font-weight:600; padding:1px 6px; border-radius:8px; {% if b.status=='Requested' %}background:#fef3c7; color:#92400e;{% elif b.status=='Issued' %}background:#dcfce7; color:#166534;{% elif b.status=='Rejected' %}background:#fee2e2; color:#991b1b;{% else %}background:#e2e8f0; color:#475569;{% endif %}">{{ b.status }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Batch Actions if pending -->
+      {% if gr.pending_books > 0 %}
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding-top:8px; border-top:1px dashed #e2e8f0;">
+        <form method="post" action="/admin/lending/batch-request/{{ gr.id }}/" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0;">
+          <input type="hidden" name="action" value="issue">
+          <label style="font-size:12px; font-weight:600; margin:0;">Due Date:
+            <input type="date" name="due_date" min="{{ today }}" style="padding:4px 8px; font-size:12px;">
+          </label>
+          <input type="text" name="admin_note" placeholder="Optional issue note" style="padding:4px 8px; font-size:12px; width:160px;">
+          <button type="submit" class="bb34-primary" style="padding:6px 14px; font-size:12px; background:#0A2472; color:#fff; border:none; border-radius:4px; cursor:pointer;">
+            Approve &amp; Issue All ({{ gr.pending_books }})
+          </button>
+        </form>
+
+        <div style="display:flex; gap:8px;">
+          <form method="post" action="/admin/lending/batch-request/{{ gr.id }}/" style="margin:0;">
+            <input type="hidden" name="action" value="reject">
+            <button type="submit" class="bb16-muted" style="padding:6px 12px; font-size:12px; background:#f1f5f9; color:#b91c1c; border:1px solid #cbd5e1; border-radius:4px; cursor:pointer;">
+              Reject Batch
+            </button>
+          </form>
+          <form method="post" action="/admin/lending/batch-request/{{ gr.id }}/" style="margin:0;">
+            <input type="hidden" name="action" value="cancel">
+            <button type="submit" class="bb16-muted" style="padding:6px 12px; font-size:12px; background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1; border-radius:4px; cursor:pointer;">
+              Cancel Batch
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
 <div class="bb34-result-header" role="status" aria-live="polite">
   <strong>{{ total }} matching record{{ '' if total==1 else 's' }}</strong>
   <span>{% if total %}Showing {{ (filters.page-1)*filters.per_page+1 }}–{{ [(filters.page*filters.per_page),total]|min }}{% else %}Try clearing one or more filters{% endif %}</span>
 </div>
-<div class="bb16-table-wrap bb34-table-wrap"><table class="bb16-table"><thead><tr><th scope="col">Member</th><th scope="col">Book</th><th scope="col">Status &amp; dates</th><th scope="col">Desk action</th></tr></thead>
+<div class="bb16-table-wrap bb34-table-wrap"><table class="bb16-table"><thead><tr><th scope="col">Member</th><th scope="col">Book &amp; Mode</th><th scope="col">Status &amp; dates</th><th scope="col">Desk action</th></tr></thead>
 <tbody>{% for r in rows %}<tr>
-<td><strong>{{ r.member_name }}</strong><small>{{ r.email }}</small><small>{{ r.phone }}</small></td>
-<td><strong>{{ r.title }}</strong><small>Request #{{ r.id }} · {{ r.plan_name or 'Standard account borrowing' }}</small></td>
+<td><strong>{{ r.member_name }}</strong><small>{{ r.email }}</small><small>{{ r.contact_phone or r.phone }}</small></td>
+<td><strong>{{ r.title }}</strong>
+<small>Request #{{ r.id }}{% if r.request_id %} · <span style="font-weight:600; color:#0A2472;">Batch #{{ r.request_id }}</span>{% endif %} · {{ r.plan_name or 'Standard account borrowing' }}</small>
+{% if r.delivery_mode == 'online' %}
+<div style="margin-top:4px;"><span style="font-size:11px; padding:2px 6px; background:#eff6ff; color:#1d4ed8; border-radius:4px; font-weight:600;">Doorstep</span> <small style="display:block; color:#475569; word-break:break-word;">{{ r.delivery_address }}</small></div>
+{% elif r.delivery_mode == 'offline' %}
+<div style="margin-top:4px;"><span style="font-size:11px; padding:2px 6px; background:#f0fdf4; color:#15803d; border-radius:4px; font-weight:600;">Self-pickup</span></div>
+{% endif %}
+</td>
 <td><span class="bb16-status">{{ 'Overdue' if r.status=='Issued' and r.due_date and r.due_date < today else r.status }}</span>
 <small>Requested {{ (r.requested_at or '')[:10] }}</small>
 {% if r.return_requested_at and r.status=='Issued' %}<strong class="bb18-return-label">Return requested {{ r.return_requested_at }}</strong>{% endif %}
@@ -50,7 +152,7 @@
 <form method="post" action="{{ url_for('admin_loan_status16',loan_id=r.id) }}" class="bb16-desk-form">
 <label>Desk note <input name="admin_note" maxlength="600" placeholder="Optional note"></label>
 {% if r.status=='Requested' %}<label>Due date <input name="due_date" type="date" min="{{ today }}"></label>
-<button type="submit" name="action" value="issue">Issue book</button><button type="submit" name="action" value="reject" class="bb16-muted">Reject</button>
+<button type="submit" name="action" value="issue">Issue book</button><button type="submit" name="action" value="reject" class="bb16-muted">Reject</button><button type="submit" name="action" value="cancel" class="bb16-muted" style="color:#64748b;">Cancel</button>
 {% else %}<button type="submit" name="action" value="return">Mark returned</button>
 <label>Replacement charge (₹)<input name="replacement_amount" type="number" min="0" step="0.01" value="0"></label>
 <button type="submit" name="action" value="lost">Mark lost</button><button type="submit" name="action" value="damaged">Mark damaged</button>{% endif %}

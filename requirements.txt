@@ -9,3 +9,4 @@ tzdata>=2024.1
 beautifulsoup4>=4.12,<5.0
 
 pymupdf
+openpyxl>=3.1.0

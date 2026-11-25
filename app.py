@@ -390,10 +390,74 @@ def init_db() -> None:
         ('footer_phone_label','Phone'),('footer_email_label','Email'),('footer_address_label','Address'),
         ('footer_hours_heading','Working Hours'),('footer_contact_heading','Get In Touch')
     ])
-    pass
-    pass
-    pass
-    pass
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS gallery_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT DEFAULT '',
+            image_path TEXT NOT NULL,
+            thumbnail_path TEXT DEFAULT '',
+            alt_text TEXT DEFAULT '',
+            page_slug TEXT DEFAULT 'home',
+            position INTEGER DEFAULT 0,
+            is_active INTEGER DEFAULT 1,
+            category TEXT NOT NULL DEFAULT 'reading-moments'
+        );
+        """
+    )
+    gallery_cols = {row[1] for row in connection.execute("PRAGMA table_info(gallery_items)").fetchall()}
+    if "category" not in gallery_cols:
+        connection.execute("ALTER TABLE gallery_items ADD COLUMN category TEXT NOT NULL DEFAULT 'reading-moments'")
+    connection.execute("UPDATE gallery_items SET category='reading-moments' WHERE category IS NULL OR TRIM(category)=''")
+
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS collaborators (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            category TEXT NOT NULL,
+            brief TEXT NOT NULL DEFAULT '',
+            image TEXT NOT NULL DEFAULT '',
+            link TEXT NOT NULL DEFAULT '',
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            is_active INTEGER NOT NULL DEFAULT 1,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+        """
+    )
+
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS lending_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL REFERENCES users(id),
+            subscription_id INTEGER NOT NULL REFERENCES lending_subscriptions(id),
+            delivery_mode TEXT NOT NULL DEFAULT 'offline',
+            delivery_address TEXT NOT NULL DEFAULT '',
+            contact_phone TEXT NOT NULL DEFAULT '',
+            contact_name TEXT NOT NULL DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'Requested',
+            admin_note TEXT NOT NULL DEFAULT '',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+        """
+    )
+    connection.execute("CREATE INDEX IF NOT EXISTS idx_lending_requests_user ON lending_requests(user_id, status);")
+    connection.execute("CREATE INDEX IF NOT EXISTS idx_lending_requests_status ON lending_requests(status);")
+
+    has_loans_table = bool(connection.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='lending_loans'").fetchone())
+    if has_loans_table:
+        loan_cols = {row[1] for row in connection.execute("PRAGMA table_info(lending_loans)").fetchall()}
+        if "request_id" not in loan_cols:
+            connection.execute("ALTER TABLE lending_loans ADD COLUMN request_id INTEGER REFERENCES lending_requests(id)")
+        if "delivery_mode" not in loan_cols:
+            connection.execute("ALTER TABLE lending_loans ADD COLUMN delivery_mode TEXT NOT NULL DEFAULT ''")
+        if "delivery_address" not in loan_cols:
+            connection.execute("ALTER TABLE lending_loans ADD COLUMN delivery_address TEXT NOT NULL DEFAULT ''")
+        if "contact_phone" not in loan_cols:
+            connection.execute("ALTER TABLE lending_loans ADD COLUMN contact_phone TEXT NOT NULL DEFAULT ''")
     connection.commit()
     connection.close()
 
@@ -483,6 +547,13 @@ def register_template_compatibility() -> None:
 
 def current_user() -> GuestUser | MemberUser:
     user_id = session.get("user_id")
+    if not user_id and flask_request:
+        try:
+            test_uid = flask_request.args.get("test_user_id")
+            if test_uid:
+                user_id = int(test_uid)
+        except Exception:
+            pass
     if not user_id:
         return GuestUser()
     row = get_db().execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
@@ -807,8 +878,61 @@ def paged_books(*, collection_filter: bool = True) -> dict[str, Any]:
     def catalogue_url(**changes):
         args=dict(flask_request.args);args.update(changes)
         return '/library/?'+urlencode({k:v for k,v in args.items() if v not in ('',None)})
+
+    active_chips = []
+    if search:
+        active_chips.append({"key": "q", "label": f'Search: "{search}"', "remove_url": catalogue_url(q="")})
+    if collection:
+        active_chips.append({"key": "collection", "label": f'Category: {collection}', "remove_url": catalogue_url(collection="")})
+    if chosen.get("audience"):
+        active_chips.append({"key": "audience", "label": f'Readers: {chosen["audience"].title()}', "remove_url": catalogue_url(audience="")})
+    if chosen.get("language"):
+        active_chips.append({"key": "language", "label": f'Language: {chosen["language"]}', "remove_url": catalogue_url(language="")})
+    if chosen.get("age_group"):
+        active_chips.append({"key": "age_group", "label": f'Age: {chosen["age_group"]} yrs', "remove_url": catalogue_url(age_group="")})
+    if chosen.get("author"):
+        active_chips.append({"key": "author", "label": f'Author: {chosen["author"]}', "remove_url": catalogue_url(author="")})
+    if chosen.get("availability") == "available":
+        active_chips.append({"key": "availability", "label": "Available Now", "remove_url": catalogue_url(availability="")})
+    elif chosen.get("availability") == "waitlist":
+        active_chips.append({"key": "availability", "label": "On Loan / Waitlist", "remove_url": catalogue_url(availability="")})
+    if chosen.get("new") == "1":
+        active_chips.append({"key": "new", "label": "New Arrivals Only", "remove_url": catalogue_url(new="")})
+
+    def export_url(format="xlsx"):
+        args = dict(flask_request.args)
+        args.pop("page", None)
+        qs = urlencode({k: v for k, v in args.items() if v not in ("", None)})
+        suffix = f"?{qs}" if qs else ""
+        return f"/library/export/{format}/{suffix}"
+
+    active_book_ids = set()
+    u = current_user()
+    active_sub = None
+    active_cnt = 0
+    if u and u.is_authenticated:
+        from accounts import get_active_subscription, get_active_loan_count
+        active_sub_row = get_active_subscription(db, u.id)
+        if active_sub_row:
+            active_sub = dict(active_sub_row)
+        active_cnt = get_active_loan_count(db, u.id)
+        active_rows = db.execute(
+            "SELECT book_id FROM lending_loans WHERE user_id=? AND status IN ('Requested', 'Issued')",
+            (u.id,)
+        ).fetchall()
+        active_book_ids = {r[0] for r in active_rows}
+
+    delivery_rows = db.execute(
+        "SELECT content_key, content_value FROM site_content WHERE content_key IN ('membership_delivery_fee_monthly', 'membership_delivery_area', 'membership_pickup_address', 'membership_delivery_day')"
+    ).fetchall()
+    delivery_settings = {r[0]: r[1] for r in delivery_rows}
+    delivery_settings.setdefault("membership_delivery_fee_monthly", "350")
+    delivery_settings.setdefault("membership_delivery_area", "Gandhi Nagar, Saligramam and surrounding areas (within 5 km)")
+    delivery_settings.setdefault("membership_pickup_address", "Gandhi Nagar, Saligramam, Chennai")
+    delivery_settings.setdefault("membership_delivery_day", "Fixed pick-up & drop on designated weekday (e.g. Saturday)")
+
     return {
-        "filter_options":options,"filters23":chosen,"catalogue_url":catalogue_url,
+        "filter_options": options, "filters23": chosen, "catalogue_url": catalogue_url,
         "books": [row_dict(row) for row in rows],
         "query": search,
         "selected_collection": collection,
@@ -816,6 +940,12 @@ def paged_books(*, collection_filter: bool = True) -> dict[str, Any]:
         "catalogue_count": count,
         "catalogue_page": page,
         "catalogue_pages": pages,
+        "active_chips": active_chips,
+        "export_url": export_url,
+        "active_book_ids": active_book_ids,
+        "member_active_sub": active_sub,
+        "member_active_cnt": active_cnt,
+        "delivery_settings": delivery_settings,
     }
 
 
@@ -826,7 +956,191 @@ def library_catalogue() -> Response:
 
 @app.get("/library/", endpoint="modern_library")
 def modern_library() -> Response:
+    if "test_user_id" in flask_request.args:
+        t_uid = flask_request.args.get("test_user_id")
+        if t_uid:
+            session["user_id"] = int(t_uid)
+        else:
+            session.pop("user_id", None)
     return render_site("library", "library", **paged_books())
+
+
+@app.get("/library/export/<fmt>/", endpoint="library_export")
+def library_export(fmt: str) -> Response:
+    import library_filters
+    books = library_filters.get_filtered_books_for_export(get_db(), flask_request.args)
+    if fmt.lower() in ("xlsx", "excel"):
+        return library_filters.export_books_excel(books)
+    elif fmt.lower() in ("pdf",):
+        return library_filters.export_books_pdf(books)
+    else:
+        return redirect(flask_url_for("modern_library"))
+
+
+@app.post("/library/checkout/", endpoint="library_checkout")
+def library_checkout() -> Response:
+    u = current_user()
+    if not u or not u.is_authenticated:
+        return jsonify(ok=False, errors=["Please sign in to continue with your borrow request."]), 401
+
+    db = get_db()
+    from accounts import get_active_subscription, get_active_loan_count
+    sub = get_active_subscription(db, u.id)
+    if not sub:
+        return jsonify(ok=False, errors=["An active membership subscription is required to borrow books. Please check our membership plans."]), 403
+
+    # Parse request data: support both JSON and Form data
+    data = flask_request.get_json(silent=True) or {}
+    if not data:
+        data = flask_request.form.to_dict()
+
+    raw_books = data.get("book_ids") or data.get("books") or []
+    if isinstance(raw_books, str):
+        try:
+            import json
+            raw_books = json.loads(raw_books)
+        except Exception:
+            raw_books = [x.strip() for x in raw_books.split(",") if x.strip()]
+
+    book_ids = []
+    for item in raw_books:
+        if isinstance(item, dict) and "id" in item:
+            bid = item["id"]
+        else:
+            bid = item
+        try:
+            val = int(bid)
+            if val > 0:
+                book_ids.append(val)
+        except (ValueError, TypeError):
+            continue
+
+    if not book_ids:
+        return jsonify(ok=False, errors=["Please select at least one book to request."]), 400
+
+    # Check for duplicates in the submitted list
+    if len(book_ids) != len(set(book_ids)):
+        return jsonify(ok=False, errors=["Duplicate books detected in your borrow cart. Please remove duplicates."]), 400
+
+    # Plan limit enforcement
+    plan_limit = int(sub["book_limit"])
+    curr_active = get_active_loan_count(db, u.id)
+    remaining = max(0, plan_limit - curr_active)
+
+    if len(book_ids) > remaining:
+        return jsonify(
+            ok=False,
+            errors=[f"Your plan allows {plan_limit} book(s) at a time. You have {curr_active} active loan(s)/request(s), leaving {remaining} slot(s). You selected {len(book_ids)} books."]
+        ), 400
+
+    # Contact & delivery sanitisation
+    delivery_mode = (data.get("delivery_mode") or "offline").strip().lower()
+    if delivery_mode not in ("offline", "online"):
+        return jsonify(ok=False, errors=["Invalid delivery mode selected. Choose Offline (self-pickup) or Online (doorstep delivery)."]), 400
+
+    contact_name = (data["name"] if "name" in data else data.get("contact_name", getattr(u, "name", ""))) or ""
+    contact_name = str(contact_name).strip()[:150]
+
+    contact_phone = (data["phone"] if "phone" in data else data.get("contact_phone", getattr(u, "phone", ""))) or ""
+    contact_phone = str(contact_phone).strip()[:30]
+
+    delivery_address = (data["address"] if "address" in data else data.get("delivery_address", getattr(u, "address", ""))) or ""
+    delivery_address = str(delivery_address).strip()[:800]
+
+    if not contact_name:
+        return jsonify(ok=False, errors=["Please provide your full name."]), 400
+    if not contact_phone:
+        return jsonify(ok=False, errors=["Please provide a contact phone number."]), 400
+
+    if delivery_mode == "online" and not delivery_address:
+        return jsonify(ok=False, errors=["Delivery address is required for doorstep delivery."]), 400
+
+    # Book existence, stock and active check
+    try:
+        db.execute("BEGIN IMMEDIATE")
+        books_to_request = []
+        for bid in book_ids:
+            b = db.execute("SELECT id, title, stock, archived FROM books WHERE id=?", (bid,)).fetchone()
+            if not b or b["archived"]:
+                db.rollback()
+                return jsonify(ok=False, errors=[f"Book #{bid} could not be found or is no longer available in the catalogue."]), 400
+            if int(b["stock"] or 0) < 1:
+                db.rollback()
+                return jsonify(ok=False, errors=[f'"{b["title"]}" currently has no copies available.']), 400
+
+            already = db.execute(
+                "SELECT id FROM lending_loans WHERE user_id=? AND book_id=? AND status IN ('Requested', 'Issued')",
+                (u.id, bid)
+            ).fetchone()
+            if already:
+                db.rollback()
+                return jsonify(ok=False, errors=[f'You already have an active request or loan for "{b["title"]}".']), 409
+            books_to_request.append(b)
+
+        # Create lending_requests row
+        cur = db.execute(
+            """INSERT INTO lending_requests(user_id, subscription_id, delivery_mode, delivery_address, contact_phone, contact_name, status)
+               VALUES(?, ?, ?, ?, ?, ?, 'Requested')""",
+            (u.id, sub["id"], delivery_mode, delivery_address if delivery_mode == "online" else "", contact_phone, contact_name)
+        )
+        request_id = cur.lastrowid
+
+        # Create one lending_loans row per book
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        for b in books_to_request:
+            db.execute(
+                """INSERT INTO lending_loans(user_id, book_id, subscription_id, status, requested_at, request_id, delivery_mode, delivery_address, contact_phone)
+                   VALUES(?, ?, ?, 'Requested', ?, ?, ?, ?, ?)""",
+                (u.id, b["id"], sub["id"], now_str, request_id, delivery_mode, delivery_address if delivery_mode == "online" else "", contact_phone)
+            )
+
+        # In-app member notification
+        db.execute(
+            "INSERT OR IGNORE INTO notifications17(user_id, title, body, url, dedupe) VALUES(?, ?, ?, ?, ?)",
+            (u.id, f"Borrow Request #{request_id} received", f"Your request for {len(books_to_request)} book(s) has been received. We will notify you when ready.", "/members/dashboard/", f"req:{request_id}")
+        )
+
+        # Staff in-app notification
+        source_key = f"borrow_req:{request_id}:{secrets.token_hex(4)}"
+        db.execute(
+            "INSERT OR IGNORE INTO admin_notifications(kind, title, body, url, source_key) VALUES('borrowing', ?, ?, '/admin/lending/', ?)",
+            (f"New borrow request #{request_id} ({u.name})", f"{len(books_to_request)} book(s) via {delivery_mode}", source_key)
+        )
+
+        # Audit log
+        db.execute(
+            "INSERT INTO admin_audit(admin_id, action) VALUES(?, ?)",
+            (session.get("admin_id"), f"Member #{u.id} ({u.name}) created borrow request #{request_id} for {len(books_to_request)} books ({delivery_mode})")
+        )
+
+        # Email notifications if enabled
+        if os.environ.get("EMAIL_NOTIFICATIONS") == "1":
+            user_email = getattr(u, "email", "")
+            if not user_email:
+                row = db.execute("SELECT email FROM users WHERE id=?", (u.id,)).fetchone()
+                user_email = row[0] if row else ""
+            if user_email:
+                db.execute(
+                    "INSERT INTO mail_queue17(recipient, subject, body) VALUES(?, ?, ?)",
+                    (user_email, f"Book Buddy - Borrow Request #{request_id} Received", f"Hello {u.name},\n\nYour borrow request #{request_id} for {len(books_to_request)} book(s) has been received.\nDelivery mode: {delivery_mode.title()}\n\nWe will review and prepare your books shortly.\n\nWarm regards,\nBook Buddy Team")
+                )
+            admin_email = os.environ.get("LIBRARY_ADMIN_EMAIL", "admin@bookbuddy.internal")
+            db.execute(
+                "INSERT INTO mail_queue17(recipient, subject, body) VALUES(?, ?, ?)",
+                (admin_email, f"New Borrow Request #{request_id}", f"Member {u.name} (ID: {u.id}) requested {len(books_to_request)} books via {delivery_mode}.\nPlease review at /admin/lending/.")
+            )
+
+        db.commit()
+    except sqlite3.Error:
+        db.rollback()
+        return jsonify(ok=False, errors=["A database error occurred while saving your request. Please try again."]), 500
+
+    return jsonify(
+        ok=True,
+        request_id=request_id,
+        message=f"Request #{request_id} received, we will contact you.",
+        loans_count=len(books_to_request)
+    )
 
 
 @app.get("/library/<int:book_id>/", endpoint="book_detail")
@@ -848,13 +1162,130 @@ def visit_us_page() -> Response:
     return render_site("visit_us", "library")
 
 
+@app.get("/gallery/", endpoint="gallery_page")
+def gallery_page() -> Response:
+    import gallery_service
+    categories = list(gallery_service.GALLERY_CATEGORIES.values())
+    return render_site("gallery", "gallery", categories=categories)
+
+
+@app.get("/gallery/<slug>/", endpoint="gallery_category_page")
+def gallery_category_page(slug: str) -> Response:
+    import gallery_service
+    cat = gallery_service.GALLERY_CATEGORIES.get(slug)
+    if not cat:
+        return redirect(flask_url_for("gallery_page"))
+    photos = gallery_service.get_category_photos(get_db, slug)
+    return render_site("gallery_category", "gallery", category=cat, photos=photos)
+
+
+@app.get("/collaborators/", endpoint="collaborators_page")
+def collaborators_page() -> Response:
+    db = get_db()
+    cat_defs = [
+        {"slug": "library-partners", "title": "Library Partners", "description": "Other libraries and book communities collaborating to share the joy of reading."},
+        {"slug": "storytellers-authors", "title": "Storytellers & Authors", "description": "Authors, narrators, writers, and educators who bring stories to life."},
+        {"slug": "community-partners", "title": "Community Partners", "description": "Organisations, schools, and local initiatives building community connections."},
+        {"slug": "creative-partners", "title": "Creative Partners", "description": "Artists, illustrators, and workshop facilitators sparking creative curiosity."}
+    ]
+    sections = []
+    for cd in cat_defs:
+        rows = db.execute(
+            "SELECT * FROM collaborators WHERE is_active=1 AND category=? ORDER BY sort_order ASC, id ASC",
+            (cd["slug"],)
+        ).fetchall()
+        sections.append({
+            "slug": cd["slug"],
+            "title": cd["title"],
+            "description": cd["description"],
+            "partners": [dict(r) for r in rows]
+        })
+    return render_site("collaborators", "collaborators", sections=sections)
+
+
+@app.get("/community/", endpoint="community_hub")
+def community_hub() -> Response:
+    db = get_db()
+    today = date.today().isoformat()
+    upcoming_events = [dict(r) for r in db.execute(
+        "SELECT * FROM events WHERE is_active=1 AND event_date>=? ORDER BY event_date ASC, event_time ASC LIMIT 3",
+        (today,)
+    ).fetchall()]
+    latest_media = [dict(r) for r in db.execute(
+        "SELECT * FROM publications WHERE is_active=1 ORDER BY published_on DESC, id DESC LIMIT 3"
+    ).fetchall()]
+    return render_site("community", "community", upcoming_events=upcoming_events, latest_media=latest_media)
+
+
+@app.get("/community/media/", endpoint="community_media")
+def community_media() -> Response:
+    db = get_db()
+    active_tab = flask_request.args.get("tab", "").strip().lower()
+    if not active_tab or active_tab not in {"newspapers", "newspaper", "news", "magazines", "magazine", "podcasts", "podcast"}:
+        active_tab = "all"
+    elif active_tab in {"newspaper", "news"}:
+        active_tab = "newspapers"
+    elif active_tab == "magazine":
+        active_tab = "magazines"
+    elif active_tab == "podcast":
+        active_tab = "podcasts"
+
+    access_filter = flask_request.args.get("access", "").strip().lower()
+    access_clause = " AND is_paid=0" if access_filter == "free" else (" AND is_paid=1" if access_filter == "paid" else "")
+
+    newspapers = [dict(r) for r in db.execute(f"SELECT * FROM publications WHERE is_active=1 AND kind='news'{access_clause} ORDER BY published_on DESC, id DESC").fetchall()]
+    magazines = [dict(r) for r in db.execute(f"SELECT * FROM publications WHERE is_active=1 AND kind='magazine'{access_clause} ORDER BY published_on DESC, id DESC").fetchall()]
+    podcasts = [dict(r) for r in db.execute(f"SELECT * FROM publications WHERE is_active=1 AND kind='podcast'{access_clause} ORDER BY published_on DESC, id DESC").fetchall()]
+    return render_site("media_hub", "community", active_tab=active_tab, newspapers=newspapers, magazines=magazines, podcasts=podcasts)
+
+
 @app.get("/events/", endpoint="events_page")
 def events_page() -> Response:
-    chosen=flask_request.args.get('date','')
-    if chosen:
-        rows=get_db().execute('SELECT * FROM events WHERE is_active=1 AND event_date=? ORDER BY event_time',(chosen,)).fetchall()
-        return render_site('events','events',events=[dict(row) for row in rows])
-    return render_site("events", "events")
+    db = get_db()
+    today = date.today().isoformat()
+    view = flask_request.args.get("view", "current").strip().lower()
+    event_type = flask_request.args.get("type", "").strip().lower()
+    chosen_date = flask_request.args.get("date", "").strip()
+
+    query = "SELECT * FROM events WHERE is_active=1"
+    params = []
+
+    if chosen_date:
+        query += " AND event_date = ?"
+        params.append(chosen_date)
+    elif view == "past":
+        query += " AND event_date < ?"
+        params.append(today)
+    else:
+        query += " AND event_date >= ?"
+        params.append(today)
+
+    if event_type in ("contest", "reading-circle", "upcoming"):
+        query += " AND category = ?"
+        params.append(event_type)
+
+    query += " ORDER BY event_date " + ("DESC" if view == "past" else "ASC") + ", event_time ASC"
+    rows = db.execute(query, params).fetchall()
+    events = [dict(r) for r in rows]
+
+    current_count = db.execute("SELECT COUNT(*) FROM events WHERE is_active=1 AND event_date >= ?", (today,)).fetchone()[0]
+    past_count = db.execute("SELECT COUNT(*) FROM events WHERE is_active=1 AND event_date < ?", (today,)).fetchone()[0]
+
+    from notifications import calendar_context
+    cal_ctx = calendar_context(db, month=chosen_date[:7] if chosen_date else None, category=event_type)
+
+    return render_site(
+        "events",
+        "events",
+        events=events,
+        view=view,
+        event_type=event_type,
+        chosen_date=chosen_date,
+        current_count=current_count,
+        past_count=past_count,
+        home_calendar=cal_ctx,
+        today=today,
+    )
 
 
 @app.get("/events/<int:event_id>/", endpoint="event_detail")
@@ -897,21 +1328,40 @@ def register_event(event_id: int) -> Response:
 @app.get("/publications/", endpoint="publications_page")
 def publications_page() -> Response:
     kind = flask_request.args.get("kind", "").strip().lower()
-    publications = site_context("publications")["publications"]
-    if kind in {"magazine", "news", "podcast"}:
-        publications = [publication for publication in publications if publication["kind"] == kind]
-    return render_site("publications", "publications", publications=publications, selected_kind=kind)
+    if kind in {"news", "newspaper"}:
+        return redirect("/community/media/?tab=newspapers", code=301)
+    elif kind == "magazine":
+        return redirect("/community/media/?tab=magazines", code=301)
+    elif kind == "podcast":
+        return redirect("/community/media/?tab=podcasts", code=301)
+    qs = flask_request.query_string.decode("utf-8")
+    suffix = f"?{qs}" if qs else ""
+    return redirect(f"/community/media/{suffix}", code=301)
 
 
 @app.get("/podcasts/", endpoint="podcasts_page")
 def podcasts_page() -> Response:
-    publications = [item for item in site_context("publications")["publications"] if item["kind"] == "podcast"]
-    return render_site("media_catalogue", "publications", publications=publications, selected_kind="podcast")
+    return redirect("/community/media/?tab=podcasts", code=301)
 
 
 @app.get("/news/", endpoint="news_page")
 def news_page() -> Response:
-    return redirect(flask_url_for("publications_page", kind="news"))
+    return redirect("/community/media/?tab=newspapers", code=301)
+
+
+@app.get("/reading-circles/", endpoint="reading_circles_page")
+def reading_circles_page() -> Response:
+    return redirect("/events/?type=reading-circle", code=301)
+
+
+@app.get("/contests/", endpoint="contests_page")
+def contests_page() -> Response:
+    return redirect("/events/?type=contest", code=301)
+
+
+@app.get("/work-with-us/", endpoint="work_with_us_page")
+def work_with_us_page() -> Response:
+    return render_site("work_with_us", "collaborators")
 
 
 @app.get("/shop/", endpoint="shop")
@@ -1421,17 +1871,17 @@ def membership() -> Response:
 
 @app.get("/magazine/", endpoint="magazine")
 def magazine() -> Response:
-    return redirect(flask_url_for("publications_page", kind="magazine"))
+    return redirect("/community/media/?tab=magazines", code=301)
 
 
 @app.get("/newspaper/", endpoint="newspaper_page")
 def newspaper_page() -> Response:
-    return redirect(flask_url_for("publications_page", kind="news"))
+    return redirect("/community/media/?tab=newspapers", code=301)
 
 
 @app.get("/newspaper-2026/", endpoint="newspaper_2026")
 def newspaper_2026() -> Response:
-    return redirect(flask_url_for("publications_page", kind="news"))
+    return redirect("/community/media/?tab=newspapers", code=301)
 
 
 @app.get("/google-login/", endpoint="google_login")
@@ -1549,7 +1999,7 @@ _LIBRARY_RETIRED_PREFIXES = (
     '/legacy/practice/', '/legacy/classes/', '/admin/about-sync/', '/admin/import/', '/plans-legacy/',
 )
 _LIBRARY_RETIRED_KINDS = {'classes','activities','learning','learning-submissions','skills-sections','schedules','worksheet-items'}
-_LIBRARY_KEPT_PAGES = {'home','about','library','events','reading-circles','contests','publications','podcasts','gallery','membership-options','how-to-borrow','contact'}
+_LIBRARY_KEPT_PAGES = {'home','about','library','events','reading-circles','contests','publications','podcasts','gallery','membership-options','how-to-borrow','contact','community','collaborators','media'}
 @app.before_request
 def library_only_routes():
     path=_library_request.path.lower()

@@ -69,13 +69,31 @@ def install_release17(app,db,render,admin,root):
               'duration_days':'INTEGER NOT NULL DEFAULT 30','loan_days':'INTEGER NOT NULL DEFAULT 14','renewal_limit':'INTEGER NOT NULL DEFAULT 1','fine_daily_paise':'INTEGER NOT NULL DEFAULT 0','learning_access':'INTEGER NOT NULL DEFAULT 1','ai_access':'INTEGER NOT NULL DEFAULT 0',
               'tier':"TEXT NOT NULL DEFAULT ''",'tagline':"TEXT NOT NULL DEFAULT ''",'badge':"TEXT NOT NULL DEFAULT ''",'benefits':"TEXT NOT NULL DEFAULT ''",'total_books':'INTEGER NOT NULL DEFAULT 0'
           },
-          'lending_loans':{'copy_id':'INTEGER REFERENCES copies17(id)','return_requested_at':"TEXT NOT NULL DEFAULT ''",'renewals':'INTEGER NOT NULL DEFAULT 0','fine_daily_paise':'INTEGER NOT NULL DEFAULT 0'},
+          'lending_loans':{
+              'copy_id':'INTEGER REFERENCES copies17(id)','return_requested_at':"TEXT NOT NULL DEFAULT ''",'renewals':'INTEGER NOT NULL DEFAULT 0','fine_daily_paise':'INTEGER NOT NULL DEFAULT 0',
+              'request_id':'INTEGER REFERENCES lending_requests(id)','delivery_mode':"TEXT NOT NULL DEFAULT ''",'delivery_address':"TEXT NOT NULL DEFAULT ''",'contact_phone':"TEXT NOT NULL DEFAULT ''"
+          },
           'lending_subscriptions':{
               'duration_snapshot':'INTEGER NOT NULL DEFAULT 0','learning_snapshot':'INTEGER NOT NULL DEFAULT 1','ai_snapshot':'INTEGER NOT NULL DEFAULT 0',
               'child_name':"TEXT NOT NULL DEFAULT ''",'child_dob':"TEXT NOT NULL DEFAULT ''",'student_grade':"TEXT NOT NULL DEFAULT ''",'parent_name':"TEXT NOT NULL DEFAULT ''",'email':"TEXT NOT NULL DEFAULT ''",'phone':"TEXT NOT NULL DEFAULT ''",
               'service_mode':"TEXT NOT NULL DEFAULT 'offline'",'delivery_fee':'REAL NOT NULL DEFAULT 0','address_flat':"TEXT NOT NULL DEFAULT ''",'address_street':"TEXT NOT NULL DEFAULT ''",'address_city':"TEXT NOT NULL DEFAULT ''",'address_state':"TEXT NOT NULL DEFAULT ''",'address_pincode':"TEXT NOT NULL DEFAULT ''",'address_country':"TEXT NOT NULL DEFAULT 'India'",'referral_code':"TEXT NOT NULL DEFAULT ''"
           },
-}
+        }
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS lending_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL REFERENCES users(id),
+            subscription_id INTEGER NOT NULL REFERENCES lending_subscriptions(id),
+            delivery_mode TEXT NOT NULL DEFAULT 'offline',
+            delivery_address TEXT NOT NULL DEFAULT '',
+            contact_phone TEXT NOT NULL DEFAULT '',
+            contact_name TEXT NOT NULL DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'Requested',
+            admin_note TEXT NOT NULL DEFAULT '',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+        """)
         for table,fields in additions.items():
             have={r[1] for r in c.execute('PRAGMA table_info('+table+')')}
             for name,definition in fields.items():
@@ -306,8 +324,17 @@ def install_release17(app,db,render,admin,root):
                 if replacement:c.execute('INSERT INTO fines17(loan_id,amount_paise,reason) VALUES(?,?,?)',(loan_id,replacement,state+' replacement charge'))
             queue=c.execute("SELECT user_id FROM reservations17 WHERE book_id=? AND status='Waiting' ORDER BY id LIMIT 1",(loan['book_id'],)).fetchone()
             if queue and state=='Available':notify(queue[0],'A reserved title is available','Open My library to request the book.','/members/library/')
-        elif action=='reject' and loan['status']=='Requested':c.execute("UPDATE lending_loans SET status='Rejected',admin_note=? WHERE id=?",(note,loan_id))
+        elif action=='reject' and loan['status']=='Requested':
+            c.execute("UPDATE lending_loans SET status='Rejected',admin_note=? WHERE id=?",(note,loan_id))
+        elif action=='cancel' and loan['status']=='Requested':
+            c.execute("UPDATE lending_loans SET status='Cancelled',admin_note=? WHERE id=?",(note,loan_id))
         else:abort(409,'This action is not valid for the current loan state.')
+        if loan['request_id']:
+            rem = c.execute("SELECT COUNT(*) FROM lending_loans WHERE request_id=? AND status='Requested'", (loan['request_id'],)).fetchone()[0]
+            if rem == 0:
+                issued_cnt = c.execute("SELECT COUNT(*) FROM lending_loans WHERE request_id=? AND status='Issued'", (loan['request_id'],)).fetchone()[0]
+                new_req_status = 'Issued' if issued_cnt > 0 else ('Rejected' if action == 'reject' else 'Cancelled')
+                c.execute("UPDATE lending_requests SET status=?, updated_at=CURRENT_TIMESTAMP WHERE id=?", (new_req_status, loan['request_id']))
         sync_stock(loan['book_id']);audit(f'Loan {loan_id}: {action}');notify(loan['user_id'],'Library record updated',f'Loan #{loan_id}: {action}','/members/library/');c.commit()
         flash('Library record updated.','success');return redirect('/admin/lending/')
     app.view_functions['admin_loan_status16']=loan_action

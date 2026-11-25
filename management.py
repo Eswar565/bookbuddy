@@ -29,12 +29,13 @@ MODELS = {
     'subscribers': ('Subscribers', 'subscribers', 'email edition_name'),
     'enquiries': ('Enquiries', 'contact_submissions', 'full_name email subject phone message'),
     'partners': ('Partner enquiries', 'partner_submissions', 'full_name email phone organisation proposal_type message status'),
+    'collaborators': ('Collaborators', 'collaborators', 'name category brief image link sort_order is_active'),
     'contributions': ('Reader contributions', 'reader_contributions', 'student_name email title category body status'),
 }
 READ_ONLY = {'orders','registrations','members','requests','enquiries','subscribers','contributions'}
-NUMBERS = {'price','fee','stock','capacity','seats','amount','total','event_id','position','download_count'}
+NUMBERS = {'price','fee','stock','capacity','seats','amount','total','event_id','position','download_count','sort_order'}
 BOOLS = {'is_active','is_online'}
-LONG = {'body','description','summary','message','address','proposal_type','hours'}
+LONG = {'body','description','summary','message','address','proposal_type','hours','brief'}
 
 def install_management(app, get_db, render_site, current_admin, base_dir):
     with app.app_context():
@@ -52,7 +53,12 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
             body TEXT, status TEXT DEFAULT 'Pending');
             CREATE TABLE IF NOT EXISTS working_hours (
             id INTEGER PRIMARY KEY, days TEXT NOT NULL DEFAULT '', hours TEXT NOT NULL DEFAULT '',
-            closed TEXT NOT NULL DEFAULT '', position INTEGER NOT NULL DEFAULT 0, is_active INTEGER NOT NULL DEFAULT 1);''')
+            closed TEXT NOT NULL DEFAULT '', position INTEGER NOT NULL DEFAULT 0, is_active INTEGER NOT NULL DEFAULT 1);
+            CREATE TABLE IF NOT EXISTS collaborators (
+            id INTEGER PRIMARY KEY, name TEXT NOT NULL, category TEXT NOT NULL,
+            brief TEXT NOT NULL DEFAULT '', image TEXT NOT NULL DEFAULT '', link TEXT NOT NULL DEFAULT '',
+            sort_order INTEGER NOT NULL DEFAULT 0, is_active INTEGER NOT NULL DEFAULT 1,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);''')
         if get_db().execute('SELECT COUNT(*) FROM working_hours').fetchone()[0] == 0:
             get_db().executescript('''
                 INSERT INTO working_hours(days, hours, closed, position, is_active) VALUES ('Tuesday – Sunday', '10:00 AM – 1:00 PM\n4:30 PM – 8:30 PM', '', 1, 1);
@@ -170,7 +176,9 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
         if request.method=='POST':
             if request.endpoint in {'razorpay_webhook_v9','membership_webhook17'}: return None
             expected=token()
-            actual=request.form.get('csrf_guard') or request.form.get('csrf_token') or request.headers.get('X-CSRFToken','')
+            json_body = request.get_json(silent=True) if request.is_json else None
+            json_token = (json_body.get('csrf_token') or json_body.get('csrf_guard')) if isinstance(json_body, dict) else ''
+            actual=request.form.get('csrf_guard') or request.form.get('csrf_token') or request.headers.get('X-CSRFToken','') or request.headers.get('X-CSRF-Token','') or json_token
             if not actual or not secrets.compare_digest(actual,expected):
                 abort(400,'Reload the page before submitting this form.')
 
@@ -340,11 +348,17 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
                     flash('Gallery page settings saved.', 'success')
                 elif action == 'upload':
                     files = request.files.getlist('photos')
-                    errs = gallery_service.add_gallery_photos(get_db, files)
+                    category = request.form.get('category', 'reading-moments')
+                    errs = gallery_service.add_gallery_photos(get_db, files, category=category)
                     if errs:
                         for err in errs: flash(err, 'danger')
                     else:
                         flash(f'Uploaded {len(files)} photo(s) successfully.', 'success')
+                elif action == 'update_category':
+                    gid = int(request.form.get('item_id', 0))
+                    cat = request.form.get('category', 'reading-moments')
+                    gallery_service.update_gallery_item_category(get_db, gid, cat)
+                    flash('Photo category updated.', 'success')
                 elif action == 'reorder':
                     db = get_db()
                     for key in request.form:
@@ -606,6 +620,13 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
         if kind=='partners':
             options['status']=[(v,v) for v in ['New','In Review','Contacted','Approved','Closed']]
             options['proposal_type']=[('Reading Circle Partner','Reading Circle Partner'),('School Library Outreach','School Library Outreach'),('Book Box Donation & Sponsorship','Book Box Donation & Sponsorship'),('Author & Storyteller Collaboration','Author & Storyteller Collaboration'),('Venue & Community Partner','Venue & Community Partner'),('Other','Other Collaboration')]
+        if kind=='collaborators':
+            options['category']=[
+                ('library-partners','Library Partners'),
+                ('storytellers-authors','Storytellers & Authors'),
+                ('community-partners','Community Partners'),
+                ('creative-partners','Creative Partners')
+            ]
         if kind in ('home-sections','homepage_sections'):
             options['section_key']=[('hero','Hero Section'),('community','Community & Events'),('publications','Publications'),('reviews','Reviews & Ratings'),('footer','Footer Details')]
         pass

@@ -1,0 +1,104 @@
+{% extends 'site/base.html' %}
+{% block title %}{{ category.title }} · Gallery · Book Buddy{% endblock %}
+
+{% block body %}
+<main class="gallery-hub">
+  <div class="bb8-container" style="max-width:1140px; margin:0 auto; padding:0 20px;">
+    <nav style="margin-bottom:20px; font-size:14px; color:var(--text-muted);" aria-label="Breadcrumb">
+      <a href="/" style="color:var(--navy); text-decoration:none;">Home</a> &rsaquo;
+      <a href="/gallery/" style="color:var(--navy); text-decoration:none;">Gallery</a> &rsaquo;
+      <span style="color:var(--text-muted); font-weight:600;">{{ category.title }}</span>
+    </nav>
+
+    <header class="gallery-hub-header" style="text-align:left; max-width:800px; margin:0 0 32px 0; padding:0;">
+      <span class="gallery-badge">{{ category.title }}</span>
+      <h1 style="text-align:left;">{{ category.title }}</h1>
+      <p style="text-align:left;">{{ category.short_line }}</p>
+    </header>
+
+    {% if photos %}
+    <div class="category-photos-grid">
+      {% for photo in photos %}
+      <button type="button" class="photo-item-card" data-lightbox-trigger="{{ photo.image_path }}" data-caption="{{ photo.alt_text }}" aria-label="View photo in full screen">
+        <img src="{{ photo.thumbnail_path or photo.image_path }}" alt="{{ photo.alt_text }}" loading="lazy" decoding="async">
+        <div class="photo-item-overlay">
+          <span>{{ photo.alt_text }}</span>
+        </div>
+      </button>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center; padding:48px 20px; background:var(--surface-card); border-radius:var(--radius-lg); border:1px dashed var(--border-color); margin-bottom:48px;">
+      <p style="color:var(--text-muted); font-size:16px; margin:0;">New photographs for this collection are coming soon!</p>
+    </div>
+    {% endif %}
+
+    <!-- Category CTA Footer -->
+    {% if category.cta_link %}
+    <section class="category-page-cta">
+      <h3>{{ category.cta_text }}</h3>
+      <p>{{ category.cta_desc }}</p>
+      <a href="{{ category.cta_link }}" class="btn-cta-link">
+        <span>{{ category.cta_text }}</span>
+        <span aria-hidden="true">&rarr;</span>
+      </a>
+    </section>
+    {% endif %}
+  </div>
+</main>
+
+<!-- Lightbox Modal -->
+<div class="bb-lightbox" id="bb-lightbox" role="dialog" aria-modal="true" aria-label="Image preview">
+  <div class="bb-lightbox-content">
+    <button type="button" class="bb-lightbox-close" id="bb-lightbox-close" aria-label="Close preview">&times;</button>
+    <img src="" alt="" class="bb-lightbox-img" id="bb-lightbox-img">
+    <div class="bb-lightbox-caption" id="bb-lightbox-caption"></div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var lightbox = document.getElementById('bb-lightbox');
+    var lightboxImg = document.getElementById('bb-lightbox-img');
+    var lightboxCap = document.getElementById('bb-lightbox-caption');
+    var closeBtn = document.getElementById('bb-lightbox-close');
+
+    function openLightbox(src, caption) {
+      if (!lightbox || !lightboxImg) return;
+      lightboxImg.src = src;
+      lightboxImg.alt = caption || 'Book Buddy gallery photo';
+      lightboxCap.textContent = caption || '';
+      lightbox.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      if (!lightbox) return;
+      lightbox.classList.remove('active');
+      if (lightboxImg) lightboxImg.src = '';
+      document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('[data-lightbox-trigger]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var src = this.getAttribute('data-lightbox-trigger');
+        var cap = this.getAttribute('data-caption');
+        openLightbox(src, cap);
+      });
+    });
+
+    if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+    if (lightbox) {
+      lightbox.addEventListener('click', function (e) {
+        if (e.target === lightbox) closeLightbox();
+      });
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && lightbox && lightbox.classList.contains('active')) {
+        closeLightbox();
+      }
+    });
+  });
+</script>
+{% endblock %}

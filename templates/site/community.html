@@ -1,0 +1,120 @@
+{% extends 'site/base.html' %}
+{% block title %}Community · Reading Circles, Contests & Gatherings · Book Buddy{% endblock %}
+
+{% block body %}
+<main class="community-hub-page">
+  <div class="bb8-container">
+    <!-- Hero Banner -->
+    <header class="community-hero">
+      <span class="gallery-badge" style="background:rgba(255,255,255,0.18); color:#fff; border:1px solid rgba(255,255,255,0.3);">Our Reading Family</span>
+      <h1>Welcome to the Book Buddy Community</h1>
+      <p>Stories are meant to be shared, lived, and celebrated together. We bring readers, parents, children, and authors together through inspiring reading circles, friendly creative contests, and thoughtful library gatherings.</p>
+      <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
+        <a href="/events/" class="btn-cta-link" style="background:#fff; color:var(--navy);">
+          Explore Events &amp; Contests &rarr;
+        </a>
+        <a href="/community/media/" class="btn-cta-link" style="background:transparent; color:#fff; border:1.5px solid #fff;">
+          Read Our Media &rarr;
+        </a>
+      </div>
+    </header>
+
+    <!-- 4 Community Pillars Grid -->
+    <div class="community-pillars-grid">
+      <!-- 1. Reading Circles -->
+      <article class="community-pillar-card">
+        <div class="community-pillar-icon" aria-hidden="true">
+          <svg class="bb-icon" style="width:28px;height:28px;"><use href="#i-book-open"/></svg>
+        </div>
+        <h2>Reading Circles</h2>
+        <p>Curated reading sessions for children and adults. We dive into rich stories, discuss themes, build vocabulary, and nurture lifelong reading habits.</p>
+        <a href="/events/?type=reading-circle" class="pillar-link">
+          Explore Reading Circles &rarr;
+        </a>
+      </article>
+
+      <!-- 2. Contests & Creative Challenges -->
+      <article class="community-pillar-card">
+        <div class="community-pillar-icon" aria-hidden="true" style="color:var(--gold); background:var(--gold-tint);">
+          <svg class="bb-icon" style="width:28px;height:28px;"><use href="#i-trophy"/></svg>
+        </div>
+        <h2>Contests &amp; Challenges</h2>
+        <p>From story-writing contests and bookmark creation to vocabulary challenges, our friendly competitions recognize young talent and encourage creative expression.</p>
+        <a href="/events/?type=contest" class="pillar-link">
+          See Active Contests &rarr;
+        </a>
+      </article>
+
+      <!-- 3. Workshops & Author Visits -->
+      <article class="community-pillar-card">
+        <div class="community-pillar-icon" aria-hidden="true" style="color:var(--maroon); background:var(--maroon-tint);">
+          <svg class="bb-icon" style="width:28px;height:28px;"><use href="#i-calendar"/></svg>
+        </div>
+        <h2>Events &amp; Workshops</h2>
+        <p>Meet children's book authors, participate in hands-on art &amp; craft sessions, and attend educational seminars hosted right in our Saligramam library room.</p>
+        <a href="/events/" class="pillar-link">
+          Browse Events Calendar &rarr;
+        </a>
+      </article>
+
+      <!-- 4. Reader Contributions -->
+      <article class="community-pillar-card">
+        <div class="community-pillar-icon" aria-hidden="true">
+          <svg class="bb-icon" style="width:28px;height:28px;"><use href="#i-pencil"/></svg>
+        </div>
+        <h2>Reader Contributions</h2>
+        <p>Your child wrote a heartwarming story, poem, or book review? Share it with us to be featured in our student newspapers, magazines, and podcasts!</p>
+        <a href="/submit-contribution/" class="pillar-link">
+          Submit Your Story &rarr;
+        </a>
+      </article>
+    </div>
+
+    <!-- Clear Section Linking to Media -->
+    <section style="background:var(--surface-card); border:1px solid var(--border-color); border-radius:var(--radius-xl); padding:36px; margin:0 auto 48px; max-width:1140px; box-shadow:var(--shadow-sm);">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px; margin-bottom:24px;">
+        <div>
+          <span class="gallery-badge" style="margin-bottom:8px;">Read, Listen &amp; Learn</span>
+          <h2 style="font-size:24px; font-weight:700; color:var(--navy); margin:0 0 6px;">Media Hub: Newspapers, Magazines &amp; Podcasts</h2>
+          <p style="color:var(--text-muted); font-size:15px; margin:0;">Explore publications written by and for young readers, parents, and literature lovers.</p>
+        </div>
+        <a href="/community/media/" class="btn-book-event" style="background:var(--navy); font-size:14px;">
+          View All Media Publications &rarr;
+        </a>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:20px;">
+        <div style="background:var(--surface-body); padding:20px; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+          <h3 style="font-size:17px; font-weight:700; color:var(--navy); margin:0 0 6px;">Newspapers</h3>
+          <p style="font-size:13px; color:var(--text-muted); margin:0 0 12px; line-height:1.5;">Student journalism, book roundups, and young author spotlights in our community newspaper editions.</p>
+          <a href="/community/media/?tab=newspapers" style="font-size:13px; font-weight:700; color:var(--maroon); text-decoration:none;">Read Newspapers &rarr;</a>
+        </div>
+        <div style="background:var(--surface-body); padding:20px; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+          <h3 style="font-size:17px; font-weight:700; color:var(--navy); margin:0 0 6px;">Magazines</h3>
+          <p style="font-size:13px; color:var(--text-muted); margin:0 0 12px; line-height:1.5;">Quarterly literary magazines filled with illustrated adventures, creative writing, and reader reviews.</p>
+          <a href="/community/media/?tab=magazines" style="font-size:13px; font-weight:700; color:var(--maroon); text-decoration:none;">Browse Magazines &rarr;</a>
+        </div>
+        <div style="background:var(--surface-body); padding:20px; border-radius:var(--radius-md); border:1px solid var(--border-color);">
+          <h3 style="font-size:17px; font-weight:700; color:var(--navy); margin:0 0 6px;">Podcasts</h3>
+          <p style="font-size:13px; color:var(--text-muted); margin:0 0 12px; line-height:1.5;">Audio episodes featuring engaging bedtime stories, author discussions, and reading tips for parents.</p>
+          <a href="/community/media/?tab=podcasts" style="font-size:13px; font-weight:700; color:var(--maroon); text-decoration:none;">Listen to Podcasts &rarr;</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Join Callout Footer -->
+    <section class="category-page-cta" style="margin-top:0;">
+      <h3>Ready to Join Our Community?</h3>
+      <p>Whether you're visiting our reading room in Chennai, joining an online circle, or sharing your creative story, there is always an open chair for you at Book Buddy.</p>
+      <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+        <a href="/visit-us/" class="btn-cta-link">
+          Visit Our Library
+        </a>
+        <a href="/contact/" class="btn-cta-link" style="background:transparent; color:#fff; border:1.5px solid #fff;">
+          Contact Us
+        </a>
+      </div>
+    </section>
+  </div>
+</main>
+{% endblock %}
