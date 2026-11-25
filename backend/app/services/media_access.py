@@ -61,8 +61,22 @@ def install_media_access(app, db, render, root):
             resolved = (media_root / path[7:]).resolve()
             if not resolved.is_relative_to(media_root): return None
         else:
-            resolved = (Path(root)/path.lstrip('/')).resolve()
-            allowed = [(Path(root)/p).resolve() for p in ('static/uploads','static/demo')]
+            rel = path.lstrip('/')
+            candidates = []
+            if hasattr(app, 'static_folder') and app.static_folder:
+                candidates.append(Path(app.static_folder).parent)
+            candidates.extend([Path(root), Path(root) / 'backend' / 'app', Path(root) / 'app'])
+            resolved = None
+            for base in candidates:
+                cand = (base / rel).resolve()
+                if cand.exists():
+                    resolved = cand
+                    break
+            if not resolved:
+                resolved = (Path(root) / rel).resolve()
+            allowed = []
+            for base in candidates:
+                allowed.extend([(base / p).resolve() for p in ('static/uploads', 'static/demo')])
             if not any(resolved.is_relative_to(base) for base in allowed): return None
         if any(part in {'users','interns','resumes'} for part in Path(path).parts):return None
         return resolved

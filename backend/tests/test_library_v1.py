@@ -2,18 +2,31 @@ from pathlib import Path
 import pytest
 ROOT=Path(__file__).resolve().parents[1]
 
+def get_file(rel_path: str) -> Path:
+    candidates = [
+        ROOT / rel_path,
+        ROOT / "app" / rel_path,
+        ROOT / "app" / "services" / rel_path,
+        ROOT / "app" / "routes" / rel_path,
+        ROOT / "app" / "templates" / rel_path,
+    ]
+    for c in candidates:
+        if c.exists():
+            return c
+    return ROOT / rel_path
+
 def test_standalone_library_package():
     for name in ('app.py','access.py','about_content.py','library_core.py','library_centers.py'):
-        assert (ROOT/name).is_file()
+        assert get_file(name).is_file()
     for obsolete in ('bookbuddy_reference.py','learning.py','skills26.py','seeds.py'):
         assert not (ROOT/obsolete).exists()
     assert not list(ROOT.glob('BOOKBUDDY_V*.md'))
 
 def test_about_never_downloads_remote_references():
     for name in ('access.py','about_content.py','about_editor.py'):
-        source=(ROOT/name).read_text(encoding='utf-8')
+        source=get_file(name).read_text(encoding='utf-8')
         assert 'from bookbuddy_reference' not in source
-    form=(ROOT/'templates/workspace/about_editor.html').read_text(encoding='utf-8')
+    form=get_file('workspace/about_editor.html').read_text(encoding='utf-8')
     for key in ('about_philosophy_intro','about_philosophy_body','about_ikigai_url'):
         assert f'name="{key}"' in form
 
@@ -35,9 +48,9 @@ def test_public_site_and_retired_routes():
 
 
 def test_no_class_schedule_startup_or_skills_dependencies():
-    source=(ROOT/'portal.py').read_text(encoding='utf-8')
-    schema=(ROOT/'schema.sql').read_text(encoding='utf-8')
-    app_source=(ROOT/'app.py').read_text(encoding='utf-8')
+    source=get_file('portal.py').read_text(encoding='utf-8')
+    schema=get_file('schema.sql').read_text(encoding='utf-8')
+    app_source=(get_file('site.py') if get_file('site.py').is_file() else get_file('app.py')).read_text(encoding='utf-8')
     assert 'class_schedules' not in source
     assert 'class_schedules' not in schema
     assert 'CREATE TABLE IF NOT EXISTS classes' not in app_source
@@ -70,8 +83,8 @@ def test_about_editor_installer_is_importable():
     assert callable(install_about_editor)
 
 def test_retired_payment_trigger_cannot_break_sqlite_migrations():
-    src=(ROOT/'app.py').read_text(encoding='utf-8')
-    notifications=(ROOT/'notifications.py').read_text(encoding='utf-8')
+    src=(get_file('site.py') if get_file('site.py').is_file() else get_file('app.py')).read_text(encoding='utf-8')
+    notifications=get_file('notifications.py').read_text(encoding='utf-8')
     assert 'DROP TRIGGER IF EXISTS notify10_event_payment' in src
     assert 'DROP TRIGGER IF EXISTS notify10_event_payment' in notifications
     assert 'CREATE TRIGGER IF NOT EXISTS notify10_event_payment' not in notifications

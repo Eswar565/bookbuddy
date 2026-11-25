@@ -1,18 +1,37 @@
+# Dependencies and virtual environments
+node_modules/
+dist/
+.venv/
 __pycache__/
 *.py[cod]
 .pytest_cache/
-.venv/
+
+# Local configuration and state
 .env
+.session-secret
 instance/
 media/
 backups/
 *backup*/
+*.bak
+*.png.bak
 *.sqlite3
 *.sqlite3-journal
-*.bak
 *.db
 *.zip
-scratch_*.py
-scratch/
-frontend/node_modules/
 
+# Archived directories outside repo
+scratch/
+scratch_*.py
+media_backup_*/
+
+# Frontend build outputs
+frontend/dist/
+frontend/node_modules/
+*.tsbuildinfo
+
+# Junction aliases for legacy path compatibility
+/static
+/templates
+/backend/static
+/backend/templates

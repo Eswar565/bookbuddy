@@ -15,9 +15,22 @@ import sqlite3
 from dataclasses import dataclass, field
 from datetime import date, datetime, timezone
 from functools import wraps
+import sys
 from pathlib import Path
+
+ROUTES_DIR = Path(__file__).resolve().parent
+APP_DIR = ROUTES_DIR.parent
+SERVICES_DIR = APP_DIR / "services"
+BACKEND_DIR = APP_DIR.parent
+ROOT_DIR = BACKEND_DIR.parent
+BASE_DIR = APP_DIR
+
+for _p in (str(SERVICES_DIR), str(ROUTES_DIR), str(APP_DIR), str(BACKEND_DIR), str(ROOT_DIR)):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
 from dotenv import load_dotenv
-load_dotenv(os.environ.get("BOOK_BUDDY_ENV_FILE", Path(__file__).resolve().parent / ".env"), override=False)
+load_dotenv(os.environ.get("BOOK_BUDDY_ENV_FILE", ROOT_DIR / ".env"), override=False)
 from typing import Any
 
 from flask import (
@@ -41,7 +54,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.routing import BuildError
 
 
-BASE_DIR = Path(__file__).resolve().parent
 if os.environ.get("VERCEL"):  # read-only filesystem: keep writable data in /tmp
     _tmp = Path("/tmp/bookbuddy")
     for _k, _v in (("BOOK_BUDDY_DATABASE", _tmp / "book_buddy.sqlite3"),
@@ -49,12 +61,13 @@ if os.environ.get("VERCEL"):  # read-only filesystem: keep writable data in /tmp
                    ("BOOK_BUDDY_BACKUP_DIR", _tmp / "backups")):
         os.environ.setdefault(_k, str(_v))
     os.environ.setdefault("SECRET_KEY", "change-me-set-SECRET_KEY-in-vercel")
-DATABASE_PATH = Path(os.environ.get("BOOK_BUDDY_DATABASE", BASE_DIR / "instance" / "book_buddy.sqlite3"))
+# Database lives in instance/ at the project root (not inside backend/)
+DATABASE_PATH = Path(os.environ.get("BOOK_BUDDY_DATABASE", ROOT_DIR / "instance" / "book_buddy.sqlite3"))
 
 def get_database_path() -> Path:
     return DATABASE_PATH
 
-app = Flask(__name__, template_folder=str(BASE_DIR / "templates"), static_folder=str(BASE_DIR / "static"))
+app = Flask(__name__, template_folder=str(APP_DIR / "templates"), static_folder=str(APP_DIR / "static"))
 secret_path = DATABASE_PATH.parent / '.session-secret'
 secret_path.parent.mkdir(parents=True, exist_ok=True)
 if not os.environ.get('SECRET_KEY') and not secret_path.exists():
@@ -1557,7 +1570,7 @@ def save_admin_upload(field: str, category: str, kind: str = "image") -> str:
     raw = f.read(10 * 1024 * 1024 + 1)
     if not raw or len(raw) > 10 * 1024 * 1024:
         raise ValueError("Upload must be smaller than 10 MB")
-    dest = BASE_DIR / 'media' / 'admin' / category
+    dest = ROOT_DIR / 'media' / 'admin' / category
     dest.mkdir(parents=True, exist_ok=True)
     key = secrets.token_hex(15)
     if kind == 'pdf':
@@ -1700,7 +1713,7 @@ def dynamic_page(template_name: str) -> Response:
 def media(filename: str) -> Response:
     from flask import send_from_directory
 
-    return send_from_directory(BASE_DIR / "media", filename)
+    return send_from_directory(ROOT_DIR / "media", filename)
 
 
 @app.post("/save-subscriber-email/", endpoint="save_subscriber")
@@ -2049,13 +2062,13 @@ def bookbuddy_favicon():
 
 # Per-publication free/paid access, installed after legacy hooks.
 from media_access import install_media_access
-install_media_access(app, get_db, render_site, BASE_DIR)
+install_media_access(app, get_db, render_site, ROOT_DIR)
 
 from site_design import install_site_design
 install_site_design(app, get_db)
 
 from spa_serving import install_spa_serving
-install_spa_serving(app, BASE_DIR)
+install_spa_serving(app, ROOT_DIR)
 
 if __name__ == "__main__":
     app.run(host=os.environ.get("FLASK_HOST", "127.0.0.1"), port=int(os.environ.get("FLASK_PORT", "5000")), debug=os.environ.get("FLASK_DEBUG", "0") == "1")

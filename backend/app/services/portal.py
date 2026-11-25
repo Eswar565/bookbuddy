@@ -98,7 +98,12 @@ def install_release17(app,db,render,admin,root):
             have={r[1] for r in c.execute('PRAGMA table_info('+table+')')}
             for name,definition in fields.items():
                 if name not in have:c.execute(f'ALTER TABLE {table} ADD COLUMN {name} {definition}')
-        c.executescript((root/'schema.sql').read_text())
+        schema_path = root / 'schema.sql'
+        if not schema_path.exists():
+            schema_path = root.parent / 'schema.sql'
+        if not schema_path.exists():
+            schema_path = root.parent.parent / 'schema.sql'
+        c.executescript(schema_path.read_text())
         if not c.execute("SELECT 1 FROM schema_updates WHERE version='v17'").fetchone():
             c.execute('UPDATE lending_plans SET duration_days=MAX(1,months*30)')
             c.execute('UPDATE lending_subscriptions SET book_limit_snapshot=(SELECT book_limit FROM lending_plans WHERE id=lending_subscriptions.plan_id) WHERE book_limit_snapshot=0')

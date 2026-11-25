@@ -1,10 +1,16 @@
 import os
+import sys
+from pathlib import Path
 
-# Default to development environment for local server runs if not set
+ROOT_DIR = Path(__file__).resolve().parent
+BACKEND_DIR = ROOT_DIR / "backend"
+for p in (str(BACKEND_DIR), str(BACKEND_DIR / "app"), str(BACKEND_DIR / "app" / "services")):
+    if p not in sys.path:
+        sys.path.insert(0, p)
+
 os.environ.setdefault("APP_ENV", "development")
 
 from app import app, get_database_path
-
 
 if __name__ == "__main__":
     db_file = get_database_path()
@@ -15,5 +21,3 @@ if __name__ == "__main__":
         port=port,
         debug=False,
     )
-
-

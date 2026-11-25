@@ -6,7 +6,9 @@ from PIL import Image
 
 BASE_DIR = Path(__file__).resolve().parent
 IS_VERCEL = os.environ.get("VERCEL") == "1" or os.environ.get("VERCEL_ENV") is not None
-MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", "/tmp/media" if IS_VERCEL else BASE_DIR / "media")).resolve()
+# Media lives at project root (parent of backend/), not inside backend/
+_media_root_default = "/tmp/media" if IS_VERCEL else str(BASE_DIR.parent / "media")
+MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", _media_root_default)).resolve()
 THUMBNAIL_DIR = os.path.join(str(MEDIA_ROOT), "thumbnails", "gallery")
 UPLOAD_DIR = os.path.join(str(MEDIA_ROOT), "admin", "gallery")
 
