@@ -175,6 +175,7 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
     def secure_mutations():
         if request.method=='POST':
             if request.endpoint in {'razorpay_webhook_v9','membership_webhook17'}: return None
+            if request.path.startswith('/api/'): return None
             expected=token()
             json_body = request.get_json(silent=True) if request.is_json else None
             json_token = (json_body.get('csrf_token') or json_body.get('csrf_guard')) if isinstance(json_body, dict) else ''

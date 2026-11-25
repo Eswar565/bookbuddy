@@ -18,7 +18,7 @@ PUBLIC_EXACT = {'/', '/about/', '/contact/', '/membership/', '/plans/', '/how-to
     '/maths/', '/english/', '/financial-literacy/', '/ba/',
     '/accounts/login/', '/account/login/', '/login/', '/accounts/signup/', '/account/signup/', '/signup/',
     '/accounts/password/reset/', '/account/password/reset/', '/membership-options/', '/robots.txt', '/sitemap.xml', '/favicon.ico'}
-PUBLIC_PREFIX = ('/static/', '/media/', '/admin/')
+PUBLIC_PREFIX = ('/static/', '/media/', '/admin/', '/api/')
 SCHOOL_GRADES = ['LKG','UKG'] + [f'Std {x}' for x in range(1,13)]
 COLLEGE_GRADES = [f'Degree Year {x}' for x in range(1,5)] + [f'PG Year {x}' for x in range(1,3)]
 
@@ -192,7 +192,7 @@ def install_release16(app, db, render_site, admin):
 
     @app.after_request
     def v16_security(resp):
-        if request.path not in PUBLIC_EXACT and not request.path.startswith(('/static/','/media/','/assets/')):
+        if request.path not in PUBLIC_EXACT and not request.path.startswith(('/static/','/media/','/assets/','/api/')):
             resp.headers['Cache-Control']='private, no-store'
             resp.headers['X-Robots-Tag']='noindex, nofollow'
         resp.headers.setdefault('X-Content-Type-Options','nosniff')

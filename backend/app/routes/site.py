@@ -2070,5 +2070,8 @@ install_site_design(app, get_db)
 from spa_serving import install_spa_serving
 install_spa_serving(app, ROOT_DIR)
 
+from backend.app.api import install_api
+install_api(app)
+
 if __name__ == "__main__":
     app.run(host=os.environ.get("FLASK_HOST", "127.0.0.1"), port=int(os.environ.get("FLASK_PORT", "5000")), debug=os.environ.get("FLASK_DEBUG", "0") == "1")

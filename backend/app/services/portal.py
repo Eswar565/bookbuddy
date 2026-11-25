@@ -270,7 +270,8 @@ def install_release17(app,db,render,admin,root):
 
     for error_code in (400,401,403,409,413,429,503):
         def friendly_error(error):
-            if request.accept_mimetypes.best=='application/json':return jsonify(error=error.description),error.code
+            if request.path.startswith('/api/') or request.is_json or request.accept_mimetypes.best=='application/json':
+                return jsonify(ok=False, error={"code": f"HTTP_{error.code}", "message": getattr(error, "description", str(error))}), error.code
             return page('error', {400:'Check your request',401:'Sign in to continue',403:'Access required',409:'Action could not be completed',413:'File too large',429:'Please try again shortly',503:'Service temporarily unavailable'}.get(error.code,'Request error'),message=error.description,error_code=error.code),error.code
         app.register_error_handler(error_code,friendly_error)
 
