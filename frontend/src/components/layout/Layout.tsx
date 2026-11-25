@@ -2,6 +2,8 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
+import { FloatingCheckout } from '../cart/FloatingCheckout';
+import { CheckoutModal } from '../cart/CheckoutModal';
 
 export const Layout: React.FC = () => {
   return (
@@ -11,6 +13,8 @@ export const Layout: React.FC = () => {
         <Outlet />
       </main>
       <Footer />
+      <FloatingCheckout />
+      <CheckoutModal />
     </div>
   );
 };
