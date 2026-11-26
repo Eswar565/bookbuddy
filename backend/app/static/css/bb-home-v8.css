@@ -122,7 +122,8 @@ body.bookbuddy-modern :is(h1, h2, h3, h4, h5, h6, .bb8-hero-title, .bb8-hero-lin
   font-size: 15px;
   font-weight: 500;
   color: var(--ink-muted);
-  text-decoration: none;
+  text-decoration: none !important;
+  border-bottom: none !important;
   padding: 8px 12px;
   border-radius: var(--radius-sm);
   transition: color 0.15s, background-color 0.15s;
@@ -131,11 +132,25 @@ body.bookbuddy-modern :is(h1, h2, h3, h4, h5, h6, .bb8-hero-title, .bb8-hero-lin
   gap: 4px;
 }
 
+.bb8-nav-link::after {
+  content: none !important;
+  display: none !important;
+}
+
 .bb8-nav-link:hover,
-.bb8-nav-link[aria-current="page"] {
+.bb8-nav-link[aria-current="page"],
+.bb8-nav-link.is-active {
   color: var(--navy);
   background-color: var(--tint);
   font-weight: 600;
+  text-decoration: none !important;
+  border-bottom: none !important;
+}
+
+.bb8-nav-link:focus-visible,
+.bb8-dropdown summary:focus-visible {
+  outline: 2px solid var(--navy) !important;
+  outline-offset: 2px !important;
 }
 
 /* Accessible Dropdowns */
