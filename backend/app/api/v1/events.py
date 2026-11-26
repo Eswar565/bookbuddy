@@ -10,7 +10,33 @@ events_bp = Blueprint("api_events", __name__)
 @events_bp.get("/events")
 def list_events():
     db = get_db()
-    rows = db.execute("SELECT * FROM events WHERE is_active=1 ORDER BY event_date ASC, event_time ASC").fetchall()
+    view = request.args.get("view", "current").strip().lower()
+    event_type = request.args.get("type", "").strip().lower()
+    chosen_date = request.args.get("date", "").strip()
+    today = datetime.now().date().isoformat()
+
+    query = "SELECT * FROM events WHERE (is_active=1 OR is_active IS NULL)"
+    params = []
+
+    if chosen_date:
+        query += " AND event_date = ?"
+        params.append(chosen_date)
+    elif view == "past":
+        query += " AND event_date < ?"
+        params.append(today)
+    elif view == "current":
+        query += " AND event_date >= ?"
+        params.append(today)
+
+    if event_type in ("contest", "contests"):
+        query += " AND LOWER(category) IN ('contest', 'contests')"
+    elif event_type in ("reading-circle", "reading_circle", "reading-circles"):
+        query += " AND LOWER(category) IN ('reading-circle', 'reading_circle', 'reading-circles')"
+    elif event_type in ("upcoming", "event", "events", "workshop"):
+        query += " AND (LOWER(category) IN ('upcoming', 'event', 'events', 'workshop') OR category IS NULL OR category = '')"
+
+    query += " ORDER BY event_date " + ("DESC" if view == "past" else "ASC") + ", event_time ASC"
+    rows = db.execute(query, params).fetchall()
     events = [dict(r) for r in rows]
     for ev in events:
         ev["seats_left"] = max(0, int(ev.get("capacity") or 0) - int(ev.get("booked_seats") or 0))

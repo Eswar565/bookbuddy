@@ -471,6 +471,27 @@ def init_db() -> None:
             connection.execute("ALTER TABLE lending_loans ADD COLUMN delivery_address TEXT NOT NULL DEFAULT ''")
         if "contact_phone" not in loan_cols:
             connection.execute("ALTER TABLE lending_loans ADD COLUMN contact_phone TEXT NOT NULL DEFAULT ''")
+
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS member_favourites (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            book_id INTEGER NOT NULL REFERENCES books(id) ON DELETE CASCADE,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(user_id, book_id)
+        );
+        """
+    )
+    connection.execute("CREATE INDEX IF NOT EXISTS idx_member_favourites_user ON member_favourites(user_id);")
+
+    # Migrate Summer Special to Beginner Plan across all existing plan records
+    has_lending_plans = bool(connection.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='lending_plans'").fetchone())
+    if has_lending_plans:
+        connection.execute("UPDATE lending_plans SET tagline='Beginner Plan' WHERE tagline='Summer Special'")
+        connection.execute("UPDATE lending_plans SET name=REPLACE(name, 'Summer Special', 'Beginner Plan') WHERE name LIKE '%Summer Special%'")
+        connection.execute("UPDATE lending_plans SET description=REPLACE(description, 'Summer Special', 'Beginner Plan') WHERE description LIKE '%Summer Special%'")
+
     connection.commit()
     connection.close()
 
@@ -758,7 +779,7 @@ def base_context(template_name: str = "") -> dict[str, Any]:
     books = [row_to_book(row) for row in db.execute("SELECT * FROM books ORDER BY id DESC").fetchall()]
     now = datetime.now(timezone.utc)
     plans = [
-        CompatObject({"id": 1, "plan_type": "2 Months", "tagline": "Summer Special", "solo_price": 800, "family_price": 1200, "total_books": 2, "get_plan_type_display": "2 Months", "get_features_list": ["2 books at a time", "Reading circle access"]}),
+        CompatObject({"id": 1, "plan_type": "2 Months", "tagline": "Beginner Plan", "solo_price": 800, "family_price": 1200, "total_books": 2, "get_plan_type_display": "2 Months", "get_features_list": ["2 books at a time", "Reading circle access"]}),
         CompatObject({"id": 2, "plan_type": "3 Months", "tagline": "Regular Explorer", "solo_price": 1100, "family_price": 1600, "total_books": 3, "get_plan_type_display": "3 Months", "get_features_list": ["3 books at a time", "Learning activities"]}),
         CompatObject({"id": 3, "plan_type": "9 Months", "tagline": "Academic Year", "solo_price": 2800, "family_price": 4000, "total_books": 9, "get_plan_type_display": "9 Months", "get_features_list": ["9 books at a time", "All learning modules"]}),
     ]
@@ -960,6 +981,11 @@ def paged_books(*, collection_filter: bool = True) -> dict[str, Any]:
     delivery_settings.setdefault("membership_pickup_address", "Gandhi Nagar, Saligramam, Chennai")
     delivery_settings.setdefault("membership_delivery_day", "Fixed pick-up & drop on designated weekday (e.g. Saturday)")
 
+    favourite_book_ids = set()
+    if u and u.is_authenticated:
+        fav_rows = db.execute("SELECT book_id FROM member_favourites WHERE user_id=?", (u.id,)).fetchall()
+        favourite_book_ids = {r[0] for r in fav_rows}
+
     return {
         "filter_options": options, "filters23": chosen, "catalogue_url": catalogue_url,
         "books": [row_dict(row) for row in rows],
@@ -972,6 +998,7 @@ def paged_books(*, collection_filter: bool = True) -> dict[str, Any]:
         "active_chips": active_chips,
         "export_url": export_url,
         "active_book_ids": active_book_ids,
+        "favourite_book_ids": favourite_book_ids,
         "member_active_sub": active_sub,
         "member_active_cnt": active_cnt,
         "delivery_settings": delivery_settings,
@@ -997,13 +1024,31 @@ def modern_library() -> Response:
 @app.get("/library/export/<fmt>/", endpoint="library_export")
 def library_export(fmt: str) -> Response:
     import library_filters
-    books = library_filters.get_filtered_books_for_export(get_db(), flask_request.args)
     if fmt.lower() in ("xlsx", "excel"):
+        books = library_filters.get_filtered_books_for_export(get_db(), flask_request.args)
         return library_filters.export_books_excel(books)
     elif fmt.lower() in ("pdf",):
-        return library_filters.export_books_pdf(books)
+        from flask import abort
+        abort(404)
     else:
         return redirect(flask_url_for("modern_library"))
+
+
+@app.get("/library/favourites/", endpoint="library_favourites")
+def library_favourites() -> Response:
+    u = current_user()
+    db = get_db()
+    fav_books = []
+    if u and u.is_authenticated:
+        rows = db.execute(
+            """SELECT b.* FROM books b
+               JOIN member_favourites mf ON b.id = mf.book_id
+               WHERE mf.user_id = ? AND b.archived = 0
+               ORDER BY mf.created_at DESC""",
+            (u.id,)
+        ).fetchall()
+        fav_books = [row_dict(r) for r in rows]
+    return render_site("library", "favourites", fav_books=fav_books, user=u)
 
 
 @app.post("/library/checkout/", endpoint="library_checkout")
@@ -1246,26 +1291,22 @@ def community_hub() -> Response:
     return render_site("community", "community", upcoming_events=upcoming_events, latest_media=latest_media)
 
 
+@app.get("/media/", endpoint="media_landing")
 @app.get("/community/media/", endpoint="community_media")
 def community_media() -> Response:
+    tab = flask_request.args.get("tab", "").strip().lower()
+    if tab in {"newspapers", "newspaper", "news"}:
+        return redirect("/newspaper/", code=301)
+    elif tab in {"magazines", "magazine"}:
+        return redirect("/magazine/", code=301)
+    elif tab in {"podcasts", "podcast"}:
+        return redirect("/podcasts/", code=301)
+
     db = get_db()
-    active_tab = flask_request.args.get("tab", "").strip().lower()
-    if not active_tab or active_tab not in {"newspapers", "newspaper", "news", "magazines", "magazine", "podcasts", "podcast"}:
-        active_tab = "all"
-    elif active_tab in {"newspaper", "news"}:
-        active_tab = "newspapers"
-    elif active_tab == "magazine":
-        active_tab = "magazines"
-    elif active_tab == "podcast":
-        active_tab = "podcasts"
-
-    access_filter = flask_request.args.get("access", "").strip().lower()
-    access_clause = " AND is_paid=0" if access_filter == "free" else (" AND is_paid=1" if access_filter == "paid" else "")
-
-    newspapers = [dict(r) for r in db.execute(f"SELECT * FROM publications WHERE is_active=1 AND kind='news'{access_clause} ORDER BY published_on DESC, id DESC").fetchall()]
-    magazines = [dict(r) for r in db.execute(f"SELECT * FROM publications WHERE is_active=1 AND kind='magazine'{access_clause} ORDER BY published_on DESC, id DESC").fetchall()]
-    podcasts = [dict(r) for r in db.execute(f"SELECT * FROM publications WHERE is_active=1 AND kind='podcast'{access_clause} ORDER BY published_on DESC, id DESC").fetchall()]
-    return render_site("media_hub", "community", active_tab=active_tab, newspapers=newspapers, magazines=magazines, podcasts=podcasts)
+    newspapers = [dict(r) for r in db.execute("SELECT * FROM publications WHERE is_active=1 AND kind='news' ORDER BY published_on DESC, id DESC").fetchall()]
+    magazines = [dict(r) for r in db.execute("SELECT * FROM publications WHERE is_active=1 AND kind='magazine' ORDER BY published_on DESC, id DESC").fetchall()]
+    podcasts = [dict(r) for r in db.execute("SELECT * FROM publications WHERE is_active=1 AND kind='podcast' ORDER BY published_on DESC, id DESC").fetchall()]
+    return render_site("media_hub", "community", newspapers=newspapers, magazines=magazines, podcasts=podcasts)
 
 
 @app.get("/events/", endpoint="events_page")
@@ -1275,9 +1316,10 @@ def events_page() -> Response:
     view = flask_request.args.get("view", "current").strip().lower()
     event_type = flask_request.args.get("type", "").strip().lower()
     chosen_date = flask_request.args.get("date", "").strip()
+    month_arg = flask_request.args.get("month", "").strip()
 
-    query = "SELECT * FROM events WHERE is_active=1"
-    params = []
+    query = "SELECT * FROM events WHERE (is_active=1 OR is_active IS NULL)"
+    params: list[Any] = []
 
     if chosen_date:
         query += " AND event_date = ?"
@@ -1289,19 +1331,25 @@ def events_page() -> Response:
         query += " AND event_date >= ?"
         params.append(today)
 
-    if event_type in ("contest", "reading-circle", "upcoming"):
-        query += " AND category = ?"
-        params.append(event_type)
+    cat_clause = ""
+    if event_type in ("contest", "contests"):
+        cat_clause = " AND LOWER(category) IN ('contest', 'contests')"
+    elif event_type in ("reading-circle", "reading_circle", "reading-circles"):
+        cat_clause = " AND LOWER(category) IN ('reading-circle', 'reading_circle', 'reading-circles')"
+    elif event_type in ("upcoming", "event", "events", "workshop"):
+        cat_clause = " AND (LOWER(category) IN ('upcoming', 'event', 'events', 'workshop') OR category IS NULL OR category = '')"
 
+    query += cat_clause
     query += " ORDER BY event_date " + ("DESC" if view == "past" else "ASC") + ", event_time ASC"
     rows = db.execute(query, params).fetchall()
     events = [dict(r) for r in rows]
 
-    current_count = db.execute("SELECT COUNT(*) FROM events WHERE is_active=1 AND event_date >= ?", (today,)).fetchone()[0]
-    past_count = db.execute("SELECT COUNT(*) FROM events WHERE is_active=1 AND event_date < ?", (today,)).fetchone()[0]
+    current_count = db.execute("SELECT COUNT(*) FROM events WHERE (is_active=1 OR is_active IS NULL) AND event_date >= ?" + cat_clause, (today,)).fetchone()[0]
+    past_count = db.execute("SELECT COUNT(*) FROM events WHERE (is_active=1 OR is_active IS NULL) AND event_date < ?" + cat_clause, (today,)).fetchone()[0]
 
+    cal_month = month_arg if month_arg else (chosen_date[:7] if chosen_date else None)
     from notifications import calendar_context
-    cal_ctx = calendar_context(db, month=chosen_date[:7] if chosen_date else None, category=event_type)
+    cal_ctx = calendar_context(db, month=cal_month, category=event_type)
 
     return render_site(
         "events",
@@ -1357,25 +1405,39 @@ def register_event(event_id: int) -> Response:
 @app.get("/publications/", endpoint="publications_page")
 def publications_page() -> Response:
     kind = flask_request.args.get("kind", "").strip().lower()
-    if kind in {"news", "newspaper"}:
-        return redirect("/community/media/?tab=newspapers", code=301)
-    elif kind == "magazine":
-        return redirect("/community/media/?tab=magazines", code=301)
-    elif kind == "podcast":
-        return redirect("/community/media/?tab=podcasts", code=301)
-    qs = flask_request.query_string.decode("utf-8")
-    suffix = f"?{qs}" if qs else ""
-    return redirect(f"/community/media/{suffix}", code=301)
+    if kind in {"news", "newspaper", "newspapers"}:
+        return redirect("/newspaper/", code=301)
+    elif kind in {"magazine", "magazines"}:
+        return redirect("/magazine/", code=301)
+    elif kind in {"podcast", "podcasts"}:
+        return redirect("/podcasts/", code=301)
+
+    access = flask_request.args.get("access", "").strip().lower()
+    if access in {"free", "paid"}:
+        db = get_db()
+        query = "SELECT * FROM publications WHERE (is_active=1 OR is_active IS NULL)"
+        params: list[Any] = []
+        if access == "free":
+            query += " AND (is_paid = 0 OR is_paid IS NULL)"
+        elif access == "paid":
+            query += " AND is_paid = 1"
+        query += " ORDER BY published_on DESC, id DESC"
+        publications = [dict(r) for r in db.execute(query, params).fetchall()]
+        return render_site("media_catalogue", "community", publications=publications, selected_kind="")
+
+    return redirect("/media/", code=301)
 
 
 @app.get("/podcasts/", endpoint="podcasts_page")
 def podcasts_page() -> Response:
-    return redirect("/community/media/?tab=podcasts", code=301)
+    db = get_db()
+    items = [dict(r) for r in db.execute("SELECT * FROM publications WHERE is_active=1 AND kind='podcast' ORDER BY published_on DESC, id DESC").fetchall()]
+    return render_site("podcasts", "community", publications=items)
 
 
 @app.get("/news/", endpoint="news_page")
 def news_page() -> Response:
-    return redirect("/community/media/?tab=newspapers", code=301)
+    return redirect("/newspaper/", code=301)
 
 
 @app.get("/reading-circles/", endpoint="reading_circles_page")
@@ -1388,9 +1450,36 @@ def contests_page() -> Response:
     return redirect("/events/?type=contest", code=301)
 
 
-@app.get("/work-with-us/", endpoint="work_with_us_page")
+@app.route("/work-with-us/", methods=["GET", "POST"], endpoint="work_with_us_page")
 def work_with_us_page() -> Response:
+    if flask_request.method == "POST":
+        full_name = flask_request.form.get("full_name", "").strip()
+        email = flask_request.form.get("email", "").strip().lower()
+        phone = flask_request.form.get("phone", "").strip()
+        organisation = flask_request.form.get("organisation", "").strip()
+        proposal_type = flask_request.form.get("proposal_type", "Other").strip()
+        message = flask_request.form.get("message", "").strip()
+
+        if not full_name or not email or not message:
+            flash("Please provide your name, email, and proposal message.", "danger")
+            return render_site("work_with_us", "collaborators")
+
+        db = get_db()
+        db.execute(
+            "INSERT INTO partner_submissions (full_name, email, phone, organisation, proposal_type, message, status) VALUES (?, ?, ?, ?, ?, ?, 'New')",
+            (full_name, email, phone, organisation, proposal_type, message)
+        )
+        db.commit()
+        flash("Thank you! Your partnership proposal has been submitted. Our team will get in touch shortly.", "success")
+        return redirect(flask_url_for("work_with_us_page"))
+
     return render_site("work_with_us", "collaborators")
+
+
+@app.get("/become-a-partner/")
+@app.get("/partner/")
+def partner_redirects() -> Response:
+    return redirect("/work-with-us/", code=301)
 
 
 @app.get("/shop/", endpoint="shop")
@@ -1915,17 +2004,60 @@ def refund_policy() -> Response:
 
 @app.get("/magazine/", endpoint="magazine")
 def magazine() -> Response:
-    return redirect("/community/media/?tab=magazines", code=301)
+    db = get_db()
+    items = [dict(r) for r in db.execute("SELECT * FROM publications WHERE is_active=1 AND kind='magazine' ORDER BY published_on DESC, id DESC").fetchall()]
+    featured = items[0] if items else None
+    past_issues = items[1:] if len(items) > 1 else []
+    return render_site("magazine", "community",
+                       publications=items,
+                       featured_issue=featured,
+                       past_issues=past_issues)
 
 
 @app.get("/newspaper/", endpoint="newspaper_page")
 def newspaper_page() -> Response:
-    return redirect("/community/media/?tab=newspapers", code=301)
+    db = get_db()
+    year = flask_request.args.get("year", "").strip()
+    month = flask_request.args.get("month", "").strip()
+    page = max(1, flask_request.args.get("page", 1, type=int))
+    per_page = 6
+    offset = (page - 1) * per_page
+
+    where_clauses = ["is_active=1", "kind='news'"]
+    params = []
+    if year:
+        where_clauses.append("strftime('%Y', published_on) = ?")
+        params.append(year)
+    if month:
+        try:
+            where_clauses.append("strftime('%m', published_on) = ?")
+            params.append(f"{int(month):02d}")
+        except ValueError:
+            pass
+
+    where_sql = " AND ".join(where_clauses)
+    total_count = db.execute(f"SELECT count(*) FROM publications WHERE {where_sql}", params).fetchone()[0]
+    total_pages = max(1, (total_count + per_page - 1) // per_page)
+
+    query = f"SELECT * FROM publications WHERE {where_sql} ORDER BY published_on DESC, id DESC LIMIT ? OFFSET ?"
+    items = [dict(r) for r in db.execute(query, params + [per_page, offset]).fetchall()]
+
+    all_dates = [r[0] for r in db.execute("SELECT DISTINCT published_on FROM publications WHERE is_active=1 AND kind='news' AND published_on IS NOT NULL").fetchall()]
+    available_years = sorted(list({d.split("-")[0] for d in all_dates if d and len(d) >= 4}), reverse=True)
+
+    return render_site("newspaper", "community",
+                       publications=items,
+                       total_count=total_count,
+                       current_page=page,
+                       total_pages=total_pages,
+                       selected_year=year,
+                       selected_month=month,
+                       available_years=available_years)
 
 
 @app.get("/newspaper-2026/", endpoint="newspaper_2026")
 def newspaper_2026() -> Response:
-    return redirect("/community/media/?tab=newspapers", code=301)
+    return redirect("/newspaper/", code=301)
 
 
 @app.get("/google-login/", endpoint="google_login")

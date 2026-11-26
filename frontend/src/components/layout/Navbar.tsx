@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { NavLink, Link } from 'react-router-dom';
-import { BookOpen, User, ShoppingBag, LogOut, Menu, X } from 'lucide-react';
+import { NavLink, Link, useLocation } from 'react-router-dom';
+import { BookOpen, User, ShoppingBag, LogOut, Menu, X, ChevronDown } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import styles from './Navbar.module.css';
@@ -9,8 +9,18 @@ export const Navbar: React.FC = () => {
   const { count, openCheckout } = useCart();
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
 
   const closeMobile = () => setMobileOpen(false);
+
+  const isCommunityActive =
+    location.pathname === '/community' ||
+    location.pathname.startsWith('/community/') ||
+    location.pathname.startsWith('/events') ||
+    location.pathname.startsWith('/newspaper') ||
+    location.pathname.startsWith('/magazine') ||
+    location.pathname.startsWith('/podcasts') ||
+    location.pathname.startsWith('/publications');
 
   return (
     <header className={styles.navbar}>
@@ -38,16 +48,27 @@ export const Navbar: React.FC = () => {
                 Plans
               </NavLink>
             </li>
-            <li>
-              <NavLink to="/events" className={({ isActive }) => (isActive ? `${styles.navLink} ${styles.activeNavLink}` : styles.navLink)}>
-                Events
+
+            {/* Community with dropdown (Media, Events & Contests) */}
+            <li className={styles.navDropdownWrapper}>
+              <NavLink
+                to="/community"
+                className={isCommunityActive ? `${styles.navLink} ${styles.activeNavLink}` : styles.navLink}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+              >
+                Community
+                <ChevronDown size={14} style={{ opacity: 0.7 }} />
               </NavLink>
+              <div className={styles.navDropdownMenu}>
+                <NavLink to="/community/media" className={styles.dropdownItem}>
+                  Media
+                </NavLink>
+                <NavLink to="/events" className={styles.dropdownItem}>
+                  Events &amp; Contests
+                </NavLink>
+              </div>
             </li>
-            <li>
-              <NavLink to="/community/media" className={({ isActive }) => (isActive ? `${styles.navLink} ${styles.activeNavLink}` : styles.navLink)}>
-                Media
-              </NavLink>
-            </li>
+
             <li>
               <NavLink to="/gallery" className={({ isActive }) => (isActive ? `${styles.navLink} ${styles.activeNavLink}` : styles.navLink)}>
                 Gallery
@@ -160,13 +181,14 @@ export const Navbar: React.FC = () => {
             borderTop: '1px solid var(--border-color)',
           }}
         >
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '14px' }}>
             {[
               { to: '/', label: 'Home' },
               { to: '/library', label: 'Book Catalogue' },
               { to: '/membership', label: 'Membership Plans' },
-              { to: '/events', label: 'Events & Reading Circles' },
-              { to: '/community/media', label: 'Media & Publications' },
+              { to: '/community', label: 'Community' },
+              { to: '/community/media', label: '— Media' },
+              { to: '/events', label: '— Events & Contests' },
               { to: '/gallery', label: 'Photo Gallery' },
               { to: '/collaborators', label: 'Collaborators' },
               { to: '/about', label: 'About Us' },
@@ -178,11 +200,12 @@ export const Navbar: React.FC = () => {
                   onClick={closeMobile}
                   style={{
                     display: 'block',
-                    fontSize: '1.05rem',
-                    fontWeight: 700,
-                    color: 'var(--navy, #061446)',
+                    fontSize: link.label.startsWith('—') ? '0.95rem' : '1.05rem',
+                    fontWeight: link.label.startsWith('—') ? 500 : 700,
+                    color: link.label.startsWith('—') ? 'var(--text-muted)' : 'var(--navy, #061446)',
+                    paddingLeft: link.label.startsWith('—') ? '12px' : '0',
                     textDecoration: 'none',
-                    padding: '8px 0',
+                    paddingBlock: '4px',
                   }}
                 >
                   {link.label}

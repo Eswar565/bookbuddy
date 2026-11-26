@@ -917,7 +917,7 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
     def published_pages():
         path=request.path.strip('/')
         if request.method=='GET':
-            aliases={'calendar':'/events/','newspaper':'/publications/?kind=news','news-paper':'/publications/?kind=news','index':'/'}
+            aliases={'calendar':'/events/','news-paper':'/newspaper/','index':'/'}
             if path in aliases: return redirect(aliases[path])
             # About is a structured page with library story, team and videos. Its
             # admin-managed copy is resolved by about_content.about_context.

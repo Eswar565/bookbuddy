@@ -1,255 +1,319 @@
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Newspaper, BookMarked, Radio, Lock, Download } from 'lucide-react';
-import { SEO } from '../components/common/SEO';
-import { useAuth } from '../context/AuthContext';
-import { apiGet } from '../api/client';
+import React from 'react';
 import { Link } from 'react-router-dom';
-
-export interface Publication {
-  id: number;
-  title: string;
-  description?: string;
-  kind: 'news' | 'magazine' | 'podcast';
-  published_on: string;
-  is_paid: number;
-  is_active: number;
-  cover_path?: string;
-  file_path?: string;
-  audio_url?: string;
-  issue_number?: string;
-}
+import { Newspaper, BookOpen, Radio, ArrowRight } from 'lucide-react';
+import { SEO } from '../components/common/SEO';
+import { useQuery } from '@tanstack/react-query';
+import { apiGet } from '../api/client';
 
 export const MediaPage: React.FC = () => {
-  const { user, activeSubscription } = useAuth();
-  const [activeTab, setActiveTab] = useState<'all' | 'news' | 'magazine' | 'podcast'>('all');
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['media', activeTab],
+  const { data } = useQuery({
+    queryKey: ['media-hub-counts'],
     queryFn: async () => {
-      const param = activeTab !== 'all' ? `?kind=${activeTab}` : '';
-      const res = await apiGet(`/api/v1/media${param}`);
-      if (!res.ok) throw new Error(res.error?.message || 'Failed to fetch publications');
+      const res = await apiGet('/api/v1/media');
+      if (!res.ok) return null;
       return res.data;
     },
   });
 
-  const newspapers: Publication[] = data?.newspapers || (activeTab === 'news' ? data?.items : []) || [];
-  const magazines: Publication[] = data?.magazines || (activeTab === 'magazine' ? data?.items : []) || [];
-  const podcasts: Publication[] = data?.podcasts || (activeTab === 'podcast' ? data?.items : []) || [];
+  const newsCount = data?.counts?.newspapers ?? 3;
+  const magCount = data?.counts?.magazines ?? 3;
+  const podCount = data?.counts?.podcasts ?? 3;
 
   return (
     <>
       <SEO
-        title="Community Publications & Podcasts | BookBuddy"
-        description="Read Book Buddy student newspapers, literary magazines, and listen to children audio podcasts in Chennai."
+        title="Media Hub · Newspapers, Magazines &amp; Podcasts | BookBuddy"
+        description="Discover original student newspapers, quarterly literary magazines, and bedtime story podcasts from the Book Buddy community."
       />
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2.5rem 1.5rem 5rem' }}>
-        <div style={{ marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: 0 }}>
-            Community Publications & Media
-          </h1>
-          <p style={{ color: 'var(--text-muted, #475569)', marginTop: '0.4rem', fontSize: '0.95rem' }}>
-            Explore newspapers, young-author magazines, and storytelling podcasts created for our reading community.
-          </p>
-        </div>
-
-        {/* Tab Controls */}
-        <div
-          style={{
-            display: 'flex',
-            gap: '8px',
-            marginBottom: '2rem',
-            borderBottom: '1px solid var(--border-color)',
-            paddingBottom: '12px',
-          }}
-        >
-          {[
-            { id: 'all', label: 'All Publications' },
-            { id: 'news', label: 'Newspapers' },
-            { id: 'magazine', label: 'Magazines' },
-            { id: 'podcast', label: 'Podcasts' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              type="button"
+      <main style={{ padding: '2.5rem 1rem 4rem', backgroundColor: 'var(--tint, #fdfbf7)', minHeight: '80vh' }}>
+        <div style={{ maxWidth: '1140px', margin: '0 auto' }}>
+          {/* Header */}
+          <header style={{ textAlign: 'center', maxWidth: '720px', margin: '0 auto 36px' }}>
+            <span
               style={{
-                padding: '8px 18px',
+                display: 'inline-block',
+                fontSize: '0.75rem',
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                color: 'var(--maroon, #740f28)',
+                backgroundColor: 'rgba(116, 15, 40, 0.08)',
+                padding: '4px 14px',
                 borderRadius: '20px',
-                border: activeTab === tab.id ? 'none' : '1px solid var(--border-color)',
-                backgroundColor: activeTab === tab.id ? 'var(--navy, #061446)' : '#ffffff',
-                color: activeTab === tab.id ? '#ffffff' : 'var(--text-muted)',
-                fontWeight: 700,
-                fontSize: '0.85rem',
-                cursor: 'pointer',
+                marginBottom: '10px',
               }}
             >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {isLoading ? (
-          <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>Loading media items...</div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-            {/* Newspapers Section */}
-            {(activeTab === 'all' || activeTab === 'news') && newspapers.length > 0 && (
-              <div>
-                <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--navy)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Newspaper size={20} color="var(--maroon)" />
-                  <span>Community Newspapers</span>
-                </h2>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-                  {newspapers.map((item) => (
-                    <PublicationCard key={item.id} item={item} user={user} activeSubscription={activeSubscription} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Magazines Section */}
-            {(activeTab === 'all' || activeTab === 'magazine') && magazines.length > 0 && (
-              <div>
-                <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--navy)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <BookMarked size={20} color="var(--maroon)" />
-                  <span>Literary Magazines</span>
-                </h2>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-                  {magazines.map((item) => (
-                    <PublicationCard key={item.id} item={item} user={user} activeSubscription={activeSubscription} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Podcasts Section */}
-            {(activeTab === 'all' || activeTab === 'podcast') && podcasts.length > 0 && (
-              <div>
-                <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--navy)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Radio size={20} color="var(--maroon)" />
-                  <span>Audio Podcasts & Stories</span>
-                </h2>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-                  {podcasts.map((item) => (
-                    <div
-                      key={item.id}
-                      style={{
-                        backgroundColor: '#ffffff',
-                        borderRadius: '12px',
-                        padding: '20px',
-                        boxShadow: '0 4px 18px rgba(10, 36, 114, 0.06)',
-                        borderLeft: '4px solid var(--maroon, #740f28)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                      }}
-                    >
-                      <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--navy)', margin: '0 0 6px' }}>{item.title}</h3>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-subtle)', marginBottom: '10px' }}>Released {item.published_on}</div>
-                      <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: '0 0 16px', flex: 1 }}>
-                        {item.description || 'Audio storytelling episode.'}
-                      </p>
-
-                      {item.audio_url ? (
-                        <div>
-                          <audio controls src={item.audio_url} style={{ width: '100%', height: '36px' }} />
-                        </div>
-                      ) : (
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-subtle)', fontStyle: 'italic' }}>Audio recording coming soon.</div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </>
-  );
-};
-
-const PublicationCard: React.FC<{ item: Publication; user: any; activeSubscription: any }> = ({ item, user, activeSubscription }) => {
-  const isLocked = item.is_paid && (!user || !activeSubscription);
-
-  return (
-    <div
-      style={{
-        backgroundColor: '#ffffff',
-        borderRadius: '12px',
-        padding: '20px',
-        boxShadow: '0 4px 18px rgba(10, 36, 114, 0.06)',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-subtle)' }}>
-          {item.issue_number ? `Issue ${item.issue_number} • ` : ''}
-          {item.published_on}
-        </span>
-        {item.is_paid ? (
-          <span style={{ fontSize: '0.7rem', fontWeight: 800, backgroundColor: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: '4px' }}>
-            Members Only
-          </span>
-        ) : (
-          <span style={{ fontSize: '0.7rem', fontWeight: 800, backgroundColor: '#dcfce7', color: '#166534', padding: '2px 8px', borderRadius: '4px' }}>
-            Free
-          </span>
-        )}
-      </div>
-
-      <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--navy)', margin: '0 0 8px' }}>
-        {item.title}
-      </h3>
-      <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.5, margin: '0 0 18px', flex: 1 }}>
-        {item.description || 'Community literary issue with student essays, artwork, and book reviews.'}
-      </p>
-
-      <div style={{ marginTop: 'auto', paddingTop: '12px', borderTop: '1px solid var(--border-color)' }}>
-        {isLocked ? (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#b45309' }}>
-              <Lock size={14} /> Subscription Required
+              Community Publications
             </span>
-            <Link
-              to="/membership"
+            <h1 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: '0 0 8px', lineHeight: 1.25 }}>
+              Book Buddy Media Hub
+            </h1>
+            <p style={{ color: 'var(--ink-subtle, #4b5563)', fontSize: '1rem', lineHeight: 1.55, margin: 0 }}>
+              Explore our original student newspapers, curated quarterly magazines, and cozy story podcasts created by and for our vibrant reading community.
+            </p>
+          </header>
+
+          {/* 3 Large Cards Hub */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+              gap: '24px',
+              marginBottom: '40px',
+            }}
+          >
+            {/* Card 1: Newspapers */}
+            <article
               style={{
-                fontSize: '0.8rem',
+                backgroundColor: '#ffffff',
+                border: '1px solid var(--border-color, #e5e7eb)',
+                borderRadius: '12px',
+                padding: '32px 26px',
+                boxShadow: '0 4px 16px rgba(6, 20, 70, 0.05)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+              }}
+            >
+              <div
+                style={{
+                  width: '54px',
+                  height: '54px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(6, 20, 70, 0.08)',
+                  color: 'var(--navy, #061446)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '20px',
+                }}
+              >
+                <Newspaper size={28} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: 0 }}>
+                  Newspapers
+                </h2>
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    backgroundColor: '#ecfdf5',
+                    color: '#065f46',
+                    border: '1px solid #a7f3d0',
+                    padding: '2px 8px',
+                    borderRadius: '12px',
+                  }}
+                >
+                  {newsCount} Editions
+                </span>
+              </div>
+              <p style={{ fontSize: '0.925rem', color: 'var(--ink-subtle, #4b5563)', lineHeight: 1.6, margin: '0 0 24px', flexGrow: 1 }}>
+                Student journalism, literary scoops, and young author spotlights in our community newspaper editions. Sorted newest first with easy month/year navigation.
+              </p>
+              <Link
+                to="/newspaper"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  backgroundColor: 'var(--navy, #061446)',
+                  color: '#ffffff',
+                  padding: '12px 20px',
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  textDecoration: 'none',
+                }}
+              >
+                Read Newspapers <ArrowRight size={16} />
+              </Link>
+            </article>
+
+            {/* Card 2: Magazines */}
+            <article
+              style={{
+                backgroundColor: '#ffffff',
+                border: '1px solid var(--border-color, #e5e7eb)',
+                borderRadius: '12px',
+                padding: '32px 26px',
+                boxShadow: '0 4px 16px rgba(6, 20, 70, 0.05)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+              }}
+            >
+              <div
+                style={{
+                  width: '54px',
+                  height: '54px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(217, 119, 6, 0.12)',
+                  color: '#b45309',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '20px',
+                }}
+              >
+                <BookOpen size={28} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: 0 }}>
+                  Magazines
+                </h2>
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    backgroundColor: '#fffbeb',
+                    color: '#b45309',
+                    border: '1px solid #fde68a',
+                    padding: '2px 8px',
+                    borderRadius: '12px',
+                  }}
+                >
+                  {magCount} Issues
+                </span>
+              </div>
+              <p style={{ fontSize: '0.925rem', color: 'var(--ink-subtle, #4b5563)', lineHeight: 1.6, margin: '0 0 24px', flexGrow: 1 }}>
+                Quarterly literary digests filled with illustrated adventures, creative writing, poetry, and reader reviews. Featured issue on top with archive of past issues.
+              </p>
+              <Link
+                to="/magazine"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  backgroundColor: 'var(--maroon, #740f28)',
+                  color: '#ffffff',
+                  padding: '12px 20px',
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  textDecoration: 'none',
+                }}
+              >
+                Browse Magazines <ArrowRight size={16} />
+              </Link>
+            </article>
+
+            {/* Card 3: Podcasts */}
+            <article
+              style={{
+                backgroundColor: '#ffffff',
+                border: '1px solid var(--border-color, #e5e7eb)',
+                borderRadius: '12px',
+                padding: '32px 26px',
+                boxShadow: '0 4px 16px rgba(6, 20, 70, 0.05)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+              }}
+            >
+              <div
+                style={{
+                  width: '54px',
+                  height: '54px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(116, 15, 40, 0.08)',
+                  color: 'var(--maroon, #740f28)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '20px',
+                }}
+              >
+                <Radio size={28} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: 0 }}>
+                  Podcasts
+                </h2>
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    backgroundColor: '#eff6ff',
+                    color: '#1e40af',
+                    border: '1px solid #bfdbfe',
+                    padding: '2px 8px',
+                    borderRadius: '12px',
+                  }}
+                >
+                  {podCount} Episodes
+                </span>
+              </div>
+              <p style={{ fontSize: '0.925rem', color: 'var(--ink-subtle, #4b5563)', lineHeight: 1.6, margin: '0 0 24px', flexGrow: 1 }}>
+                Audio bedtime stories, literature discussions, and reading tips for parents and young minds. Listen directly through our integrated player.
+              </p>
+              <Link
+                to="/podcasts"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  backgroundColor: 'var(--navy, #061446)',
+                  color: '#ffffff',
+                  padding: '12px 20px',
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  textDecoration: 'none',
+                }}
+              >
+                Listen to Podcasts <ArrowRight size={16} />
+              </Link>
+            </article>
+          </div>
+
+          {/* Reader Contribution Callout */}
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              border: '1px solid var(--border-color, #e5e7eb)',
+              borderRadius: '12px',
+              padding: '24px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '16px',
+            }}
+          >
+            <div>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--navy, #061446)', margin: '0 0 4px' }}>
+                Have a story, poem, or book review to share?
+              </h3>
+              <p style={{ fontSize: '0.875rem', color: 'var(--ink-subtle, #4b5563)', margin: 0 }}>
+                Our publications regularly feature young writers and community artists.
+              </p>
+            </div>
+            <Link
+              to="/contact"
+              style={{
+                backgroundColor: 'transparent',
+                color: 'var(--maroon, #740f28)',
+                border: '1.5px solid var(--maroon, #740f28)',
+                padding: '8px 18px',
+                borderRadius: '8px',
+                fontSize: '0.85rem',
                 fontWeight: 700,
-                color: 'var(--maroon)',
                 textDecoration: 'none',
               }}
             >
-              Unlock
+              Submit a Contribution &rarr;
             </Link>
           </div>
-        ) : item.file_path ? (
-          <a
-            href={item.file_path.startsWith('/') ? item.file_path : `/${item.file_path}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: 'var(--navy)',
-              color: '#ffffff',
-              padding: '8px 14px',
-              borderRadius: '8px',
-              fontSize: '0.825rem',
-              fontWeight: 700,
-              textDecoration: 'none',
-            }}
-          >
-            <Download size={14} /> Read Issue (PDF)
-          </a>
-        ) : (
-          <span style={{ fontSize: '0.825rem', color: 'var(--text-subtle)' }}>Published in library print edition</span>
-        )}
-      </div>
-    </div>
+        </div>
+      </main>
+    </>
   );
 };

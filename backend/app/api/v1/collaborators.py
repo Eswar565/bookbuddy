@@ -1,7 +1,7 @@
 """Collaborators and Partners API endpoints."""
 from __future__ import annotations
 
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from ...db import get_db
 
 collaborators_bp = Blueprint("api_collaborators", __name__)
@@ -91,3 +91,37 @@ def get_collaborator_category(category_slug: str):
             "partners": partners,
         }
     })
+
+
+@collaborators_bp.post("/partners")
+def submit_partner_proposal():
+    data = request.get_json(silent=True) or request.form.to_dict()
+    full_name = (data.get("full_name") or "").strip()
+    email = (data.get("email") or "").strip().lower()
+    phone = (data.get("phone") or "").strip()
+    organisation = (data.get("organisation") or "").strip()
+    proposal_type = (data.get("proposal_type") or "Other").strip()
+    message = (data.get("message") or "").strip()
+
+    if not full_name or not email or not message:
+        return jsonify({
+            "ok": False,
+            "error": {
+                "code": "VALIDATION_ERROR",
+                "message": "Full name, email, and message are required."
+            }
+        }), 400
+
+    db = get_db()
+    db.execute(
+        "INSERT INTO partner_submissions (full_name, email, phone, organisation, proposal_type, message, status) VALUES (?, ?, ?, ?, ?, ?, 'New')",
+        (full_name, email, phone, organisation, proposal_type, message)
+    )
+    db.commit()
+
+    return jsonify({
+        "ok": True,
+        "data": {
+            "message": "Partnership proposal submitted successfully."
+        }
+    }), 201

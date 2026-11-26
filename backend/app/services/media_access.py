@@ -56,6 +56,7 @@ def install_media_access(app, db, render, root):
         parsed=urlsplit(value or '')
         if parsed.scheme or parsed.netloc:return None
         path=unquote(parsed.path)
+        if path in {'/media', '/media/'}: return None
         if not path.startswith(('/media/','/static/uploads/','/static/demo/')):return None
         if path.startswith('/media/'):
             resolved = (media_root / path[7:]).resolve()

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Calendar, Clock, Users, X } from 'lucide-react';
+import { Calendar, Clock, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
 import { useToast } from '../context/ToastContext';
 import { apiGet, apiPost } from '../api/client';
@@ -16,13 +16,26 @@ export interface EventItem {
   seats_registered?: number;
   seats_left?: number;
   fee?: number;
+  location?: string;
+  image_path?: string;
   is_active: number;
 }
+
+const getCategoryLabel = (category?: string) => {
+  if (!category) return 'Event';
+  const c = category.toLowerCase();
+  if (c === 'contest' || c === 'contests') return 'Contest';
+  if (c === 'reading-circle' || c === 'reading_circle' || c === 'reading-circles') return 'Reading Circle';
+  if (c === 'workshop' || c === 'workshops') return 'Workshop';
+  return 'Event';
+};
 
 export const EventsPage: React.FC = () => {
   const { showToast } = useToast();
   const [view, setView] = useState<'current' | 'past'>('current');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [calendarDate, setCalendarDate] = useState<Date>(new Date());
   const [registerEvent, setRegisterEvent] = useState<EventItem | null>(null);
 
   // Form registration state
@@ -33,11 +46,12 @@ export const EventsPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ['events', view, selectedCategory],
+    queryKey: ['events', view, selectedCategory, selectedDate],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (view) params.set('view', view);
       if (selectedCategory) params.set('type', selectedCategory);
+      if (selectedDate) params.set('date', selectedDate);
       const res = await apiGet(`/api/v1/events?${params.toString()}`);
       if (!res.ok) throw new Error(res.error?.message || 'Failed to load events');
       return res.data?.events as EventItem[];
@@ -74,227 +88,459 @@ export const EventsPage: React.FC = () => {
 
   const events = data || [];
 
+  // Calendar calculations
+  const year = calendarDate.getFullYear();
+  const month = calendarDate.getMonth();
+  const monthLabel = calendarDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  const calendarDays = useMemo(() => {
+    const firstDay = new Date(year, month, 1).getDay(); // 0 is Sun
+    const adjustedFirstDay = (firstDay + 6) % 7; // 0 is Mon
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const days: (number | null)[] = [];
+    for (let i = 0; i < adjustedFirstDay; i++) {
+      days.push(null);
+    }
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(i);
+    }
+    while (days.length % 7 !== 0) {
+      days.push(null);
+    }
+    return days;
+  }, [year, month]);
+
+  const handlePrevMonth = () => {
+    setCalendarDate(new Date(year, month - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCalendarDate(new Date(year, month + 1, 1));
+  };
+
   return (
     <>
       <SEO
-        title="Events & Reading Circles | BookBuddy Library"
-        description="Join weekend storytelling circles, creative author sessions, and literacy contests in Chennai."
+        title="Events & Reading Circles | Book Buddy Lending Library"
+        description="Discover weekend reading circles, creative writing contests, author interactions, and workshops held at Book Buddy."
       />
 
       <div style={{ maxWidth: '1160px', margin: '0 auto', padding: '2.5rem 1.5rem 5rem' }}>
-        {/* Header */}
-        <div style={{ marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: 0 }}>
-            Library Events & Circles
+        {/* Top Header without intro text block */}
+        <header style={{ marginBottom: '1.75rem' }}>
+          <h1 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: '0 0 16px' }}>
+            Events &amp; Contests
           </h1>
-          <p style={{ color: 'var(--text-muted, #475569)', marginTop: '0.4rem', fontSize: '0.95rem' }}>
-            Inspiring gatherings, storytelling sessions, and weekend workshops for young book lovers.
-          </p>
-        </div>
 
-        {/* View & Category Toggles */}
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '12px',
-            marginBottom: '2rem',
-            backgroundColor: '#ffffff',
-            padding: '14px 18px',
-            borderRadius: '12px',
-            boxShadow: '0 2px 10px rgba(10, 36, 114, 0.05)',
-          }}
-        >
-          {/* Upcoming vs Past */}
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button
-              onClick={() => setView('current')}
-              type="button"
-              style={{
-                padding: '7px 16px',
-                borderRadius: '8px',
-                border: view === 'current' ? 'none' : '1px solid var(--border-color)',
-                backgroundColor: view === 'current' ? 'var(--navy, #061446)' : '#ffffff',
-                color: view === 'current' ? '#ffffff' : 'var(--text-muted)',
-                fontWeight: 700,
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-              }}
-            >
-              Upcoming Events
-            </button>
-            <button
-              onClick={() => setView('past')}
-              type="button"
-              style={{
-                padding: '7px 16px',
-                borderRadius: '8px',
-                border: view === 'past' ? 'none' : '1px solid var(--border-color)',
-                backgroundColor: view === 'past' ? 'var(--navy, #061446)' : '#ffffff',
-                color: view === 'past' ? '#ffffff' : 'var(--text-muted)',
-                fontWeight: 700,
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-              }}
-            >
-              Past Events
-            </button>
-          </div>
-
-          {/* Categories */}
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          {/* Top category buttons in one row directly under title */}
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
             {[
-              { slug: '', label: 'All Activities' },
+              { slug: '', label: 'All' },
+              { slug: 'upcoming', label: 'Events' },
               { slug: 'reading-circle', label: 'Reading Circles' },
               { slug: 'contest', label: 'Contests' },
-              { slug: 'upcoming', label: 'Workshops' },
-            ].map((cat) => (
-              <button
-                key={cat.slug}
-                onClick={() => setSelectedCategory(cat.slug)}
-                type="button"
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '20px',
-                  border: selectedCategory === cat.slug ? '1.5px solid var(--maroon, #740f28)' : '1px solid var(--border-color)',
-                  backgroundColor: selectedCategory === cat.slug ? 'var(--maroon-tint, rgba(116, 15, 40, 0.08))' : '#ffffff',
-                  color: selectedCategory === cat.slug ? 'var(--maroon, #740f28)' : 'var(--text-muted)',
-                  fontWeight: 600,
-                  fontSize: '0.8rem',
-                  cursor: 'pointer',
-                }}
-              >
-                {cat.label}
-              </button>
-            ))}
+            ].map((cat) => {
+              const active = selectedCategory === cat.slug;
+              return (
+                <button
+                  key={cat.slug}
+                  onClick={() => setSelectedCategory(cat.slug)}
+                  type="button"
+                  style={{
+                    padding: '8px 18px',
+                    borderRadius: '20px',
+                    border: active ? '1.5px solid var(--maroon, #740f28)' : '1px solid var(--border-color, #e2e8f0)',
+                    backgroundColor: active ? 'var(--maroon-tint, rgba(116, 15, 40, 0.08))' : '#ffffff',
+                    color: active ? 'var(--maroon, #740f28)' : 'var(--text-main, #1e293b)',
+                    fontWeight: 600,
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
           </div>
-        </div>
+        </header>
 
-        {/* Events Grid */}
-        {isLoading ? (
-          <div style={{ textAlign: 'center', padding: '5rem 0', color: 'var(--text-muted)' }}>Loading events...</div>
-        ) : events.length === 0 ? (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '4rem 2rem',
-              backgroundColor: '#ffffff',
-              borderRadius: '16px',
-              border: '1px dashed var(--border-color)',
-            }}
-          >
-            <Calendar size={40} color="var(--navy)" style={{ margin: '0 auto 12px', opacity: 0.5 }} />
-            <h3 style={{ fontSize: '1.2rem', color: 'var(--navy)', margin: '0 0 6px' }}>No events scheduled</h3>
-            <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.9rem' }}>
-              Check back soon or explore our previous reading circles!
-            </p>
-          </div>
-        ) : (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-              gap: '20px',
-            }}
-          >
-            {events.map((evt) => (
-              <div
-                key={evt.id}
-                style={{
-                  backgroundColor: '#ffffff',
-                  borderRadius: '14px',
-                  padding: '24px',
-                  boxShadow: '0 4px 18px rgba(10, 36, 114, 0.06)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  borderTop: '4px solid var(--navy, #061446)',
-                }}
-              >
-                {/* Date & Category header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--navy)', fontWeight: 700, fontSize: '0.85rem' }}>
-                    <Calendar size={15} />
-                    <span>{evt.event_date}</span>
-                  </div>
-                  {evt.category && (
-                    <span
-                      style={{
-                        fontSize: '0.72rem',
-                        fontWeight: 800,
-                        backgroundColor: 'var(--navy-tint)',
-                        color: 'var(--navy)',
-                        padding: '3px 8px',
-                        borderRadius: '6px',
-                        textTransform: 'uppercase',
-                      }}
-                    >
-                      {evt.category}
-                    </span>
-                  )}
-                </div>
-
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--navy)', margin: '0 0 8px', lineHeight: 1.3 }}>
-                  {evt.title}
-                </h3>
-
-                {evt.event_time && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '12px' }}>
-                    <Clock size={15} />
-                    <span>{evt.event_time}</span>
-                  </div>
+        {/* Layout container */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 320px) minmax(0, 1fr)', gap: '28px', alignItems: 'start' }}>
+          {/* Left Column: Calendar & View switch */}
+          <aside style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {/* Calendar widget */}
+            <div
+              style={{
+                backgroundColor: '#ffffff',
+                borderRadius: '14px',
+                border: '1px solid var(--border-color, #e2e8f0)',
+                padding: '18px',
+                boxShadow: '0 2px 8px rgba(10, 36, 114, 0.04)',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--navy, #061446)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Calendar size={16} /> Event Calendar
+                </span>
+                {selectedDate && (
+                  <button
+                    onClick={() => setSelectedDate(null)}
+                    type="button"
+                    style={{ background: 'none', border: 'none', color: 'var(--maroon, #740f28)', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                  >
+                    Show all days
+                  </button>
                 )}
+              </div>
 
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', lineHeight: 1.5, margin: '0 0 20px', flex: 1 }}>
-                  {evt.description || 'Join us for an interactive, community-led literacy session.'}
-                </p>
+              {/* Month Controls */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <button
+                  onClick={handlePrevMonth}
+                  type="button"
+                  aria-label="Previous month"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '6px',
+                    border: '1px solid var(--border-color, #e2e8f0)',
+                    backgroundColor: '#ffffff',
+                    cursor: 'pointer',
+                    color: 'var(--navy, #061446)',
+                  }}
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--navy, #061446)', margin: 0 }}>
+                  {monthLabel}
+                </h3>
+                <button
+                  onClick={handleNextMonth}
+                  type="button"
+                  aria-label="Next month"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '6px',
+                    border: '1px solid var(--border-color, #e2e8f0)',
+                    backgroundColor: '#ffffff',
+                    cursor: 'pointer',
+                    color: 'var(--navy, #061446)',
+                  }}
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
 
-                {/* Bottom Row */}
-                <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border-color)', paddingTop: '14px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.825rem', color: 'var(--text-subtle)' }}>
-                    <Users size={15} />
-                    <span>{evt.seats_left !== undefined ? `${evt.seats_left} seats remaining` : 'Open'}</span>
-                  </div>
+              {/* 7-column equal square grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', textAlign: 'center' }}>
+                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
+                  <span key={i} style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-subtle, #94a3b8)', padding: '4px 0' }}>
+                    {d}
+                  </span>
+                ))}
+                {calendarDays.map((day, idx) => {
+                  if (day === null) {
+                    return <div key={`empty-${idx}`} style={{ aspectRatio: '1 / 1' }} />;
+                  }
+                  const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                  const isSelected = selectedDate === dateStr;
+                  const isToday = dateStr === todayStr;
+                  const hasEvents = events.some((e) => e.event_date === dateStr);
 
-                  {view === 'current' && (
+                  return (
                     <button
-                      onClick={() => setRegisterEvent(evt)}
+                      key={dateStr}
+                      onClick={() => setSelectedDate(isSelected ? null : dateStr)}
                       type="button"
                       style={{
-                        padding: '7px 16px',
-                        borderRadius: '8px',
-                        border: 'none',
-                        backgroundColor: 'var(--maroon, #740f28)',
-                        color: '#ffffff',
-                        fontWeight: 700,
-                        fontSize: '0.825rem',
+                        aspectRatio: '1 / 1',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '6px',
+                        border: isToday ? '1.5px solid var(--maroon, #740f28)' : 'none',
+                        backgroundColor: isSelected
+                          ? 'var(--navy, #061446)'
+                          : hasEvents
+                          ? 'var(--gold-tint, #fef9c3)'
+                          : 'transparent',
+                        color: isSelected
+                          ? '#ffffff'
+                          : isToday
+                          ? 'var(--maroon, #740f28)'
+                          : 'var(--text-main, #1e293b)',
+                        fontWeight: isSelected || hasEvents || isToday ? 700 : 500,
+                        fontSize: '0.8rem',
                         cursor: 'pointer',
+                        padding: 0,
+                        position: 'relative',
                       }}
                     >
-                      Register Free
+                      <span>{day}</span>
+                      {hasEvents && (
+                        <span
+                          style={{
+                            display: 'block',
+                            width: '4px',
+                            height: '4px',
+                            borderRadius: '50%',
+                            backgroundColor: isSelected ? '#ffffff' : 'var(--maroon, #740f28)',
+                            marginTop: '2px',
+                          }}
+                        />
+                      )}
                     </button>
-                  )}
-                </div>
+                  );
+                })}
               </div>
-            ))}
-          </div>
-        )}
 
-        {/* Event Registration Modal */}
+              {selectedDate ? (
+                <div style={{ marginTop: '14px', textAlign: 'center' }}>
+                  <button
+                    onClick={() => setSelectedDate(null)}
+                    type="button"
+                    style={{
+                      background: '#ffffff',
+                      border: '1px solid var(--border-color, #e2e8f0)',
+                      borderRadius: '6px',
+                      padding: '4px 12px',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      color: 'var(--maroon, #740f28)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    &times; Show all days
+                  </button>
+                </div>
+              ) : (
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-subtle, #94a3b8)', textAlign: 'center', margin: '12px 0 0' }}>
+                  Click any date to filter events
+                </p>
+              )}
+            </div>
+
+            {/* View Switcher: Current vs Past */}
+            <nav aria-label="Event timeframes" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button
+                onClick={() => setView('current')}
+                type="button"
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '12px 16px',
+                  borderRadius: '10px',
+                  border: view === 'current' ? '1.5px solid var(--navy, #061446)' : '1px solid var(--border-color, #e2e8f0)',
+                  backgroundColor: view === 'current' ? 'var(--navy, #061446)' : '#ffffff',
+                  color: view === 'current' ? '#ffffff' : 'var(--text-main, #1e293b)',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <span>Current &amp; Upcoming</span>
+              </button>
+              <button
+                onClick={() => setView('past')}
+                type="button"
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '12px 16px',
+                  borderRadius: '10px',
+                  border: view === 'past' ? '1.5px solid var(--navy, #061446)' : '1px solid var(--border-color, #e2e8f0)',
+                  backgroundColor: view === 'past' ? 'var(--navy, #061446)' : '#ffffff',
+                  color: view === 'past' ? '#ffffff' : 'var(--text-main, #1e293b)',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <span>Past Events</span>
+              </button>
+            </nav>
+          </aside>
+
+          {/* Right Column: Events Content Area */}
+          <section>
+            <div style={{ marginBottom: '16px' }}>
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--navy, #061446)', margin: 0 }}>
+                {view === 'past' ? 'Past Events & Contests' : 'Upcoming Events & Contests'}
+              </h2>
+              {selectedDate && (
+                <p style={{ fontSize: '0.85rem', color: 'var(--maroon, #740f28)', fontWeight: 600, margin: '6px 0 0' }}>
+                  Filtered for date: {selectedDate} —{' '}
+                  <button
+                    onClick={() => setSelectedDate(null)}
+                    type="button"
+                    style={{ background: 'none', border: 'none', color: 'var(--navy, #061446)', textDecoration: 'underline', cursor: 'pointer', padding: 0 }}
+                  >
+                    Show all days
+                  </button>
+                </p>
+              )}
+            </div>
+
+            {isLoading ? (
+              <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>Loading events...</div>
+            ) : events.length === 0 ? (
+              <div
+                style={{
+                  textAlign: 'center',
+                  padding: '4rem 2rem',
+                  backgroundColor: '#ffffff',
+                  borderRadius: '12px',
+                  border: '1px dashed var(--border-color, #e2e8f0)',
+                }}
+              >
+                <Calendar size={36} color="var(--navy, #061446)" style={{ margin: '0 auto 12px', opacity: 0.4 }} />
+                <h3 style={{ fontSize: '1.15rem', color: 'var(--navy, #061446)', margin: '0 0 6px' }}>No events found</h3>
+                <p style={{ color: 'var(--text-muted)', margin: '0 0 16px', fontSize: '0.875rem' }}>
+                  {selectedDate
+                    ? `There are no scheduled events on ${selectedDate}.`
+                    : view === 'past'
+                    ? 'No past events found in this category.'
+                    : 'New upcoming events and contests will be posted here soon.'}
+                </p>
+                <button
+                  onClick={() => {
+                    setSelectedCategory('');
+                    setSelectedDate(null);
+                  }}
+                  type="button"
+                  style={{
+                    backgroundColor: 'var(--navy, #061446)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '8px 18px',
+                    fontWeight: 600,
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  View All Activities
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {events.map((evt) => {
+                  const badgeLabel = getCategoryLabel(evt.category);
+                  return (
+                    <article
+                      key={evt.id}
+                      style={{
+                        backgroundColor: '#ffffff',
+                        borderRadius: '12px',
+                        border: '1px solid var(--border-color, #e2e8f0)',
+                        padding: '24px',
+                        boxShadow: '0 2px 10px rgba(10, 36, 114, 0.04)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span
+                          style={{
+                            fontSize: '0.75rem',
+                            fontWeight: 800,
+                            backgroundColor: 'var(--navy-tint, rgba(6, 20, 70, 0.08))',
+                            color: 'var(--navy, #061446)',
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.04em',
+                          }}
+                        >
+                          {badgeLabel}
+                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                          <Calendar size={14} />
+                          <span>{evt.event_date}</span>
+                        </div>
+                      </div>
+
+                      <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: 0 }}>
+                        {evt.title}
+                      </h3>
+
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                        {evt.event_time && (
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <Clock size={14} /> {evt.event_time}
+                          </span>
+                        )}
+                        {evt.location && (
+                          <span>&bull; {evt.location}</span>
+                        )}
+                      </div>
+
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.5, margin: 0 }}>
+                        {evt.description || 'Join us for an inspiring session at Book Buddy.'}
+                      </p>
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', paddingTop: '14px', borderTop: '1px solid var(--border-color, #e2e8f0)' }}>
+                        <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--navy, #061446)' }}>
+                          {evt.fee ? `₹${evt.fee} / seat` : 'Free Admission'}
+                        </span>
+
+                        {view === 'current' ? (
+                          <button
+                            onClick={() => setRegisterEvent(evt)}
+                            type="button"
+                            style={{
+                              backgroundColor: 'var(--navy, #061446)',
+                              color: '#ffffff',
+                              border: 'none',
+                              borderRadius: '8px',
+                              padding: '8px 18px',
+                              fontWeight: 600,
+                              fontSize: '0.875rem',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            View &amp; Register &rarr;
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-subtle)', fontStyle: 'italic' }}>
+                            Completed on {evt.event_date}
+                          </span>
+                        )}
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        </div>
+
+        {/* Registration Modal */}
         {registerEvent && (
           <div
-            role="dialog"
-            aria-modal="true"
             style={{
               position: 'fixed',
               inset: 0,
-              zIndex: 1000,
-              backgroundColor: 'rgba(4, 13, 46, 0.65)',
-              backdropFilter: 'blur(4px)',
+              backgroundColor: 'rgba(6, 20, 70, 0.6)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              zIndex: 9999,
               padding: '16px',
             }}
           >
@@ -302,49 +548,58 @@ export const EventsPage: React.FC = () => {
               style={{
                 backgroundColor: '#ffffff',
                 borderRadius: '16px',
+                maxWidth: '480px',
                 width: '100%',
-                maxWidth: '440px',
                 padding: '24px',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
+                position: 'relative',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--navy)', margin: 0 }}>
-                  Event Registration
-                </h3>
-                <button
-                  onClick={() => setRegisterEvent(null)}
-                  type="button"
-                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px' }}
-                >
-                  <X size={20} />
-                </button>
-              </div>
+              <button
+                onClick={() => setRegisterEvent(null)}
+                type="button"
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  right: '16px',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--text-muted)',
+                }}
+              >
+                <X size={20} />
+              </button>
 
-              <div style={{ marginBottom: '16px', backgroundColor: 'var(--surface-body)', padding: '12px', borderRadius: '8px' }}>
-                <div style={{ fontWeight: 700, color: 'var(--navy)', fontSize: '0.95rem' }}>{registerEvent.title}</div>
-                <div style={{ fontSize: '0.825rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  {registerEvent.event_date} {registerEvent.event_time && `• ${registerEvent.event_time}`}
-                </div>
-              </div>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: '0 0 8px' }}>
+                Register for {registerEvent.title}
+              </h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0 0 20px' }}>
+                {registerEvent.event_date} {registerEvent.event_time ? `at ${registerEvent.event_time}` : ''}
+              </p>
 
-              <form onSubmit={handleRegisterSubmit}>
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px' }}>
-                    Participant Name
+              <form onSubmit={handleRegisterSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--navy)', marginBottom: '4px' }}>
+                    Full Name
                   </label>
                   <input
                     type="text"
                     required
                     value={regName}
                     onChange={(e) => setRegName(e.target.value)}
-                    placeholder="Full name"
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.9rem' }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-color)',
+                      fontSize: '0.9rem',
+                    }}
                   />
                 </div>
 
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--navy)', marginBottom: '4px' }}>
                     Email Address
                   </label>
                   <input
@@ -352,65 +607,71 @@ export const EventsPage: React.FC = () => {
                     required
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
-                    placeholder="email@example.com"
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.9rem' }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-color)',
+                      fontSize: '0.9rem',
+                    }}
                   />
                 </div>
 
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--navy)', marginBottom: '4px' }}>
                     Phone Number
                   </label>
                   <input
                     type="tel"
                     value={regPhone}
                     onChange={(e) => setRegPhone(e.target.value)}
-                    placeholder="+91 9876543210"
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.9rem' }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-color)',
+                      fontSize: '0.9rem',
+                    }}
                   />
                 </div>
 
-                <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '4px' }}>
-                    Number of Attendees
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--navy)', marginBottom: '4px' }}>
+                    Seats
                   </label>
-                  <select
+                  <input
+                    type="number"
+                    min={1}
+                    max={10}
                     value={regSeats}
                     onChange={(e) => setRegSeats(Number(e.target.value))}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.9rem' }}
-                  >
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <option key={n} value={n}>
-                        {n} {n === 1 ? 'attendee' : 'attendees'}
-                      </option>
-                    ))}
-                  </select>
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-color)',
+                      fontSize: '0.9rem',
+                    }}
+                  />
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                  <button
-                    onClick={() => setRegisterEvent(null)}
-                    type="button"
-                    style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid var(--border-color)', backgroundColor: '#fff', cursor: 'pointer' }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    style={{
-                      padding: '8px 20px',
-                      borderRadius: '8px',
-                      border: 'none',
-                      backgroundColor: 'var(--maroon, #740f28)',
-                      color: '#ffffff',
-                      fontWeight: 700,
-                      cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                    }}
-                  >
-                    {isSubmitting ? 'Registering...' : 'Confirm'}
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  style={{
+                    backgroundColor: 'var(--navy, #061446)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    fontWeight: 700,
+                    fontSize: '0.95rem',
+                    cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                    marginTop: '8px',
+                  }}
+                >
+                  {isSubmitting ? 'Registering...' : 'Confirm Registration'}
+                </button>
               </form>
             </div>
           </div>

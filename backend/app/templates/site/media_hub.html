@@ -1,180 +1,111 @@
 {% extends 'site/base.html' %}
-{% block title %}Media Publications · Newspapers, Magazines &amp; Podcasts · Book Buddy{% endblock %}
+{% block title %}Media Hub · Newspapers, Magazines &amp; Podcasts · Book Buddy{% endblock %}
 
 {% block body %}
-<main class="community-hub-page">
-  <div class="bb8-container" style="max-width:1140px; margin:0 auto; padding:0 20px;">
-    <header class="collaborators-header" style="margin-bottom:32px;">
-      <span class="gallery-badge">Community Publications</span>
-      <h1>Book Buddy Media</h1>
-      <p>Discover our original student newspapers, curated quarterly magazines, and cozy story podcasts created by and for our vibrant reading community.</p>
+<main class="community-hub-page" style="padding: 2.5rem 1rem 4rem; background-color: var(--tint, #fdfbf7);">
+  <div class="bb8-container" style="max-width: 1140px; margin: 0 auto;">
+    <!-- Hero Header -->
+    <header class="collaborators-header" style="text-align: center; max-width: 720px; margin: 0 auto 36px;">
+      <span class="gallery-badge" style="display:inline-block; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:var(--maroon, #740f28); background:rgba(116, 15, 40, 0.08); padding:4px 14px; border-radius:20px; margin-bottom:10px;">
+        Community Publications
+      </span>
+      <h1 style="font-size: 2.2rem; font-weight: 800; color: var(--navy, #061446); margin: 0 0 8px; line-height: 1.25;">
+        Book Buddy Media Hub
+      </h1>
+      <p style="color: var(--ink-subtle, #4b5563); font-size: 1rem; line-height: 1.55; margin: 0;">
+        Explore our original student newspapers, curated quarterly magazines, and cozy story podcasts created by and for our vibrant reading community.
+      </p>
     </header>
 
-    <!-- 3-Part Media Navigation Tabs -->
-    <div class="media-hub-tabs" role="tablist" aria-label="Media publication types">
-      <a href="/community/media/" class="media-tab-btn {% if active_tab == 'all' %}active{% endif %}">
-        All Publications
-      </a>
-      <a href="/community/media/?tab=newspapers" class="media-tab-btn {% if active_tab == 'newspapers' %}active{% endif %}">
-        Newspapers ({{ newspapers|length }})
-      </a>
-      <a href="/community/media/?tab=magazines" class="media-tab-btn {% if active_tab == 'magazines' %}active{% endif %}">
-        Magazines ({{ magazines|length }})
-      </a>
-      <a href="/community/media/?tab=podcasts" class="media-tab-btn {% if active_tab == 'podcasts' %}active{% endif %}">
-        Podcasts ({{ podcasts|length }})
-      </a>
+    <!-- 3 Large Cards Hub -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 40px;">
+      <!-- Card 1: Newspapers -->
+      <article style="background: #ffffff; border: 1px solid var(--border, #e5e7eb); border-radius: 12px; padding: 32px 26px; box-shadow: 0 4px 16px rgba(6, 20, 70, 0.05); display: flex; flex-direction: column; align-items: flex-start; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+        <div style="width: 54px; height: 54px; border-radius: 12px; background: rgba(6, 20, 70, 0.08); color: var(--navy, #061446); display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+          <!-- Custom Newspaper SVG -->
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+            <path d="M18 14h-8"/>
+            <path d="M15 18h-5"/>
+            <path d="M10 6h8v4h-8V6Z"/>
+          </svg>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+          <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--navy, #061446); margin: 0;">Newspapers</h2>
+          <span style="font-size: 0.75rem; font-weight: 700; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 12px;">
+            {{ newspapers|length }} Editions
+          </span>
+        </div>
+        <p style="font-size: 0.925rem; color: var(--ink-subtle, #4b5563); line-height: 1.6; margin: 0 0 24px; flex-grow: 1;">
+          Student journalism, literary scoops, and young author spotlights in our community newspaper editions. Sorted newest first with easy month/year navigation.
+        </p>
+        <a href="/newspaper/" class="bb-btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--navy, #061446); color: #ffffff; padding: 12px 20px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; text-decoration: none; transition: background 0.15s ease;">
+          Read Newspapers &rarr;
+        </a>
+      </article>
+
+      <!-- Card 2: Magazines -->
+      <article style="background: #ffffff; border: 1px solid var(--border, #e5e7eb); border-radius: 12px; padding: 32px 26px; box-shadow: 0 4px 16px rgba(6, 20, 70, 0.05); display: flex; flex-direction: column; align-items: flex-start; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+        <div style="width: 54px; height: 54px; border-radius: 12px; background: rgba(217, 119, 6, 0.12); color: #b45309; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+          <!-- Custom Magazine SVG -->
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m16 6 4 14"/>
+            <path d="M12 6v14"/>
+            <path d="M8 8v12"/>
+            <path d="M4 4v16"/>
+          </svg>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+          <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--navy, #061446); margin: 0;">Magazines</h2>
+          <span style="font-size: 0.75rem; font-weight: 700; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 12px;">
+            {{ magazines|length }} Issues
+          </span>
+        </div>
+        <p style="font-size: 0.925rem; color: var(--ink-subtle, #4b5563); line-height: 1.6; margin: 0 0 24px; flex-grow: 1;">
+          Quarterly literary digests filled with illustrated adventures, creative writing, poetry, and reader reviews. Featured issue on top with archive of past issues.
+        </p>
+        <a href="/magazine/" class="bb-btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--maroon, #740f28); color: #ffffff; padding: 12px 20px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; text-decoration: none; transition: background 0.15s ease;">
+          Browse Magazines &rarr;
+        </a>
+      </article>
+
+      <!-- Card 3: Podcasts -->
+      <article style="background: #ffffff; border: 1px solid var(--border, #e5e7eb); border-radius: 12px; padding: 32px 26px; box-shadow: 0 4px 16px rgba(6, 20, 70, 0.05); display: flex; flex-direction: column; align-items: flex-start; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+        <div style="width: 54px; height: 54px; border-radius: 12px; background: rgba(116, 15, 40, 0.08); color: var(--maroon, #740f28); display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+          <!-- Custom Podcast SVG -->
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/>
+            <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/>
+            <circle cx="12" cy="12" r="2"/>
+            <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/>
+            <path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/>
+          </svg>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+          <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--navy, #061446); margin: 0;">Podcasts</h2>
+          <span style="font-size: 0.75rem; font-weight: 700; background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 12px;">
+            {{ podcasts|length }} Episodes
+          </span>
+        </div>
+        <p style="font-size: 0.925rem; color: var(--ink-subtle, #4b5563); line-height: 1.6; margin: 0 0 24px; flex-grow: 1;">
+          Audio bedtime stories, literature discussions, and reading tips for parents and young minds. Listen directly through our integrated player.
+        </p>
+        <a href="/podcasts/" class="bb-btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--navy, #061446); color: #ffffff; padding: 12px 20px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; text-decoration: none; transition: background 0.15s ease;">
+          Listen to Podcasts &rarr;
+        </a>
+      </article>
     </div>
 
-    <!-- PART 1: NEWSPAPERS -->
-    {% if active_tab in ('all', 'newspapers') %}
-    <section class="collab-section" id="newspapers" style="padding:0; margin-bottom:48px;">
-      <div class="collab-section-header">
-        <h2>Book Buddy Newspapers</h2>
-        <p>Curated journalism, literary book scoops, and reader spotlights written by our young library journalists.</p>
+    <!-- Reader Contribution Note -->
+    <div style="background: #ffffff; border: 1px solid var(--border, #e5e7eb); border-radius: 12px; padding: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+      <div>
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--navy, #061446); margin: 0 0 4px;">Have a story, poem, or book review to share?</h3>
+        <p style="font-size: 0.875rem; color: var(--ink-subtle, #4b5563); margin: 0;">Our publications regularly feature young writers and community artists.</p>
       </div>
-
-      {% if newspapers %}
-      <div class="collab-cards-grid">
-        {% for item in newspapers %}
-        <article class="collab-card" style="text-align:left; align-items:flex-start; padding:20px;">
-          <div style="width:100%; aspect-ratio:4/3; background:#e2e8f0; border-radius:var(--radius-md); overflow:hidden; margin-bottom:14px;">
-            {% if item.cover_path %}
-            <img src="{{ item.cover_path }}" alt="{{ item.title }}" style="width:100%; height:100%; object-fit:cover;" loading="lazy">
-            {% else %}
-            <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--navy-tint); color:var(--navy);">
-              <svg class="bb-icon" style="width:40px;height:40px;"><use href="#i-newspaper"/></svg>
-            </div>
-            {% endif %}
-          </div>
-          <span class="event-type-tag" style="background:#f0fdf4; color:#166534;">Newspaper</span>
-          <h3 style="font-size:16px; font-weight:700; color:var(--navy); margin:0 0 6px;">{{ item.title }}</h3>
-          <p style="font-size:12px; color:var(--text-subtle); margin:0 0 8px;">{{ item.published_on or item.edition or 'Latest Edition' }}</p>
-          <p style="font-size:13px; color:var(--text-muted); line-height:1.5; margin:0 0 16px; flex-grow:1;">{{ item.description or 'A fresh edition of the Book Buddy community newspaper.' }}</p>
-          <div style="display:flex; gap:8px; width:100%; margin-top:auto;">
-            {% if item.file_path %}
-            <a href="{{ item.file_path }}" target="_blank" rel="noopener" class="btn-export btn-excel" style="flex:1; justify-content:center;">
-              Read Issue &rarr;
-            </a>
-            {% else %}
-            <a href="/publication/{{ item.id }}/" class="btn-export" style="flex:1; justify-content:center;">
-              View Details
-            </a>
-            {% endif %}
-          </div>
-        </article>
-        {% endfor %}
-      </div>
-      {% else %}
-      <div class="collab-empty-box">
-        <p style="margin:0;">No newspaper editions published yet. Check back soon!</p>
-      </div>
-      {% endif %}
-    </section>
-    {% endif %}
-
-    <!-- PART 2: MAGAZINES -->
-    {% if active_tab in ('all', 'magazines') %}
-    <section class="collab-section" id="magazines" style="padding:0; margin-bottom:48px;">
-      <div class="collab-section-header" style="border-left-color:var(--gold);">
-        <h2>Literary Magazines</h2>
-        <p>Richly illustrated quarterly digests filled with poetry, stories, student art, and thoughtful book essays.</p>
-      </div>
-
-      {% if magazines %}
-      <div class="collab-cards-grid">
-        {% for item in magazines %}
-        <article class="collab-card" style="text-align:left; align-items:flex-start; padding:20px;">
-          <div style="width:100%; aspect-ratio:4/3; background:#e2e8f0; border-radius:var(--radius-md); overflow:hidden; margin-bottom:14px;">
-            {% if item.cover_path %}
-            <img src="{{ item.cover_path }}" alt="{{ item.title }}" style="width:100%; height:100%; object-fit:cover;" loading="lazy">
-            {% else %}
-            <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--gold-tint); color:var(--gold);">
-              <svg class="bb-icon" style="width:40px;height:40px;"><use href="#i-book-open"/></svg>
-            </div>
-            {% endif %}
-          </div>
-          <span class="event-type-tag" style="background:var(--gold-tint); color:#b45309;">Magazine</span>
-          <h3 style="font-size:16px; font-weight:700; color:var(--navy); margin:0 0 6px;">{{ item.title }}</h3>
-          <p style="font-size:12px; color:var(--text-subtle); margin:0 0 8px;">{{ item.published_on or item.edition or 'Featured Issue' }}</p>
-          <p style="font-size:13px; color:var(--text-muted); line-height:1.5; margin:0 0 16px; flex-grow:1;">{{ item.description or 'A creative edition of the Book Buddy literary magazine.' }}</p>
-          <div style="display:flex; gap:8px; width:100%; margin-top:auto;">
-            {% if item.file_path %}
-            <a href="{{ item.file_path }}" target="_blank" rel="noopener" class="btn-export btn-excel" style="flex:1; justify-content:center;">
-              Read Issue &rarr;
-            </a>
-            {% else %}
-            <a href="/publication/{{ item.id }}/" class="btn-export" style="flex:1; justify-content:center;">
-              View Details
-            </a>
-            {% endif %}
-          </div>
-        </article>
-        {% endfor %}
-      </div>
-      {% else %}
-      <div class="collab-empty-box">
-        <p style="margin:0;">No magazine issues published yet. Check back soon!</p>
-      </div>
-      {% endif %}
-    </section>
-    {% endif %}
-
-    <!-- PART 3: PODCASTS -->
-    {% if active_tab in ('all', 'podcasts') %}
-    <section class="collab-section" id="podcasts" style="padding:0; margin-bottom:48px;">
-      <div class="collab-section-header" style="border-left-color:var(--navy);">
-        <h2>Book Buddy Podcasts</h2>
-        <p>Listen in to delightful bedtime stories, book reviews by kids, and interviews with community educators.</p>
-      </div>
-
-      {% if podcasts %}
-      <div class="collab-cards-grid">
-        {% for item in podcasts %}
-        <article class="collab-card" style="text-align:left; align-items:flex-start; padding:20px;">
-          <div style="width:100%; aspect-ratio:4/3; background:#e2e8f0; border-radius:var(--radius-md); overflow:hidden; margin-bottom:14px;">
-            {% if item.cover_path %}
-            <img src="{{ item.cover_path }}" alt="{{ item.title }}" style="width:100%; height:100%; object-fit:cover;" loading="lazy">
-            {% else %}
-            <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--navy-tint); color:var(--navy);">
-              <svg class="bb-icon" style="width:40px;height:40px;"><use href="#i-headphones"/></svg>
-            </div>
-            {% endif %}
-          </div>
-          <span class="event-type-tag" style="background:#eff6ff; color:#1d4ed8;">Podcast</span>
-          <h3 style="font-size:16px; font-weight:700; color:var(--navy); margin:0 0 6px;">{{ item.title }}</h3>
-          <p style="font-size:12px; color:var(--text-subtle); margin:0 0 8px;">{{ item.published_on or item.edition or 'Audio Episode' }}</p>
-          <p style="font-size:13px; color:var(--text-muted); line-height:1.5; margin:0 0 16px; flex-grow:1;">{{ item.description or 'An inspiring audio story episode from Book Buddy.' }}</p>
-          <div style="display:flex; gap:8px; width:100%; margin-top:auto;">
-            {% if item.file_path %}
-            <a href="{{ item.file_path }}" target="_blank" rel="noopener" class="btn-export btn-pdf" style="flex:1; justify-content:center;">
-              Listen Now &rarr;
-            </a>
-            {% else %}
-            <a href="/publication/{{ item.id }}/" class="btn-export" style="flex:1; justify-content:center;">
-              Episode Info
-            </a>
-            {% endif %}
-          </div>
-        </article>
-        {% endfor %}
-      </div>
-      {% else %}
-      <div class="collab-empty-box">
-        <p style="margin:0;">No podcast episodes published yet. Stay tuned for audio releases!</p>
-      </div>
-      {% endif %}
-    </section>
-    {% endif %}
-
-    <!-- Contribute Callout -->
-    <section class="category-page-cta" style="margin-top:20px;">
-      <h3>Have an Article, Poem or Podcast Idea?</h3>
-      <p>We welcome submissions from school students, parents, and community book lovers. Get your creative voice featured in our next release.</p>
-      <a href="/submit-contribution/" class="btn-cta-link">
-        Submit Reader Contribution &rarr;
+      <a href="/contact/" style="background: transparent; color: var(--maroon, #740f28); border: 1.5px solid var(--maroon, #740f28); padding: 8px 18px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; text-decoration: none;">
+        Submit a Contribution &rarr;
       </a>
-    </section>
+    </div>
   </div>
 </main>
 {% endblock %}

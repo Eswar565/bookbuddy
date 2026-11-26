@@ -1463,6 +1463,13 @@ body.storybook .bb-book-grid {
   width: 100% !important;
 }
 
+.catalogue-sidebar {
+  position: sticky !important;
+  top: 80px !important;
+  max-height: calc(100vh - 90px) !important;
+  overflow-y: auto !important;
+}
+
 @media (max-width: 899px) {
   .catalogue-layout {
     grid-template-columns: 1fr !important;
@@ -1470,6 +1477,19 @@ body.storybook .bb-book-grid {
   }
   .catalogue-sidebar {
     display: none;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    z-index: 9999 !important;
+    background: #ffffff !important;
+    border-radius: 16px 16px 0 0 !important;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.25) !important;
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+    padding: 24px 20px !important;
+    border: none !important;
   }
   .catalogue-sidebar.is-open {
     display: block !important;

@@ -125,12 +125,37 @@
     if (isNaN(id)) return;
     var list = getWishlist();
     var idx = list.indexOf(id);
-    if (idx !== -1) {
-      list.splice(idx, 1);
-    } else {
+    var willAdd = (idx === -1);
+    if (willAdd) {
       list.push(id);
+    } else {
+      list.splice(idx, 1);
     }
     saveWishlist(list);
+
+    // Sync with backend if logged in
+    var token = (config && config.csrfToken) || '';
+    if (willAdd) {
+      fetch('/api/v1/library/favourites/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': token,
+          'X-CSRF-Token': token
+        },
+        credentials: 'include',
+        body: JSON.stringify({ book_id: id, csrf_token: token })
+      }).catch(function() {});
+    } else {
+      fetch('/api/v1/library/favourites/' + id + '/', {
+        method: 'DELETE',
+        headers: {
+          'X-CSRFToken': token,
+          'X-CSRF-Token': token
+        },
+        credentials: 'include'
+      }).catch(function() {});
+    }
   }
 
   function updateWishlistUI() {
@@ -139,16 +164,76 @@
     buttons.forEach(function (btn) {
       var id = parseInt(btn.dataset.bookId, 10);
       var active = list.indexOf(id) !== -1;
+      var svg = btn.querySelector('svg');
       if (active) {
         btn.classList.add('is-active');
         btn.setAttribute('aria-pressed', 'true');
-        btn.setAttribute('aria-label', 'Remove from wishlist');
+        btn.setAttribute('aria-label', 'Remove from favourites');
+        if (svg) {
+          svg.setAttribute('fill', 'var(--maroon, #7b1230)');
+          svg.setAttribute('stroke', 'var(--maroon, #7b1230)');
+        }
       } else {
         btn.classList.remove('is-active');
         btn.setAttribute('aria-pressed', 'false');
-        btn.setAttribute('aria-label', 'Add to wishlist');
+        btn.setAttribute('aria-label', 'Add to favourites');
+        if (svg) {
+          svg.setAttribute('fill', 'none');
+          svg.setAttribute('stroke', 'currentColor');
+        }
       }
     });
+
+    // Update favourites badges
+    var badges = document.querySelectorAll('.js-fav-badge, #bb-filter-fav-badge');
+    badges.forEach(function(badge) {
+      badge.textContent = list.length;
+      badge.style.display = list.length > 0 ? 'inline-block' : 'none';
+    });
+  }
+
+  function syncWishlistFromServer() {
+    fetch('/api/v1/library/favourites/', { credentials: 'include' })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (!data || !data.ok || !data.data) return;
+        var serverIds = data.data.book_ids || [];
+        var localList = getWishlist();
+        if (data.data.is_guest) {
+          updateWishlistUI();
+        } else {
+          var toMerge = [];
+          localList.forEach(function(id) {
+            if (serverIds.indexOf(id) === -1) toMerge.push(id);
+          });
+          if (toMerge.length > 0) {
+            var token = (config && config.csrfToken) || '';
+            fetch('/api/v1/library/favourites/sync/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': token,
+                'X-CSRF-Token': token
+              },
+              credentials: 'include',
+              body: JSON.stringify({ book_ids: toMerge, csrf_token: token })
+            }).then(function() {
+              var merged = [];
+              serverIds.concat(localList).forEach(function(x) {
+                if (merged.indexOf(x) === -1) merged.push(x);
+              });
+              saveWishlist(merged);
+            }).catch(function() {
+              saveWishlist(serverIds);
+            });
+          } else {
+            saveWishlist(serverIds);
+          }
+        }
+      })
+      .catch(function() {
+        updateWishlistUI();
+      });
   }
 
   // Helper: HTML escaping
@@ -586,6 +671,7 @@
   document.addEventListener('DOMContentLoaded', function () {
     render();
     updateWishlistUI();
+    syncWishlistFromServer();
 
     // Mobile filter drawer toggle
     var toggleBtn = document.getElementById('filter-drawer-toggle');
@@ -601,5 +687,6 @@
   if (document.readyState !== 'loading') {
     render();
     updateWishlistUI();
+    syncWishlistFromServer();
   }
 })();

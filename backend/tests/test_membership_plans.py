@@ -24,12 +24,12 @@ def test_membership_plans_seed():
         assert solo_2['amount'] == 800.0
         assert solo_2['book_limit'] == 2
         assert solo_2['total_books'] == 8
-        assert solo_2['tagline'] == 'Summer Special'
+        assert solo_2['tagline'] == 'Beginner Plan'
 
         assert family_2['amount'] == 1400.0
         assert family_2['book_limit'] == 4
         assert family_2['total_books'] == 16
-        assert family_2['tagline'] == 'Summer Special'
+        assert family_2['tagline'] == 'Beginner Plan'
 
         # Check 3 Months plans
         three_mo = [p for p in plans if p['months'] == 3]

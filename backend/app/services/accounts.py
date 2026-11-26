@@ -14,10 +14,11 @@ from flask import abort, flash, redirect, render_template, request, session, url
 from werkzeug.security import generate_password_hash, check_password_hash
 
 PUBLIC_EXACT = {'/', '/about/', '/contact/', '/membership/', '/plans/', '/how-to-borrow/',
-    '/collaborators/', '/community/', '/community/media/', '/gallery/',
+    '/collaborators/', '/community/', '/community/media/', '/media/', '/newspaper/', '/magazine/', '/podcasts/', '/publications/', '/gallery/',
+    '/work-with-us/', '/become-a-partner/', '/partner/',
     '/maths/', '/english/', '/financial-literacy/', '/ba/',
     '/accounts/login/', '/account/login/', '/login/', '/accounts/signup/', '/account/signup/', '/signup/',
-    '/accounts/password/reset/', '/account/password/reset/', '/membership-options/', '/privacy-policy/', '/terms/', '/refund-policy/', '/robots.txt', '/sitemap.xml', '/favicon.ico'}
+    '/accounts/password/reset/', '/account/password/reset/', '/membership-options/', '/privacy-policy/', '/terms/', '/refund-policy/', '/library/favourites/', '/robots.txt', '/sitemap.xml', '/favicon.ico'}
 PUBLIC_PREFIX = ('/static/', '/media/', '/admin/', '/api/')
 SCHOOL_GRADES = ['LKG','UKG'] + [f'Std {x}' for x in range(1,13)]
 COLLEGE_GRADES = [f'Degree Year {x}' for x in range(1,5)] + [f'PG Year {x}' for x in range(1,3)]
