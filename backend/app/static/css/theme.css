@@ -22,6 +22,9 @@
 
   --color-primary: var(--maroon);
   --color-secondary: var(--navy-light);
+  --color-border: #e2e8f0;
+  --color-text: #061446;
+  --color-primary-soft: rgba(116, 15, 40, 0.08);
 
   --gold: #d97706;
   --gold-tint: #fef3c7;
@@ -2176,4 +2179,107 @@ body .btn-cart-add {            /* the Add / Added button */
 .btn-modal-confirm:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* ==========================================================================
+   Shared Catalogue Sidebar Dropdown Menus (Sort By & Categories)
+   ========================================================================== */
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  padding: 4px;
+  margin-top: 4px;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(10,36,114,.12);
+  max-height: min(320px, calc(100vh - 160px));   /* never taller than the viewport */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  z-index: 50;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+.dropdown-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.dropdown-menu.dropdown-menu--up,
+.dropdown-menu--up {
+  top: auto;
+  bottom: calc(100% + 4px);
+  margin-top: 0;
+  margin-bottom: 4px;
+}
+
+.dropdown-item,
+body.folio button.dropdown-item,
+.catalogue-sidebar button.dropdown-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  height: 36px !important;
+  padding: 8px 12px !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  color: var(--color-text) !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  font-family: inherit !important;
+  transition: background 0.15s ease, color 0.15s ease !important;
+}
+
+.dropdown-item + .dropdown-item,
+body.folio button.dropdown-item + button.dropdown-item,
+.catalogue-sidebar button.dropdown-item + button.dropdown-item {
+  margin-top: 0 !important;
+  border-top: 0 !important;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus-visible,
+body.folio button.dropdown-item:hover,
+body.folio button.dropdown-item:focus-visible {
+  background: var(--color-primary-soft) !important;
+  color: var(--color-primary) !important;
+  outline: none !important;
+}
+
+.dropdown-item[aria-checked="true"],
+.dropdown-item.is-selected,
+body.folio button.dropdown-item[aria-checked="true"],
+body.folio button.dropdown-item.is-selected {
+  font-weight: 700 !important;
+  color: var(--color-primary) !important;
+  background: transparent !important;
+}
+
+.dropdown-item .check {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}   /* inline SVG check on the right */
+
+.dropdown-item:not(.is-selected):not([aria-checked="true"]) .check {
+  display: none;
 }

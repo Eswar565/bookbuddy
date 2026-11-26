@@ -25,6 +25,9 @@
 
   --color-primary: var(--maroon);
   --color-secondary: var(--navy-light);
+  --color-border: #e2e8f0;
+  --color-text: #061446;
+  --color-primary-soft: rgba(116, 15, 40, 0.08);
 
   --gold: #d97706;
   --gold-tint: #fef3c7;

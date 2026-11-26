@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, Link } from 'react-router-dom';
 import {
@@ -7,7 +7,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  Check,
   X,
   Heart,
   Sliders,
@@ -39,6 +38,34 @@ export const LibraryPage: React.FC = () => {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isCatOpen, setIsCatOpen] = useState(false);
   const [isLangSubmenuOpen, setIsLangSubmenuOpen] = useState(false);
+  const [isSortUp, setIsSortUp] = useState(false);
+  const [isCatUp, setIsCatUp] = useState(false);
+  const sortBtnRef = useRef<HTMLButtonElement>(null);
+  const catBtnRef = useRef<HTMLButtonElement>(null);
+
+  const toggleSort = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsCatOpen(false);
+    if (!isSortOpen && sortBtnRef.current) {
+      const rect = sortBtnRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      setIsSortUp(spaceBelow < 130 && spaceAbove > spaceBelow);
+    }
+    setIsSortOpen((prev) => !prev);
+  };
+
+  const toggleCat = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsSortOpen(false);
+    if (!isCatOpen && catBtnRef.current) {
+      const rect = catBtnRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      setIsCatUp(spaceBelow < 328 && spaceAbove > spaceBelow);
+    }
+    setIsCatOpen((prev) => !prev);
+  };
 
   // Debounce search input sync
   useEffect(() => {
@@ -71,6 +98,20 @@ export const LibraryPage: React.FC = () => {
         setIsSortOpen(false);
         setIsCatOpen(false);
         setIsLangSubmenuOpen(false);
+      } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        const activeMenu = document.querySelector('.dropdown-menu[role="menu"]');
+        if (activeMenu) {
+          e.preventDefault();
+          const items = Array.from(activeMenu.querySelectorAll<HTMLButtonElement>('.dropdown-item:not([disabled])'));
+          const curIndex = items.indexOf(document.activeElement as HTMLButtonElement);
+          if (e.key === 'ArrowDown') {
+            const next = curIndex < items.length - 1 ? curIndex + 1 : 0;
+            items[next]?.focus();
+          } else {
+            const prev = curIndex > 0 ? curIndex - 1 : items.length - 1;
+            items[prev]?.focus();
+          }
+        }
       }
     };
     document.addEventListener('click', handleClickOutside);
@@ -575,14 +616,12 @@ export const LibraryPage: React.FC = () => {
                 Ordering
               </label>
               <button
+                ref={sortBtnRef}
                 type="button"
+                id="sidebar-sort-btn"
                 aria-haspopup="true"
                 aria-expanded={isSortOpen}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsCatOpen(false);
-                  setIsSortOpen((prev) => !prev);
-                }}
+                onClick={toggleSort}
                 style={{
                   width: '100%',
                   height: '40px',
@@ -601,7 +640,7 @@ export const LibraryPage: React.FC = () => {
                   boxSizing: 'border-box',
                 }}
               >
-                <span>
+                <span id="sidebar-sort-label">
                   Sort By: {sort === 'az' ? 'A–Z' : sort === 'za' ? 'Z–A' : 'Newest'}
                 </span>
                 <ChevronDown size={14} />
@@ -609,20 +648,9 @@ export const LibraryPage: React.FC = () => {
 
               {isSortOpen && (
                 <div
+                  id="sidebar-sort-menu"
                   role="menu"
-                  style={{
-                    position: 'absolute',
-                    top: 'calc(100% + 4px)',
-                    left: 0,
-                    width: '100%',
-                    backgroundColor: '#ffffff',
-                    border: '1px solid var(--border-color, #e2e8f0)',
-                    borderRadius: '8px',
-                    boxShadow: '0 8px 24px rgba(10,36,114,0.14)',
-                    zIndex: 100,
-                    padding: '6px',
-                    boxSizing: 'border-box',
-                  }}
+                  className={`dropdown-menu sidebar-menu ${isSortUp ? 'dropdown-menu--up' : ''}`}
                 >
                   {[
                     { val: 'newest', label: 'Newest' },
@@ -635,28 +663,19 @@ export const LibraryPage: React.FC = () => {
                         key={item.val}
                         type="button"
                         role="menuitem"
+                        aria-checked={isSelected}
+                        className={`dropdown-item js-sort-opt ${isSelected ? 'is-selected' : ''}`}
                         onClick={() => {
                           updateParam('sort', item.val);
                           setIsSortOpen(false);
                         }}
-                        style={{
-                          width: '100%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '8px 10px',
-                          fontSize: '13px',
-                          fontWeight: isSelected ? 700 : 600,
-                          color: isSelected ? 'var(--maroon, #7b1230)' : 'var(--navy, #061446)',
-                          backgroundColor: 'transparent',
-                          border: 'none',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          textAlign: 'left',
-                        }}
                       >
                         <span>{item.label}</span>
-                        {isSelected && <Check size={14} color="var(--maroon, #7b1230)" strokeWidth={2.5} />}
+                        {isSelected && (
+                          <svg className="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                        )}
                       </button>
                     );
                   })}
@@ -670,14 +689,12 @@ export const LibraryPage: React.FC = () => {
                 Categories
               </label>
               <button
+                ref={catBtnRef}
                 type="button"
+                id="sidebar-cat-btn"
                 aria-haspopup="true"
                 aria-expanded={isCatOpen}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsSortOpen(false);
-                  setIsCatOpen((prev) => !prev);
-                }}
+                onClick={toggleCat}
                 style={{
                   width: '100%',
                   height: '40px',
@@ -696,7 +713,7 @@ export const LibraryPage: React.FC = () => {
                   boxSizing: 'border-box',
                 }}
               >
-                <span>
+                <span id="sidebar-cat-label">
                   {category && category.toLowerCase() !== 'all'
                     ? `${category}${language ? ` (${language})` : ''}`
                     : 'Categories'}
@@ -706,48 +723,26 @@ export const LibraryPage: React.FC = () => {
 
               {isCatOpen && (
                 <div
+                  id="sidebar-cat-menu"
                   role="menu"
-                  style={{
-                    position: 'absolute',
-                    top: 'calc(100% + 4px)',
-                    left: 0,
-                    width: '100%',
-                    backgroundColor: '#ffffff',
-                    border: '1px solid var(--border-color, #e2e8f0)',
-                    borderRadius: '8px',
-                    boxShadow: '0 8px 24px rgba(10,36,114,0.14)',
-                    zIndex: 100,
-                    padding: '6px',
-                    boxSizing: 'border-box',
-                  }}
+                  className={`dropdown-menu sidebar-menu ${isCatUp ? 'dropdown-menu--up' : ''}`}
                 >
                   {/* All Option */}
                   <button
                     type="button"
                     role="menuitem"
+                    aria-checked={!category || category.toLowerCase() === 'all'}
+                    className={`dropdown-item js-cat-opt ${(!category || category.toLowerCase() === 'all') ? 'is-selected' : ''}`}
                     onClick={() => {
                       updateMultipleParams({ category: '', language: '', lang: '' });
                       setIsCatOpen(false);
                     }}
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '8px 10px',
-                      fontSize: '13px',
-                      fontWeight: (!category || category.toLowerCase() === 'all') ? 700 : 600,
-                      color: (!category || category.toLowerCase() === 'all') ? 'var(--maroon, #7b1230)' : 'var(--navy, #061446)',
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                    }}
                   >
                     <span>All</span>
                     {(!category || category.toLowerCase() === 'all') && (
-                      <Check size={14} color="var(--maroon, #7b1230)" strokeWidth={2.5} />
+                      <svg className="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
                     )}
                   </button>
 
@@ -758,61 +753,36 @@ export const LibraryPage: React.FC = () => {
                         key={cat}
                         type="button"
                         role="menuitem"
+                        aria-checked={isSelected}
+                        className={`dropdown-item js-cat-opt ${isSelected ? 'is-selected' : ''}`}
                         onClick={() => {
                           updateMultipleParams({ category: cat, language: '', lang: '' });
                           setIsCatOpen(false);
                         }}
-                        style={{
-                          width: '100%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '8px 10px',
-                          fontSize: '13px',
-                          fontWeight: isSelected ? 700 : 600,
-                          color: isSelected ? 'var(--maroon, #7b1230)' : 'var(--navy, #061446)',
-                          backgroundColor: 'transparent',
-                          border: 'none',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          textAlign: 'left',
-                        }}
                       >
                         <span>{cat}</span>
-                        {isSelected && <Check size={14} color="var(--maroon, #7b1230)" strokeWidth={2.5} />}
+                        {isSelected && (
+                          <svg className="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                        )}
                       </button>
                     );
                   })}
 
                   {/* Languages Option with Submenu */}
-                  <div
-                    style={{ position: 'relative', width: '100%' }}
-                    onMouseEnter={() => setIsLangSubmenuOpen(true)}
-                    onMouseLeave={() => setIsLangSubmenuOpen(false)}
-                  >
+                  <div style={{ position: 'relative', width: '100%' }}>
                     <button
                       type="button"
+                      id="sidebar-languages-trigger"
                       role="menuitem"
                       aria-haspopup="true"
                       aria-expanded={isLangSubmenuOpen}
+                      aria-checked={category.toLowerCase() === 'languages' || Boolean(language)}
+                      className={`dropdown-item js-lang-trigger ${(category.toLowerCase() === 'languages' || language) ? 'is-selected' : ''}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         setIsLangSubmenuOpen((prev) => !prev);
-                      }}
-                      style={{
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '8px 10px',
-                        fontSize: '13px',
-                        fontWeight: (category.toLowerCase() === 'languages' || language) ? 700 : 600,
-                        color: (category.toLowerCase() === 'languages' || language) ? 'var(--maroon, #7b1230)' : 'var(--navy, #061446)',
-                        backgroundColor: 'transparent',
-                        border: 'none',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        textAlign: 'left',
                       }}
                     >
                       <span>Languages</span>
@@ -824,47 +794,33 @@ export const LibraryPage: React.FC = () => {
 
                     {isLangSubmenuOpen && (
                       <div
+                        id="sidebar-languages-submenu"
                         role="menu"
                         style={{
-                          position: 'absolute',
-                          left: '100%',
-                          top: 0,
-                          minWidth: '140px',
-                          backgroundColor: '#ffffff',
-                          border: '1px solid var(--border-color, #e2e8f0)',
-                          borderRadius: '8px',
-                          boxShadow: '0 8px 24px rgba(10,36,114,0.14)',
-                          zIndex: 110,
-                          padding: '6px',
-                          boxSizing: 'border-box',
+                          paddingLeft: '10px',
+                          background: 'var(--surface-body, #f8fafc)',
+                          borderRadius: '6px',
+                          margin: '2px 0',
                         }}
                       >
                         <button
                           type="button"
                           role="menuitem"
+                          aria-checked={!language}
+                          className={`dropdown-item js-sublang-opt ${!language ? 'is-selected' : ''}`}
                           onClick={() => {
                             updateMultipleParams({ category: '', language: '', lang: '' });
                             setIsCatOpen(false);
                             setIsLangSubmenuOpen(false);
                           }}
-                          style={{
-                            width: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            padding: '6px 10px',
-                            fontSize: '12px',
-                            fontWeight: !language ? 700 : 600,
-                            color: !language ? 'var(--maroon, #7b1230)' : 'var(--navy, #061446)',
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            textAlign: 'left',
-                          }}
+                          style={{ fontSize: '0.85rem' }}
                         >
                           <span>All Languages</span>
-                          {!language && <Check size={12} color="var(--maroon, #7b1230)" strokeWidth={2.5} />}
+                          {!language && (
+                            <svg className="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                          )}
                         </button>
 
                         {(filterOptions.languages || filterOptions.language || ['English', 'Tamil', 'Hindi', 'French', 'German']).map((langItem: string) => {
@@ -874,29 +830,21 @@ export const LibraryPage: React.FC = () => {
                               key={langItem}
                               type="button"
                               role="menuitem"
+                              aria-checked={isSelected}
+                              className={`dropdown-item js-sublang-opt ${isSelected ? 'is-selected' : ''}`}
                               onClick={() => {
                                 updateMultipleParams({ category: 'Languages', language: langItem, lang: langItem });
                                 setIsCatOpen(false);
                                 setIsLangSubmenuOpen(false);
                               }}
-                              style={{
-                                width: '100%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                padding: '6px 10px',
-                                fontSize: '12px',
-                                fontWeight: isSelected ? 700 : 600,
-                                color: isSelected ? 'var(--maroon, #7b1230)' : 'var(--navy, #061446)',
-                                backgroundColor: 'transparent',
-                                border: 'none',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                                textAlign: 'left',
-                              }}
+                              style={{ fontSize: '0.85rem' }}
                             >
                               <span>{langItem}</span>
-                              {isSelected && <Check size={12} color="var(--maroon, #7b1230)" strokeWidth={2.5} />}
+                              {isSelected && (
+                                <svg className="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                  <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                              )}
                             </button>
                           );
                         })}
