@@ -1898,6 +1898,21 @@ def membership() -> Response:
     return render_page("membership")
 
 
+@app.get("/privacy-policy/", endpoint="privacy_policy")
+def privacy_policy() -> Response:
+    return render_site("legal", "home", page_title="Privacy Policy", page_subtitle="How we collect, use, and protect your information at Book Buddy Community Library.")
+
+
+@app.get("/terms/", endpoint="terms_conditions")
+def terms_conditions() -> Response:
+    return render_site("legal", "home", page_title="Terms & Conditions", page_subtitle="Membership terms, borrowing policies, and guidelines for library members.")
+
+
+@app.get("/refund-policy/", endpoint="refund_policy")
+def refund_policy() -> Response:
+    return render_site("legal", "home", page_title="Refund & Cancellation Policy", page_subtitle="Payment processing, cancellation guidelines, and refund terms for memberships.")
+
+
 @app.get("/magazine/", endpoint="magazine")
 def magazine() -> Response:
     return redirect("/community/media/?tab=magazines", code=301)

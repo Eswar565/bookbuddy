@@ -16,6 +16,7 @@ import { CollaboratorsPage } from './pages/CollaboratorsPage';
 import { ContactPage } from './pages/ContactPage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
+import { LegalPage } from './pages/LegalPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 export const App: React.FC = () => {
@@ -38,6 +39,9 @@ export const App: React.FC = () => {
               <Route path="gallery/:slug" element={<GalleryPage />} />
               <Route path="collaborators" element={<CollaboratorsPage />} />
               <Route path="contact" element={<ContactPage />} />
+              <Route path="privacy-policy" element={<LegalPage type="privacy" />} />
+              <Route path="terms" element={<LegalPage type="terms" />} />
+              <Route path="refund-policy" element={<LegalPage type="refund" />} />
               <Route path="login" element={<LoginPage />} />
               <Route path="signup" element={<SignupPage />} />
               <Route path="*" element={<NotFoundPage />} />

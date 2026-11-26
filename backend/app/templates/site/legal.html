@@ -1,0 +1,44 @@
+{% extends 'site/base.html' %}
+{% block title %}{{ page_title }} · Book Buddy{% endblock %}
+{% block body %}
+<main class="bb8-section" style="max-width: 860px; margin: 32px auto 60px; padding: 0 20px;">
+  <nav style="margin-bottom: 20px; font-size: 0.875rem;">
+    <a href="/" style="color: var(--navy-light, #0a2472); text-decoration: none;">Home</a>
+    <span style="margin: 0 8px; color: #94a3b8;">/</span>
+    <span style="color: #64748b;">{{ page_title }}</span>
+  </nav>
+
+  <h1 style="font-size: 2rem; font-weight: 700; color: var(--navy, #061446); margin-bottom: 8px;">
+    {{ page_title }}
+  </h1>
+  <p style="color: #475569; font-size: 1rem; margin-bottom: 32px; line-height: 1.5;">
+    {{ page_subtitle }}
+  </p>
+
+  <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+    <div style="display: inline-flex; align-items: center; gap: 8px; background: #fef3c7; color: #92400e; padding: 6px 12px; border-radius: 9999px; font-size: 0.8125rem; font-weight: 600; margin-bottom: 20px;">
+      <span>Note: Content to be provided</span>
+    </div>
+
+    <p style="color: #334155; line-height: 1.6; font-size: 0.95rem; margin-bottom: 16px;">
+      The complete text of the <strong>{{ page_title }}</strong> is currently being drafted and finalized by Book Buddy management in accordance with Indian regulatory and payment gateway guidelines (including Razorpay compliance).
+    </p>
+
+    <p style="color: #334155; line-height: 1.6; font-size: 0.95rem; margin-bottom: 24px;">
+      If you have questions regarding our membership rules, data privacy, or payment cancellations in the interim, please reach out to our circulation desk:
+    </p>
+
+    <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #f1f5f9;">
+      <p style="margin: 0 0 6px 0; font-size: 0.9rem; color: #1e293b;">
+        <strong>Email:</strong> <a href="mailto:bookbuddy.edu@gmail.com" style="color: var(--navy-light, #0a2472);">bookbuddy.edu@gmail.com</a>
+      </p>
+      <p style="margin: 0 0 6px 0; font-size: 0.9rem; color: #1e293b;">
+        <strong>Phone / WhatsApp:</strong> <a href="tel:+919080759312" style="color: var(--navy-light, #0a2472);">+91 9080759312</a>
+      </p>
+      <p style="margin: 0; font-size: 0.9rem; color: #1e293b;">
+        <strong>Address:</strong> 1, Thiruvalluvar St, Thiru Nagar Colony, Gandhi Nagar, Saligramam, Chennai, Tamil Nadu 600093
+      </p>
+    </div>
+  </div>
+</main>
+{% endblock %}

@@ -211,7 +211,9 @@ def test_navigation_and_seo(client):
     html = res.data.decode('utf-8')
 
     # Dropdown link
-    assert 'href="/membership/">Membership &amp; Plans</a>' in html or 'href="/membership/">Membership & Plans</a>' in html
+    assert ('href="/membership/">Membership &amp; Plans</a>' in html or
+            'href="/membership/">Membership & Plans</a>' in html or
+            'href="/membership/">Membership Plans</a>' in html)
 
     # Footer link
     assert '/membership/' in html

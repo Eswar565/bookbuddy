@@ -29,6 +29,7 @@ media_backup_*/
 frontend/dist/
 frontend/node_modules/
 *.tsbuildinfo
+screenshots_footer/
 
 # Junction aliases for legacy path compatibility
 /static
