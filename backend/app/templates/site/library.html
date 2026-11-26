@@ -8,7 +8,7 @@
     <div class="bb-catalogue-heading" style="margin-bottom:24px;">
       <div>
         <span class="gallery-badge">The Book Buddy Library</span>
-        <h1 style="font-size:clamp(26px, 4vw, 36px); font-weight:800; color:var(--navy); margin:8px 0;">Discover your next read</h1>
+        <h1 style="font-size:clamp(26px, 4vw, 36px); font-weight:800; color:var(--navy); margin:8px 0;">Book Catalogue</h1>
         <p style="color:var(--text-muted); font-size:15px; margin:0;">Browse through our curated collection of illustrated picture books, chapter novels, non-fiction, and classics.</p>
       </div>
       <a class="bb-catalogue-basket" href="/members/dashboard/">
@@ -16,51 +16,56 @@
       </a>
     </div>
 
-    <!-- Quick Readers & Language Row with Export Buttons -->
-    <nav class="catalogue-quick" aria-label="Quick filters and export" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:16px; background:var(--surface-card); padding:14px 20px; border-radius:var(--radius-lg); border:1px solid var(--border-color); margin-bottom:20px; box-shadow:var(--shadow-sm);">
-      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+    <!-- Quick Readers & Language Row with Export Buttons (Exact Order: Readers | Download as Excel | Language (dropdown) | Favourites | Checkout) -->
+    <nav class="catalogue-quick" aria-label="Quick filters and export" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:14px; background:var(--surface-card); padding:12px 18px; border-radius:var(--radius-lg); border:1px solid var(--border-color); margin-bottom:20px; box-shadow:var(--shadow-sm);">
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
         <strong style="color:var(--navy); font-size:13px; font-weight:700;">Readers:</strong>
         {% for value, label in [('', 'All'), ('adult', 'Adults'), ('kids', 'Kids')] %}
         <a href="{{ catalogue_url(audience=value, page=1) }}"
            class="btn-export {% if filters23.audience == value %}btn-excel{% endif %}"
-           style="font-size:13px; {% if filters23.audience == value %}background:var(--navy); color:#fff; border-color:var(--navy); font-weight:700;{% endif %}"
+           style="height:38px; display:inline-flex; align-items:center; padding:0 14px; font-size:13px; {% if filters23.audience == value %}background:var(--navy); color:#fff; border-color:var(--navy); font-weight:700;{% endif %}"
            {% if filters23.audience == value %}aria-current="page"{% endif %}>
           {{ label }}
         </a>
         {% endfor %}
 
-        <!-- Download as Excel and Download as PDF placed right after Kids -->
-        <span class="catalogue-export-group">
-          <a href="{{ export_url(format='xlsx') }}" class="btn-export btn-excel" title="Download currently filtered list as Excel spreadsheet">
-            <svg class="bb-icon" style="width:14px;height:14px;" aria-hidden="true"><use href="#i-download"/></svg> Download as Excel
-          </a>
-          <a href="{{ export_url(format='pdf') }}" class="btn-export btn-pdf" title="Download currently filtered list as PDF document">
-            <svg class="bb-icon" style="width:14px;height:14px;" aria-hidden="true"><use href="#i-download"/></svg> Download as PDF
-          </a>
-        </span>
+        <!-- Download as Excel placed right after Kids -->
+        <a href="{{ export_url(format='xlsx') }}" class="btn-export btn-excel" title="Download currently filtered list as Excel spreadsheet" style="height:38px; display:inline-flex; align-items:center; gap:6px; padding:0 14px; font-size:13px;">
+          <svg class="bb-icon" style="width:14px;height:14px;" aria-hidden="true"><use href="#i-download"/></svg> Download as Excel
+        </a>
       </div>
 
-      <div class="catalogue-language-group" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-        <!-- Checkout button immediately BEFORE the "Language:" group -->
-        <button type="button" id="bb-filter-checkout-btn" class="btn-filter-checkout js-checkout-trigger" aria-label="Open borrow cart checkout" aria-haspopup="dialog">
+      <div class="catalogue-right-actions" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <!-- Language Dropdown (replaces pill buttons) -->
+        <div style="display:flex; align-items:center; gap:6px;">
+          <label for="top-filter-lang" style="color:var(--navy); font-size:13px; font-weight:700;">Language:</label>
+          <select id="top-filter-lang" name="language" onchange="if(this.value){window.location.href=this.value;}" style="height:38px; padding:0 12px; font-size:13px; font-weight:600; color:var(--navy); border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; cursor:pointer;">
+            <option value="{{ catalogue_url(language='', page=1) }}" {% if not filters23.language %}selected{% endif %}>All Languages</option>
+            {% for lang in filter_options['language'] %}
+            <option value="{{ catalogue_url(language=lang, page=1) }}" {% if filters23.language|lower == lang|lower %}selected{% endif %}>{{ lang }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Favourites Button with Count Badge -->
+        <a href="/library/favourites/" id="bb-filter-favs-btn" class="btn-export btn-favs js-favs-trigger" title="View your saved favourite books" style="height:38px; display:inline-flex; align-items:center; gap:8px; padding:0 14px; font-size:13px; font-weight:600; color:var(--navy); background:#fff; border:1px solid var(--border-color); border-radius:var(--radius-sm); text-decoration:none; cursor:pointer;">
+          <svg class="bb-icon" width="16" height="16" viewBox="0 0 24 24" fill="var(--maroon)" stroke="var(--maroon)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+          <span>Favourites</span>
+          <span class="bb-fav-badge js-fav-badge" id="bb-filter-fav-badge" style="display:none; background:var(--maroon); color:#fff; font-size:11px; font-weight:700; padding:2px 7px; border-radius:999px;">0</span>
+        </a>
+
+        <!-- Checkout Button -->
+        <button type="button" id="bb-filter-checkout-btn" class="btn-filter-checkout js-checkout-trigger" aria-label="Open borrow cart checkout" aria-haspopup="dialog" style="height:38px; display:inline-flex; align-items:center; gap:8px; padding:0 16px; font-size:13px; font-weight:700; border-radius:var(--radius-sm); background:var(--navy); color:#fff; border:none; cursor:pointer;">
           <svg class="bb-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
             <line x1="3" y1="6" x2="21" y2="6"></line>
             <path d="M16 10a4 4 0 0 1-8 0"></path>
           </svg>
           <span>Checkout</span>
-          <span class="bb-cart-badge js-cart-badge" id="bb-filter-cart-badge" style="display:none;">0</span>
+          <span class="bb-cart-badge js-cart-badge" id="bb-filter-cart-badge" style="display:none; background:#ff4757; color:#fff; font-size:11px; font-weight:700; padding:2px 7px; border-radius:999px;">0</span>
         </button>
-
-        <strong style="color:var(--navy); font-size:13px; font-weight:700;">Language:</strong>
-        {% for value, label in [('', 'All'), ('English', 'English'), ('Tamil', 'Tamil'), ('Hindi', 'Hindi')] %}
-        <a href="{{ catalogue_url(language=value, page=1) }}"
-           class="btn-export {% if filters23.language|lower == value|lower %}btn-excel{% endif %}"
-           style="font-size:13px; {% if filters23.language|lower == value|lower %}background:var(--navy); color:#fff; border-color:var(--navy); font-weight:700;{% endif %}"
-           {% if filters23.language|lower == value|lower %}aria-current="page"{% endif %}>
-          {{ label }}
-        </a>
-        {% endfor %}
       </div>
     </nav>
 
@@ -72,24 +77,34 @@
 
     <!-- Main Layout: Sidebar Filters + Books Grid -->
     <div class="catalogue-layout">
-      <!-- Filter Panel (Collapses to drawer on mobile) -->
-      <aside class="catalogue-sidebar" id="catalogue-sidebar">
+      <!-- Filter Panel (Sticky on desktop, collapses to bottom-sheet drawer on mobile) -->
+      <aside class="catalogue-sidebar" id="catalogue-sidebar" style="position:sticky; top:80px; max-height:calc(100vh - 90px); overflow-y:auto;">
         <div class="catalogue-filter-bar">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
             <h3 style="font-size:16px; font-weight:700; color:var(--navy); margin:0; display:flex; align-items:center; gap:6px;">
               <svg class="bb-icon" style="width:16px;height:16px;"><use href="#i-sliders"/></svg> Refine Catalogue
             </h3>
-            <a href="/library/" class="filter-clear-all" style="font-size:12px;">Reset All</a>
+            <a href="/library/" class="filter-clear-all" style="font-size:12px;">Clear All</a>
           </div>
 
           <form action="/library/" method="get" id="catalogue-filter-form">
-            <!-- Search Title/Author -->
+            <!-- 1. Search Title/Author -->
             <div style="margin-bottom:14px;">
-              <label for="filter-q" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Title, Author or Topic</label>
-              <input id="filter-q" type="search" name="q" value="{{ query }}" placeholder="Search by title or author..." style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); box-sizing:border-box;">
+              <label for="filter-q" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Search</label>
+              <input id="filter-q" type="search" name="q" value="{{ query }}" placeholder="Search by title, author, topic..." style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); box-sizing:border-box;">
             </div>
 
-            <!-- Age Group -->
+            <!-- 2. Reader Type (All / Adults / Kids) -->
+            <div style="margin-bottom:14px;">
+              <label for="filter-audience" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Reader Type</label>
+              <select id="filter-audience" name="audience" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
+                <option value="">All readers</option>
+                <option value="adult" {% if filters23.audience == 'adult' %}selected{% endif %}>Adults &amp; Parents</option>
+                <option value="kids" {% if filters23.audience == 'kids' %}selected{% endif %}>Children &amp; Young Readers</option>
+              </select>
+            </div>
+
+            <!-- 3. Age Group -->
             <div style="margin-bottom:14px;">
               <label for="filter-age_group" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Age Group</label>
               <select id="filter-age_group" name="age_group" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
@@ -100,28 +115,7 @@
               </select>
             </div>
 
-            <!-- Reader Type -->
-            <div style="margin-bottom:14px;">
-              <label for="filter-audience" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Reader Type</label>
-              <select id="filter-audience" name="audience" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
-                <option value="">All readers</option>
-                <option value="kids" {% if filters23.audience == 'kids' %}selected{% endif %}>Children &amp; Young Readers</option>
-                <option value="adult" {% if filters23.audience == 'adult' %}selected{% endif %}>Adults &amp; Parents</option>
-              </select>
-            </div>
-
-            <!-- Language -->
-            <div style="margin-bottom:14px;">
-              <label for="filter-language" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Language</label>
-              <select id="filter-language" name="language" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
-                <option value="">All languages</option>
-                {% for value in filter_options['language'] %}
-                <option value="{{ value }}" {% if value == filters23.language %}selected{% endif %}>{{ value }}</option>
-                {% endfor %}
-              </select>
-            </div>
-
-            <!-- Genre / Category -->
+            <!-- 4. Genre / Category -->
             <div style="margin-bottom:14px;">
               <label for="filter-collection" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Genre / Category</label>
               <select id="filter-collection" name="collection" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
@@ -132,7 +126,7 @@
               </select>
             </div>
 
-            <!-- Author -->
+            <!-- 5. Author -->
             <div style="margin-bottom:14px;">
               <label for="filter-author" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Author</label>
               <select id="filter-author" name="author" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
@@ -143,7 +137,7 @@
               </select>
             </div>
 
-            <!-- Availability -->
+            <!-- 6. Availability -->
             <div style="margin-bottom:14px;">
               <label for="filter-availability" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Availability</label>
               <select id="filter-availability" name="availability" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
@@ -153,7 +147,7 @@
               </select>
             </div>
 
-            <!-- Sort By -->
+            <!-- 7. Sort By -->
             <div style="margin-bottom:16px;">
               <label for="filter-sort" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Sort By</label>
               <select id="filter-sort" name="sort" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
@@ -170,9 +164,15 @@
               </label>
             </div>
 
-            <button type="submit" class="btn-book-event" style="width:100%; justify-content:center; padding:10px; font-size:14px;">
-              Apply Filters
-            </button>
+            <!-- 8. Apply & Clear All -->
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button type="submit" class="btn-book-event" style="flex:1; justify-content:center; padding:10px; font-size:13px; font-weight:700;">
+                Apply Filters
+              </button>
+              <a href="/library/" class="btn-export" style="padding:10px; font-size:13px; text-decoration:none; text-align:center;">
+                Clear
+              </a>
+            </div>
           </form>
         </div>
       </aside>

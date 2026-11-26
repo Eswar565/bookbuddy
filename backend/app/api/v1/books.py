@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import math
-from flask import Blueprint, jsonify, request, redirect, url_for
+from flask import Blueprint, jsonify, request, redirect, url_for, session
 from ...db import get_db
 from ...services.library_filters import (
     get_filtered_books_for_export,
@@ -139,13 +139,260 @@ def export_books(fmt: str):
     fmt_lower = fmt.lower()
     if fmt_lower in ("xlsx", "excel"):
         return export_books_excel(books)
-    elif fmt_lower in ("pdf",):
-        return export_books_pdf(books)
     else:
         return jsonify({
             "ok": False,
             "error": {
                 "code": "UNSUPPORTED_FORMAT",
-                "message": f"Unsupported export format: {fmt}. Use 'xlsx' or 'pdf'."
+                "message": f"Unsupported export format: {fmt}. Download as PDF has been removed. Use 'xlsx'."
             }
         }), 400
+
+
+@books_bp.get("/library/favourites")
+@books_bp.get("/library/favourites/")
+@books_bp.get("/books/favourites")
+@books_bp.get("/books/favourites/")
+def list_favourites():
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({
+            "ok": True,
+            "data": {
+                "favourites": [],
+                "book_ids": [],
+                "count": 0,
+                "is_guest": True
+            }
+        })
+
+    db = get_db()
+    rows = db.execute(
+        """SELECT b.* FROM books b
+           JOIN member_favourites mf ON b.id = mf.book_id
+           WHERE mf.user_id = ? AND b.archived = 0
+           ORDER BY mf.created_at DESC""",
+        (user_id,)
+    ).fetchall()
+
+    books = [dict(r) for r in rows]
+    book_ids = [b["id"] for b in books]
+    return jsonify({
+        "ok": True,
+        "data": {
+            "favourites": books,
+            "book_ids": book_ids,
+            "count": len(books),
+            "is_guest": False
+        }
+    })
+
+
+@books_bp.post("/library/favourites")
+@books_bp.post("/library/favourites/")
+@books_bp.post("/books/favourites")
+@books_bp.post("/books/favourites/")
+def add_favourite():
+    from .csrf import check_csrf_protection
+    if not check_csrf_protection(request):
+        return jsonify({
+            "ok": False,
+            "error": {
+                "code": "CSRF_FAILED",
+                "message": "Invalid or missing CSRF token."
+            }
+        }), 403
+
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({
+            "ok": False,
+            "error": {
+                "code": "AUTH_REQUIRED",
+                "message": "Please log in to save books to your account favourites."
+            }
+        }), 401
+
+    payload = request.get_json(silent=True) or request.form.to_dict()
+    book_id = payload.get("book_id")
+    if not book_id:
+        return jsonify({
+            "ok": False,
+            "error": {
+                "code": "INVALID_INPUT",
+                "message": "Missing book_id parameter."
+            }
+        }), 400
+
+    try:
+        book_id = int(book_id)
+    except (ValueError, TypeError):
+        return jsonify({
+            "ok": False,
+            "error": {
+                "code": "INVALID_INPUT",
+                "message": "Invalid book_id integer."
+            }
+        }), 400
+
+    db = get_db()
+    # Ensure book exists
+    book = db.execute("SELECT id FROM books WHERE id=? AND archived=0", (book_id,)).fetchone()
+    if not book:
+        return jsonify({
+            "ok": False,
+            "error": {
+                "code": "BOOK_NOT_FOUND",
+                "message": "Book not found or archived."
+            }
+        }), 404
+
+    db.execute(
+        "INSERT OR IGNORE INTO member_favourites (user_id, book_id) VALUES (?, ?)",
+        (user_id, book_id)
+    )
+    db.commit()
+
+    count = db.execute("SELECT COUNT(*) FROM member_favourites WHERE user_id=?", (user_id,)).fetchone()[0]
+
+    return jsonify({
+        "ok": True,
+        "data": {
+            "book_id": book_id,
+            "is_favourite": True,
+            "total_favourites": count
+        }
+    })
+
+
+@books_bp.delete("/library/favourites/<int:book_id>")
+@books_bp.delete("/library/favourites/<int:book_id>/")
+@books_bp.delete("/books/favourites/<int:book_id>")
+@books_bp.delete("/books/favourites/<int:book_id>/")
+def remove_favourite_by_id(book_id: int):
+    return _do_remove_favourite(book_id)
+
+
+@books_bp.delete("/library/favourites")
+@books_bp.delete("/library/favourites/")
+@books_bp.delete("/books/favourites")
+@books_bp.delete("/books/favourites/")
+def remove_favourite():
+    payload = request.get_json(silent=True) or request.form.to_dict()
+    book_id = payload.get("book_id") or request.args.get("book_id")
+    if not book_id:
+        return jsonify({
+            "ok": False,
+            "error": {
+                "code": "INVALID_INPUT",
+                "message": "Missing book_id parameter."
+            }
+        }), 400
+    try:
+        book_id = int(book_id)
+    except (ValueError, TypeError):
+        return jsonify({
+            "ok": False,
+            "error": {
+                "code": "INVALID_INPUT",
+                "message": "Invalid book_id."
+            }
+        }), 400
+    return _do_remove_favourite(book_id)
+
+
+def _do_remove_favourite(book_id: int):
+    from .csrf import check_csrf_protection
+    if not check_csrf_protection(request):
+        return jsonify({
+            "ok": False,
+            "error": {
+                "code": "CSRF_FAILED",
+                "message": "Invalid or missing CSRF token."
+            }
+        }), 403
+
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({
+            "ok": False,
+            "error": {
+                "code": "AUTH_REQUIRED",
+                "message": "Please log in to manage your favourites."
+            }
+        }), 401
+
+    db = get_db()
+    db.execute("DELETE FROM member_favourites WHERE user_id=? AND book_id=?", (user_id, book_id))
+    db.commit()
+
+    count = db.execute("SELECT COUNT(*) FROM member_favourites WHERE user_id=?", (user_id,)).fetchone()[0]
+
+    return jsonify({
+        "ok": True,
+        "data": {
+            "book_id": book_id,
+            "is_favourite": False,
+            "total_favourites": count
+        }
+    })
+
+
+@books_bp.post("/library/favourites/sync")
+@books_bp.post("/library/favourites/sync/")
+@books_bp.post("/books/favourites/sync")
+@books_bp.post("/books/favourites/sync/")
+def sync_favourites():
+    from .csrf import check_csrf_protection
+    if not check_csrf_protection(request):
+        return jsonify({
+            "ok": False,
+            "error": {
+                "code": "CSRF_FAILED",
+                "message": "Invalid or missing CSRF token."
+            }
+        }), 403
+
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify({
+            "ok": False,
+            "error": {
+                "code": "AUTH_REQUIRED",
+                "message": "Please log in to sync favourites."
+            }
+        }), 401
+
+    payload = request.get_json(silent=True) or {}
+    book_ids = payload.get("book_ids") or []
+    db = get_db()
+
+    added = 0
+    for bid in book_ids:
+        try:
+            bid = int(bid)
+            db.execute(
+                "INSERT OR IGNORE INTO member_favourites (user_id, book_id) VALUES (?, ?)",
+                (user_id, bid)
+            )
+            added += 1
+        except (ValueError, TypeError):
+            continue
+    db.commit()
+
+    rows = db.execute(
+        """SELECT b.id FROM books b
+           JOIN member_favourites mf ON b.id = mf.book_id
+           WHERE mf.user_id = ? AND b.archived = 0""",
+        (user_id,)
+    ).fetchall()
+    all_ids = [r[0] for r in rows]
+
+    return jsonify({
+        "ok": True,
+        "data": {
+            "merged_count": added,
+            "book_ids": all_ids,
+            "total_favourites": len(all_ids)
+        }
+    })

@@ -63,7 +63,7 @@ def test_old_urls_redirect(client):
 
 
 def test_catalogue_export_excel_and_pdf(client):
-    """Verify that Excel and PDF export endpoints return valid streaming file downloads."""
+    """Verify that Excel export works and PDF export has been removed."""
     # Excel export
     res_excel = client.get("/library/export/xlsx/")
     assert res_excel.status_code == 200
@@ -71,13 +71,9 @@ def test_catalogue_export_excel_and_pdf(client):
     assert len(res_excel.data) > 0
     assert "book_catalogue.xlsx" in res_excel.headers.get("Content-Disposition", "")
 
-    # PDF export
+    # PDF export is removed
     res_pdf = client.get("/library/export/pdf/")
-    assert res_pdf.status_code == 200
-    assert "application/pdf" in res_pdf.content_type
-    assert len(res_pdf.data) > 0
-    assert res_pdf.data.startswith(b"%PDF")
-    assert "book_catalogue.pdf" in res_pdf.headers.get("Content-Disposition", "")
+    assert res_pdf.status_code == 404
 
 
 def test_collaborators_page_renders_4_categories(client):
@@ -121,5 +117,5 @@ def test_catalogue_filter_panel_and_no_total_count(client):
     assert "books found" not in html
     assert "total books available" not in html.lower()
     assert "Download as Excel" in html
-    assert "Download as PDF" in html
+    assert "Download as PDF" not in html
     assert "Refine Catalogue" in html

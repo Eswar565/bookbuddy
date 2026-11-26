@@ -471,6 +471,19 @@ def init_db() -> None:
             connection.execute("ALTER TABLE lending_loans ADD COLUMN delivery_address TEXT NOT NULL DEFAULT ''")
         if "contact_phone" not in loan_cols:
             connection.execute("ALTER TABLE lending_loans ADD COLUMN contact_phone TEXT NOT NULL DEFAULT ''")
+
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS member_favourites (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            book_id INTEGER NOT NULL REFERENCES books(id) ON DELETE CASCADE,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(user_id, book_id)
+        );
+        """
+    )
+    connection.execute("CREATE INDEX IF NOT EXISTS idx_member_favourites_user ON member_favourites(user_id);")
     connection.commit()
     connection.close()
 
@@ -960,6 +973,11 @@ def paged_books(*, collection_filter: bool = True) -> dict[str, Any]:
     delivery_settings.setdefault("membership_pickup_address", "Gandhi Nagar, Saligramam, Chennai")
     delivery_settings.setdefault("membership_delivery_day", "Fixed pick-up & drop on designated weekday (e.g. Saturday)")
 
+    favourite_book_ids = set()
+    if u and u.is_authenticated:
+        fav_rows = db.execute("SELECT book_id FROM member_favourites WHERE user_id=?", (u.id,)).fetchall()
+        favourite_book_ids = {r[0] for r in fav_rows}
+
     return {
         "filter_options": options, "filters23": chosen, "catalogue_url": catalogue_url,
         "books": [row_dict(row) for row in rows],
@@ -972,6 +990,7 @@ def paged_books(*, collection_filter: bool = True) -> dict[str, Any]:
         "active_chips": active_chips,
         "export_url": export_url,
         "active_book_ids": active_book_ids,
+        "favourite_book_ids": favourite_book_ids,
         "member_active_sub": active_sub,
         "member_active_cnt": active_cnt,
         "delivery_settings": delivery_settings,
@@ -997,13 +1016,31 @@ def modern_library() -> Response:
 @app.get("/library/export/<fmt>/", endpoint="library_export")
 def library_export(fmt: str) -> Response:
     import library_filters
-    books = library_filters.get_filtered_books_for_export(get_db(), flask_request.args)
     if fmt.lower() in ("xlsx", "excel"):
+        books = library_filters.get_filtered_books_for_export(get_db(), flask_request.args)
         return library_filters.export_books_excel(books)
     elif fmt.lower() in ("pdf",):
-        return library_filters.export_books_pdf(books)
+        from flask import abort
+        abort(404)
     else:
         return redirect(flask_url_for("modern_library"))
+
+
+@app.get("/library/favourites/", endpoint="library_favourites")
+def library_favourites() -> Response:
+    u = current_user()
+    db = get_db()
+    fav_books = []
+    if u and u.is_authenticated:
+        rows = db.execute(
+            """SELECT b.* FROM books b
+               JOIN member_favourites mf ON b.id = mf.book_id
+               WHERE mf.user_id = ? AND b.archived = 0
+               ORDER BY mf.created_at DESC""",
+            (u.id,)
+        ).fetchall()
+        fav_books = [row_dict(r) for r in rows]
+    return render_site("library", "favourites", fav_books=fav_books, user=u)
 
 
 @app.post("/library/checkout/", endpoint="library_checkout")

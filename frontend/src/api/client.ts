@@ -90,3 +90,17 @@ export async function apiPost<T = any>(url: string, body?: any): Promise<ApiResp
     body: body ? JSON.stringify(body) : undefined,
   });
 }
+
+export async function apiDelete<T = any>(url: string, body?: any): Promise<ApiResponse<T>> {
+  return apiFetch<T>(url, {
+    method: 'DELETE',
+    body: body ? JSON.stringify(body) : undefined,
+  });
+}
+
+export async function apiPut<T = any>(url: string, body?: any): Promise<ApiResponse<T>> {
+  return apiFetch<T>(url, {
+    method: 'PUT',
+    body: body ? JSON.stringify(body) : undefined,
+  });
+}

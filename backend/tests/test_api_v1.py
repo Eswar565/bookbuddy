@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import secrets
 import pytest
 from backend.app import create_app, db_connection
 
@@ -111,8 +112,8 @@ def test_books_export(client):
     assert "spreadsheet" in res_xlsx.content_type or "octet-stream" in res_xlsx.content_type
 
     res_pdf = client.get("/api/v1/books/export/pdf")
-    assert res_pdf.status_code == 200
-    assert "pdf" in res_pdf.content_type
+    assert res_pdf.status_code == 400
+    assert "PDF has been removed" in res_pdf.get_json()["error"]["message"]
 
     res_invalid = client.get("/api/v1/books/export/docx")
     assert res_invalid.status_code == 400
@@ -292,3 +293,68 @@ def test_contact_and_contributions_api(client):
     })
     assert res_c_good.status_code == 201
     assert res_c_good.get_json()["ok"] is True
+
+
+def test_favourites_endpoints(client):
+    # 1. Guest request -> ok: True, is_guest: True, empty list
+    res_guest = client.get("/api/v1/library/favourites")
+    assert res_guest.status_code == 200
+    data_guest = res_guest.get_json()["data"]
+    assert data_guest["is_guest"] is True
+    assert data_guest["book_ids"] == []
+
+    # Guest cannot POST directly without auth
+    res_unauth = client.post("/api/v1/library/favourites", json={"book_id": 1})
+    assert res_unauth.status_code == 401
+
+    # 2. Register & Login a user
+    email = f"fav_user_{secrets.token_hex(4)}@example.com"
+    client.post("/api/v1/auth/signup", json={
+        "email": email,
+        "name": "Favourite Tester",
+        "password": "Password123!"
+    })
+
+    # Ensure test books exist
+    with client.application.app_context():
+        from backend.app.db import get_db
+        db = get_db()
+        cur = db.execute("INSERT INTO books (title, author, archived, available_copies) VALUES ('Fav Book 1', 'Fav Author', 0, 5)")
+        book_id = cur.lastrowid
+        cur2 = db.execute("INSERT INTO books (title, author, archived, available_copies) VALUES ('Fav Book 2', 'Fav Author 2', 0, 5)")
+        other_id = cur2.lastrowid
+        db.commit()
+
+    # 3. Add favourite
+    res_add = client.post("/api/v1/library/favourites", json={"book_id": book_id})
+    assert res_add.status_code == 200
+    assert res_add.get_json()["data"]["is_favourite"] is True
+
+    # 4. Check list has book_id
+    res_list = client.get("/api/v1/library/favourites")
+    assert res_list.status_code == 200
+    assert book_id in res_list.get_json()["data"]["book_ids"]
+
+    # 5. Sync multiple favourites
+    res_sync = client.post("/api/v1/library/favourites/sync", json={"book_ids": [book_id, other_id]})
+    assert res_sync.status_code == 200
+    assert other_id in res_sync.get_json()["data"]["book_ids"]
+
+    # 6. Delete favourite
+    res_del = client.delete(f"/api/v1/library/favourites/{book_id}")
+    assert res_del.status_code == 200
+    assert res_del.get_json()["data"]["is_favourite"] is False
+
+
+def test_catalogue_language_dropdown(client):
+    res = client.get("/library/")
+    assert res.status_code == 200
+    html = res.data.decode("utf-8")
+    # Verify language select element exists
+    assert '<select id="top-filter-lang"' in html or 'name="language"' in html
+    # Verify no PDF download button
+    assert "Download as PDF" not in html
+    assert "Download as Excel" in html
+    # Verify no Discover your next read
+    assert "Discover your next read" not in html
+    assert "Discover your next great read" not in html

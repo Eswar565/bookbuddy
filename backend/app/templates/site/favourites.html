@@ -1,0 +1,58 @@
+{% extends 'site/base.html' %}
+{% block title %}My Favourite Books · Book Buddy Library{% endblock %}
+
+{% block body %}
+<main class="section bb-catalogue-page" style="padding: 32px 0 64px;">
+  <div class="bb8-container" style="max-width:1280px; margin:0 auto; padding:0 20px;">
+    <!-- Breadcrumb & Heading -->
+    <div style="margin-bottom: 24px;">
+      <nav aria-label="Breadcrumb" style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">
+        <a href="/library/" style="color: var(--navy); text-decoration: none;">&larr; Back to Catalogue</a>
+      </nav>
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;">
+        <div>
+          <h1 style="font-size: clamp(24px, 3.5vw, 32px); font-weight: 800; color: var(--navy); margin: 0;">
+            My Favourite Books
+          </h1>
+          <p style="color: var(--text-muted); font-size: 14px; margin: 6px 0 0;">
+            Books you've saved to borrow later. Add them straight to your checkout cart.
+          </p>
+        </div>
+        <button type="button" class="btn-filter-checkout js-checkout-trigger" style="height:40px; padding:0 18px; font-size:13px; font-weight:700; border-radius:var(--radius-sm); background:var(--navy); color:#fff; border:none; display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+          <svg class="bb-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+          <span>Checkout</span>
+          <span class="bb-cart-badge js-cart-badge" style="display:none;">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Favourites Content Area -->
+    <div id="bb-favs-container">
+      {% if fav_books %}
+        <div class="bb-book-grid" id="bb-favs-grid" aria-label="Favourite books">
+          {% for book in fav_books %}
+            {% include 'site/_compact_book_card.html' %}
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="bb-catalogue-empty" id="bb-favs-empty" style="background:var(--surface-card); padding:56px 24px; text-align:center; border-radius:var(--radius-lg); border:1px dashed var(--border-color);">
+          <div style="width:56px; height:56px; border-radius:50%; background:#fce7f3; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
+            <svg class="bb-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--maroon)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          </div>
+          <h2 style="font-size:20px; font-weight:700; color:var(--navy); margin:0 0 8px;">No favourites saved yet</h2>
+          <p style="color:var(--text-muted); font-size:14px; margin:0 0 24px; max-width:420px; margin-left:auto; margin-right:auto;">
+            Click the heart icon on any book in the catalogue to save it to your personal reading list.
+          </p>
+          <a href="/library/" class="btn-export" style="background:var(--navy); color:#fff; border-color:var(--navy); padding:10px 20px; font-weight:700;">Browse Book Catalogue</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+{% endblock %}

@@ -17,7 +17,7 @@ PUBLIC_EXACT = {'/', '/about/', '/contact/', '/membership/', '/plans/', '/how-to
     '/collaborators/', '/community/', '/community/media/', '/gallery/',
     '/maths/', '/english/', '/financial-literacy/', '/ba/',
     '/accounts/login/', '/account/login/', '/login/', '/accounts/signup/', '/account/signup/', '/signup/',
-    '/accounts/password/reset/', '/account/password/reset/', '/membership-options/', '/privacy-policy/', '/terms/', '/refund-policy/', '/robots.txt', '/sitemap.xml', '/favicon.ico'}
+    '/accounts/password/reset/', '/account/password/reset/', '/membership-options/', '/privacy-policy/', '/terms/', '/refund-policy/', '/library/favourites/', '/robots.txt', '/sitemap.xml', '/favicon.ico'}
 PUBLIC_PREFIX = ('/static/', '/media/', '/admin/', '/api/')
 SCHOOL_GRADES = ['LKG','UKG'] + [f'Std {x}' for x in range(1,13)]
 COLLEGE_GRADES = [f'Degree Year {x}' for x in range(1,5)] + [f'PG Year {x}' for x in range(1,3)]
