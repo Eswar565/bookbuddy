@@ -119,3 +119,88 @@ def test_catalogue_filter_panel_and_no_total_count(client):
     assert "Download as Excel" in html
     assert "Download as PDF" not in html
     assert "Refine Catalogue" in html
+
+
+def test_admin_created_events_appear_on_public_page(client):
+    """Verify that events, contests, and reading circles created in admin appear under filters, with correct badges and calendar month navigation."""
+    from app import get_db
+    with client.application.app_context():
+        db = get_db()
+        admin = db.execute("SELECT id FROM admin_users WHERE is_active=1 LIMIT 1").fetchone()
+        aid = admin[0] if admin else db.execute("INSERT INTO admin_users(email,name,role,is_active) VALUES('admin-qa@test.com','Admin QA','super_admin',1)").lastrowid
+        db.commit()
+
+    with client.session_transaction() as sess:
+        sess['admin_id'] = aid
+        sess['admin_role'] = 'super_admin'
+
+    # Get CSRF token from admin form
+    res_form = client.get("/admin/manage/events/0/")
+    assert res_form.status_code == 200
+
+    # Insert items
+    future_date = "2029-08-15"
+    e_workshop_id = None
+    e_contest_id = None
+    e_circle_id = None
+
+    with client.application.app_context():
+        db = get_db()
+        e_workshop_id = db.execute(
+            "INSERT INTO events(title,category,event_date,event_time,capacity,fee,is_active) VALUES(?,?,?,?,?,?,?)",
+            ("QA Storytelling Workshop", "upcoming", future_date, "10:00", 25, 0, 1)
+        ).lastrowid
+        e_contest_id = db.execute(
+            "INSERT INTO events(title,category,event_date,event_time,capacity,fee,is_active) VALUES(?,?,?,?,?,?,?)",
+            ("QA Creative Writing Contest", "contest", future_date, "14:00", 50, 50, 1)
+        ).lastrowid
+        e_circle_id = db.execute(
+            "INSERT INTO events(title,category,event_date,event_time,capacity,fee,is_active) VALUES(?,?,?,?,?,?,?)",
+            ("QA Weekend Reading Circle", "reading-circle", future_date, "16:00", 20, 0, 1)
+        ).lastrowid
+        db.commit()
+
+    try:
+        # Public: All events
+        res_all = client.get("/events/")
+        assert res_all.status_code == 200
+        html_all = res_all.get_data(as_text=True)
+        assert "QA Storytelling Workshop" in html_all
+        assert "QA Creative Writing Contest" in html_all
+        assert "QA Weekend Reading Circle" in html_all
+        assert "Contest" in html_all
+        assert "Reading Circle" in html_all
+
+        # Public: Contests filter
+        res_contests = client.get("/events/?type=contest")
+        assert res_contests.status_code == 200
+        html_contests = res_contests.get_data(as_text=True)
+        assert "QA Creative Writing Contest" in html_contests
+        assert "QA Weekend Reading Circle" not in html_contests
+
+        # Public: Reading circles filter
+        res_circles = client.get("/events/?type=reading-circle")
+        assert res_circles.status_code == 200
+        html_circles = res_circles.get_data(as_text=True)
+        assert "QA Weekend Reading Circle" in html_circles
+        assert "QA Creative Writing Contest" not in html_circles
+
+        # Public: Events filter
+        res_events = client.get("/events/?type=upcoming")
+        assert res_events.status_code == 200
+        html_events = res_events.get_data(as_text=True)
+        assert "QA Storytelling Workshop" in html_events
+
+        # Calendar month navigation test (prev/next month)
+        res_month = client.get("/events/?month=2029-08")
+        assert res_month.status_code == 200
+        html_month = res_month.get_data(as_text=True)
+        assert "August 2029" in html_month
+        assert "2029-07" in html_month # prev month link
+        assert "2029-09" in html_month # next month link
+    finally:
+        with client.application.app_context():
+            db = get_db()
+            db.execute("DELETE FROM events WHERE id IN (?,?,?)", (e_workshop_id, e_contest_id, e_circle_id))
+            db.commit()
+

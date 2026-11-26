@@ -4,10 +4,28 @@
 {% block body %}
 <main class="events-unified-page">
   <div class="bb8-container">
-    <header class="collaborators-header" style="margin-bottom:28px;">
-      <span class="gallery-badge">Library Gatherings</span>
-      <h1>Events &amp; Contests</h1>
-      <p>Discover weekend reading circles, creative writing contests, author interactions, and workshops held at Book Buddy.</p>
+    <header class="events-page-header" style="margin-bottom:24px;">
+      <h1 style="font-size:2rem; font-weight:800; color:var(--navy, #061446); margin:0 0 16px;">Events &amp; Contests</h1>
+      
+      <!-- Top filter bar: All, Events, Reading Circles, Contests in one row -->
+      <nav class="events-type-filter-bar" aria-label="Event categories" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <a href="/events/?view={{ view }}{% if chosen_date %}&amp;date={{ chosen_date }}{% endif %}{% if home_calendar.month %}&amp;month={{ home_calendar.month }}{% endif %}"
+           class="btn-export {% if not event_type %}btn-excel{% endif %}" style="font-size:13px; padding:8px 18px; border-radius:20px; font-weight:600; text-decoration:none;">
+          All
+        </a>
+        <a href="/events/?view={{ view }}&amp;type=upcoming{% if chosen_date %}&amp;date={{ chosen_date }}{% endif %}{% if home_calendar.month %}&amp;month={{ home_calendar.month }}{% endif %}"
+           class="btn-export {% if event_type == 'upcoming' %}btn-excel{% endif %}" style="font-size:13px; padding:8px 18px; border-radius:20px; font-weight:600; text-decoration:none;">
+          Events
+        </a>
+        <a href="/events/?view={{ view }}&amp;type=reading-circle{% if chosen_date %}&amp;date={{ chosen_date }}{% endif %}{% if home_calendar.month %}&amp;month={{ home_calendar.month }}{% endif %}"
+           class="btn-export {% if event_type in ('reading-circle', 'reading_circle') %}btn-excel{% endif %}" style="font-size:13px; padding:8px 18px; border-radius:20px; font-weight:600; text-decoration:none;">
+          Reading Circles
+        </a>
+        <a href="/events/?view={{ view }}&amp;type=contest{% if chosen_date %}&amp;date={{ chosen_date }}{% endif %}{% if home_calendar.month %}&amp;month={{ home_calendar.month }}{% endif %}"
+           class="btn-export {% if event_type in ('contest', 'contests') %}btn-excel{% endif %}" style="font-size:13px; padding:8px 18px; border-radius:20px; font-weight:600; text-decoration:none;">
+          Contests
+        </a>
+      </nav>
     </header>
 
     <div class="events-layout-container">
@@ -15,22 +33,22 @@
       <aside class="events-sidebar">
         <!-- Calendar Widget -->
         <div class="events-calendar-box">
-          <div class="home-calendar calendar-v5" data-home-calendar data-month="{{ home_calendar.month }}">
+          <div class="home-calendar calendar-v5" data-events-calendar data-month="{{ home_calendar.month }}">
             <div class="calendar-v5-label" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
               <span style="font-size:13px; font-weight:700; color:var(--navy); display:inline-flex; align-items:center; gap:6px;">
                 <svg class="bb-icon" style="width:16px;height:16px;"><use href="#i-calendar"/></svg> Event Calendar
               </span>
               {% if chosen_date %}
-              <a href="/events/?view={{ view }}" style="font-size:12px; color:var(--maroon); font-weight:600;">Clear Date</a>
+              <a href="/events/?view={{ view }}{% if event_type %}&amp;type={{ event_type }}{% endif %}{% if home_calendar.month %}&amp;month={{ home_calendar.month }}{% endif %}" style="font-size:12px; color:var(--maroon); font-weight:600;">Show all days</a>
               {% endif %}
             </div>
 
             <div class="home-calendar-controls" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-              <a class="calendar-change" href="/events/?month={{ home_calendar.prev }}&amp;view={{ view }}" data-calendar-month="{{ home_calendar.prev }}" aria-label="Previous month" style="color:var(--navy); text-decoration:none; padding:4px 8px;">
+              <a class="calendar-change" href="/events/?month={{ home_calendar.prev }}&amp;view={{ view }}{% if event_type %}&amp;type={{ event_type }}{% endif %}{% if chosen_date %}&amp;date={{ chosen_date }}{% endif %}" data-calendar-month="{{ home_calendar.prev }}" aria-label="Previous month" style="display:flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:6px; border:1px solid var(--border-color, #e2e8f0); color:var(--navy); text-decoration:none;">
                 <svg class="bb-icon" style="width:14px;height:14px;"><use href="#i-chevron-left"/></svg>
               </a>
               <h3 aria-live="polite" style="font-size:15px; font-weight:700; color:var(--navy); margin:0;">{{ home_calendar.label }}</h3>
-              <a class="calendar-change" href="/events/?month={{ home_calendar.next }}&amp;view={{ view }}" data-calendar-month="{{ home_calendar.next }}" aria-label="Next month" style="color:var(--navy); text-decoration:none; padding:4px 8px;">
+              <a class="calendar-change" href="/events/?month={{ home_calendar.next }}&amp;view={{ view }}{% if event_type %}&amp;type={{ event_type }}{% endif %}{% if chosen_date %}&amp;date={{ chosen_date }}{% endif %}" data-calendar-month="{{ home_calendar.next }}" aria-label="Next month" style="display:flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:6px; border:1px solid var(--border-color, #e2e8f0); color:var(--navy); text-decoration:none;">
                 <svg class="bb-icon" style="width:14px;height:14px;"><use href="#i-chevron-right"/></svg>
               </a>
             </div>
@@ -41,17 +59,17 @@
               {% endfor %}
               {% for week in home_calendar.weeks %}
                 {% for day in week %}
-                  <div class="home-calendar-day {{ 'empty' if not day }}" style="padding:2px;">
+                  <div class="home-calendar-day {{ 'empty' if not day }}" style="aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; padding:1px;">
                     {% if day %}
                       {% set key=home_calendar.month+'-%02d'|format(day) %}
                       {% set day_events = home_calendar.events|selectattr('event_date','equalto',key)|list %}
                       <a class="home-date {{ 'today' if key==today }} {{ 'has-events' if day_events }}"
-                         href="/events/?date={{ key }}&amp;view={{ view }}"
+                         href="/events/?date={{ key }}&amp;view={{ view }}{% if event_type %}&amp;type={{ event_type }}{% endif %}{% if home_calendar.month %}&amp;month={{ home_calendar.month }}{% endif %}"
                          data-event-date="{{ key }}"
-                         style="display:block; padding:6px 0; border-radius:6px; font-size:12px; font-weight:600; text-decoration:none; position:relative; {% if key==chosen_date %}background:var(--navy); color:#fff;{% elif key==today %}border:1px solid var(--maroon); color:var(--maroon);{% elif day_events %}background:var(--gold-tint); color:var(--navy); font-weight:700;{% else %}color:var(--text-main);{% endif %}">
-                        {{ day }}
+                         style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; height:100%; border-radius:6px; font-size:12px; font-weight:600; text-decoration:none; position:relative; {% if key==chosen_date %}background:var(--navy); color:#fff;{% elif key==today %}border:1.5px solid var(--maroon); color:var(--maroon); font-weight:700;{% elif day_events %}background:var(--gold-tint); color:var(--navy); font-weight:700;{% else %}color:var(--text-main);{% endif %}">
+                        <span>{{ day }}</span>
                         {% if day_events %}
-                        <span style="display:block; width:4px; height:4px; border-radius:50%; background:{% if key==chosen_date %}#fff{% else %}var(--maroon){% endif %}; margin:2px auto 0;"></span>
+                        <span style="display:block; width:4px; height:4px; border-radius:50%; background:{% if key==chosen_date %}#fff{% else %}var(--maroon){% endif %}; margin-top:2px;"></span>
                         {% endif %}
                       </a>
                     {% endif %}
@@ -59,18 +77,27 @@
                 {% endfor %}
               {% endfor %}
             </div>
+            {% if chosen_date %}
+            <div style="margin-top:12px; text-align:center;">
+              <a href="/events/?view={{ view }}{% if event_type %}&amp;type={{ event_type }}{% endif %}{% if home_calendar.month %}&amp;month={{ home_calendar.month }}{% endif %}"
+                 style="display:inline-flex; align-items:center; gap:4px; font-size:12px; color:var(--maroon); font-weight:600; text-decoration:none; padding:4px 10px; border:1px solid var(--border-color); border-radius:6px; background:#fff;">
+                &times; Show all days
+              </a>
+            </div>
+            {% else %}
             <p style="font-size:11px; color:var(--text-subtle); text-align:center; margin:10px 0 0;">Click any date to filter events</p>
+            {% endif %}
           </div>
         </div>
 
         <!-- Vertical Menu: Current Events & Past Events -->
         <nav class="events-nav-menu" aria-label="Event timeframes">
-          <a href="/events/?view=current{% if event_type %}&amp;type={{ event_type }}{% endif %}"
+          <a href="/events/?view=current{% if event_type %}&amp;type={{ event_type }}{% endif %}{% if chosen_date %}&amp;date={{ chosen_date }}{% endif %}{% if home_calendar.month %}&amp;month={{ home_calendar.month }}{% endif %}"
              class="events-nav-item {% if view != 'past' %}is-active{% endif %}">
             <span>Current &amp; Upcoming</span>
             <span class="count-badge">{{ current_count }}</span>
           </a>
-          <a href="/events/?view=past{% if event_type %}&amp;type={{ event_type }}{% endif %}"
+          <a href="/events/?view=past{% if event_type %}&amp;type={{ event_type }}{% endif %}{% if chosen_date %}&amp;date={{ chosen_date }}{% endif %}{% if home_calendar.month %}&amp;month={{ home_calendar.month }}{% endif %}"
              class="events-nav-item {% if view == 'past' %}is-active{% endif %}">
             <span>Past Events</span>
             <span class="count-badge">{{ past_count }}</span>
@@ -80,35 +107,17 @@
 
       <!-- RIGHT COLUMN: Events Content Area -->
       <section class="events-content-area">
-        <!-- Content Header with Type Filters -->
-        <div class="events-content-header">
+        <!-- Content Header -->
+        <div class="events-content-header" style="margin-bottom:20px;">
           <div>
-            <h2>{% if view == 'past' %}Past Events &amp; Contests{% else %}Upcoming Events &amp; Contests{% endif %}</h2>
+            <h2 style="font-size:1.35rem; font-weight:700; color:var(--navy); margin:0;">
+              {% if view == 'past' %}Past Events &amp; Contests{% else %}Upcoming Events &amp; Contests{% endif %}
+            </h2>
             {% if chosen_date %}
-            <p style="font-size:13px; color:var(--maroon); font-weight:600; margin:4px 0 0;">
-              Filtered for date: {{ chosen_date }} — <a href="/events/?view={{ view }}" style="color:var(--navy);">Show all dates</a>
+            <p style="font-size:13px; color:var(--maroon); font-weight:600; margin:6px 0 0;">
+              Filtered for date: {{ chosen_date }} — <a href="/events/?view={{ view }}{% if event_type %}&amp;type={{ event_type }}{% endif %}{% if home_calendar.month %}&amp;month={{ home_calendar.month }}{% endif %}" style="color:var(--navy); text-decoration:underline;">Show all days</a>
             </p>
             {% endif %}
-          </div>
-
-          <!-- Type filter pills -->
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <a href="/events/?view={{ view }}{% if chosen_date %}&amp;date={{ chosen_date }}{% endif %}"
-               class="btn-export {% if not event_type %}btn-excel{% endif %}" style="font-size:12px;">
-              All
-            </a>
-            <a href="/events/?view={{ view }}&amp;type=upcoming{% if chosen_date %}&amp;date={{ chosen_date }}{% endif %}"
-               class="btn-export {% if event_type == 'upcoming' %}btn-excel{% endif %}" style="font-size:12px;">
-              Events
-            </a>
-            <a href="/events/?view={{ view }}&amp;type=contest{% if chosen_date %}&amp;date={{ chosen_date }}{% endif %}"
-               class="btn-export {% if event_type == 'contest' %}btn-excel{% endif %}" style="font-size:12px;">
-              Contests
-            </a>
-            <a href="/events/?view={{ view }}&amp;type=reading-circle{% if chosen_date %}&amp;date={{ chosen_date }}{% endif %}"
-               class="btn-export {% if event_type == 'reading-circle' %}btn-excel{% endif %}" style="font-size:12px;">
-              Reading Circles
-            </a>
           </div>
         </div>
 
@@ -120,9 +129,9 @@
               <div class="event-card-img-wrap">
                 {% if event.image_path %}
                 <img src="{{ event.image_path }}" alt="{{ event.title }}" loading="lazy">
-                {% elif event.category == 'contest' %}
+                {% elif event.category in ('contest', 'contests') %}
                 <img src="/static/img/art/10-contest.png" alt="Contest illustration" loading="lazy">
-                {% elif event.category == 'reading-circle' %}
+                {% elif event.category in ('reading-circle', 'reading_circle', 'reading-circles') %}
                 <img src="/static/img/art/04-reading-circle.png" alt="Reading circle illustration" loading="lazy">
                 {% else %}
                 <img src="/static/img/gallery/kids_6.jpg" alt="Library event photo" loading="lazy">
@@ -132,10 +141,12 @@
               <div class="event-card-body">
                 <div>
                   <span class="event-type-tag">
-                    {% if event.category == 'contest' %}
+                    {% if event.category in ('contest', 'contests') %}
                       Contest
-                    {% elif event.category == 'reading-circle' %}
+                    {% elif event.category in ('reading-circle', 'reading_circle', 'reading-circles') %}
                       Reading Circle
+                    {% elif event.category == 'workshop' %}
+                      Workshop
                     {% else %}
                       Event
                     {% endif %}
@@ -180,7 +191,7 @@
             {% endfor %}
           </div>
         {% else %}
-          <div class="collab-empty-box" style="padding:48px 24px;">
+          <div class="collab-empty-box" style="padding:48px 24px; text-align:center; background:#fff; border-radius:12px; border:1px dashed var(--border-color, #e2e8f0);">
             <p style="font-size:17px; font-weight:700; color:var(--navy); margin:0 0 8px;">No events found</p>
             <p style="color:var(--text-muted); margin:0 0 16px;">
               {% if chosen_date %}
@@ -191,8 +202,8 @@
                 New upcoming events and contests will be posted here soon.
               {% endif %}
             </p>
-            <a href="/events/?view={{ view }}" class="btn-export">
-              View All Events
+            <a href="/events/?view={{ view }}{% if home_calendar.month %}&amp;month={{ home_calendar.month }}{% endif %}" class="btn-export">
+              View All Activities
             </a>
           </div>
         {% endif %}

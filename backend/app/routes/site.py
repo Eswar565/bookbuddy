@@ -1316,9 +1316,10 @@ def events_page() -> Response:
     view = flask_request.args.get("view", "current").strip().lower()
     event_type = flask_request.args.get("type", "").strip().lower()
     chosen_date = flask_request.args.get("date", "").strip()
+    month_arg = flask_request.args.get("month", "").strip()
 
-    query = "SELECT * FROM events WHERE is_active=1"
-    params = []
+    query = "SELECT * FROM events WHERE (is_active=1 OR is_active IS NULL)"
+    params: list[Any] = []
 
     if chosen_date:
         query += " AND event_date = ?"
@@ -1330,19 +1331,25 @@ def events_page() -> Response:
         query += " AND event_date >= ?"
         params.append(today)
 
-    if event_type in ("contest", "reading-circle", "upcoming"):
-        query += " AND category = ?"
-        params.append(event_type)
+    cat_clause = ""
+    if event_type in ("contest", "contests"):
+        cat_clause = " AND LOWER(category) IN ('contest', 'contests')"
+    elif event_type in ("reading-circle", "reading_circle", "reading-circles"):
+        cat_clause = " AND LOWER(category) IN ('reading-circle', 'reading_circle', 'reading-circles')"
+    elif event_type in ("upcoming", "event", "events", "workshop"):
+        cat_clause = " AND (LOWER(category) IN ('upcoming', 'event', 'events', 'workshop') OR category IS NULL OR category = '')"
 
+    query += cat_clause
     query += " ORDER BY event_date " + ("DESC" if view == "past" else "ASC") + ", event_time ASC"
     rows = db.execute(query, params).fetchall()
     events = [dict(r) for r in rows]
 
-    current_count = db.execute("SELECT COUNT(*) FROM events WHERE is_active=1 AND event_date >= ?", (today,)).fetchone()[0]
-    past_count = db.execute("SELECT COUNT(*) FROM events WHERE is_active=1 AND event_date < ?", (today,)).fetchone()[0]
+    current_count = db.execute("SELECT COUNT(*) FROM events WHERE (is_active=1 OR is_active IS NULL) AND event_date >= ?" + cat_clause, (today,)).fetchone()[0]
+    past_count = db.execute("SELECT COUNT(*) FROM events WHERE (is_active=1 OR is_active IS NULL) AND event_date < ?" + cat_clause, (today,)).fetchone()[0]
 
+    cal_month = month_arg if month_arg else (chosen_date[:7] if chosen_date else None)
     from notifications import calendar_context
-    cal_ctx = calendar_context(db, month=chosen_date[:7] if chosen_date else None, category=event_type)
+    cal_ctx = calendar_context(db, month=cal_month, category=event_type)
 
     return render_site(
         "events",
