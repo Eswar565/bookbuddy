@@ -38,14 +38,13 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         style={{
           position: 'fixed',
           bottom: '24px',
-          left: '50%',
-          transform: 'translateX(-50%)',
+          right: '24px',
           zIndex: 9999,
           display: 'flex',
           flexDirection: 'column',
           gap: '8px',
           pointerEvents: 'none',
-          maxWidth: '90vw',
+          maxWidth: 'min(90vw, 360px)',
           width: 'max-content',
         }}
       >

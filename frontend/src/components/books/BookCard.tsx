@@ -64,6 +64,8 @@ export const BookCard: React.FC<BookCardProps> = ({
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
+        minWidth: 0,
+        boxSizing: 'border-box',
         position: 'relative',
         transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-bottom 0.18s ease',
         borderBottom: '3px solid transparent',
@@ -87,6 +89,8 @@ export const BookCard: React.FC<BookCardProps> = ({
           display: 'block',
           position: 'relative',
           width: '100%',
+          minWidth: 0,
+          boxSizing: 'border-box',
           aspectRatio: '3/4',
           maxHeight: '210px',
           backgroundColor: '#e1e6f0',
@@ -181,7 +185,7 @@ export const BookCard: React.FC<BookCardProps> = ({
       </Link>
 
       {/* Meta: Title & Author */}
-      <div style={{ marginTop: '8px', marginBottom: '8px', flex: '0 0 auto' }}>
+      <div style={{ marginTop: '8px', marginBottom: '8px', flex: '0 0 auto', minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
         <Link
           to={`/library/${book.id}`}
           title={book.title}
@@ -194,6 +198,7 @@ export const BookCard: React.FC<BookCardProps> = ({
             textOverflow: 'ellipsis',
             overflow: 'hidden',
             textDecoration: 'none',
+            minWidth: 0,
           }}
         >
           {book.title}
@@ -207,6 +212,7 @@ export const BookCard: React.FC<BookCardProps> = ({
             textOverflow: 'ellipsis',
             overflow: 'hidden',
             marginTop: '2px',
+            minWidth: 0,
           }}
         >
           {book.author || 'Unknown Author'}
@@ -221,6 +227,10 @@ export const BookCard: React.FC<BookCardProps> = ({
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: '6px',
+          flexWrap: 'wrap',
+          width: '100%',
+          boxSizing: 'border-box',
+          minWidth: 0,
           paddingTop: '6px',
         }}
       >
@@ -235,6 +245,8 @@ export const BookCard: React.FC<BookCardProps> = ({
               fontWeight: 700,
               padding: '6px 8px',
               borderRadius: '6px',
+              boxSizing: 'border-box',
+              minWidth: 0,
             }}
           >
             Unavailable
@@ -250,6 +262,8 @@ export const BookCard: React.FC<BookCardProps> = ({
               fontWeight: 700,
               padding: '6px 8px',
               borderRadius: '6px',
+              boxSizing: 'border-box',
+              minWidth: 0,
             }}
           >
             Requested
@@ -260,11 +274,18 @@ export const BookCard: React.FC<BookCardProps> = ({
               style={{
                 backgroundColor: 'var(--navy, #0a2472)',
                 color: '#ffffff',
-                fontSize: '0.7rem',
+                fontSize: '0.72rem',
                 fontWeight: 700,
                 padding: '3px 8px',
-                borderRadius: '12px',
+                borderRadius: '6px',
                 whiteSpace: 'nowrap',
+                flexShrink: 1,
+                minWidth: 0,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                maxWidth: 'calc(100% - 82px)',
+                boxSizing: 'border-box',
+                lineHeight: 1.2,
               }}
             >
               Available: {book.available_copies}
@@ -275,29 +296,39 @@ export const BookCard: React.FC<BookCardProps> = ({
               type="button"
               aria-label={inCart ? `Remove ${book.title} from cart` : `Add ${book.title} to cart`}
               style={{
-                padding: '7px 14px',
+                width: '76px',
+                minWidth: '76px',
+                maxWidth: '100%',
+                height: '34px',
                 minHeight: '34px',
-                borderRadius: '8px',
-                border: 'none',
-                backgroundColor: inCart ? '#059669' : 'var(--maroon, #7b1230)',
-                color: '#ffffff',
-                fontSize: '0.8rem',
+                maxHeight: '34px',
+                padding: '0 8px',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+                fontSize: '0.75rem',
                 fontWeight: 700,
+                borderRadius: '8px',
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: '4px',
-                transition: 'background-color 0.15s ease',
+                boxSizing: 'border-box',
+                lineHeight: 1,
+                border: inCart ? '1.5px solid var(--navy, #0a2472)' : '1.5px solid transparent',
+                backgroundColor: inCart ? 'transparent' : 'var(--maroon, #7b1230)',
+                color: inCart ? 'var(--navy, #0a2472)' : '#ffffff',
+                transition: 'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease',
               }}
             >
               {inCart ? (
                 <>
-                  <Check size={14} />
+                  <Check size={14} strokeWidth={2.5} style={{ flexShrink: 0 }} />
                   <span>Added</span>
                 </>
               ) : (
                 <>
-                  <Plus size={14} />
+                  <Plus size={14} strokeWidth={2.5} style={{ flexShrink: 0 }} />
                   <span>Add</span>
                 </>
               )}
