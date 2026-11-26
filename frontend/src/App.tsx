@@ -9,6 +9,7 @@ import { AboutPage } from './pages/AboutPage';
 import { LibraryPage } from './pages/LibraryPage';
 import { BookDetailPage } from './pages/BookDetailPage';
 import { MembershipPage } from './pages/MembershipPage';
+import { CommunityPage } from './pages/CommunityPage';
 import { EventsPage } from './pages/EventsPage';
 import { MediaPage } from './pages/MediaPage';
 import { GalleryPage } from './pages/GalleryPage';
@@ -32,6 +33,7 @@ export const App: React.FC = () => {
               <Route path="library/:id" element={<BookDetailPage />} />
               <Route path="membership" element={<MembershipPage />} />
               <Route path="plans" element={<MembershipPage />} />
+              <Route path="community" element={<CommunityPage />} />
               <Route path="events" element={<EventsPage />} />
               <Route path="community/media" element={<MediaPage />} />
               <Route path="publications" element={<MediaPage />} />
