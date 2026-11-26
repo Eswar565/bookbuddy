@@ -20,6 +20,9 @@
   --maroon-light: #8e1432;
   --maroon-tint: rgba(116, 15, 40, 0.08);
 
+  --color-primary: var(--maroon);
+  --color-secondary: var(--navy-light);
+
   --gold: #d97706;
   --gold-tint: #fef3c7;
 
@@ -1054,27 +1057,21 @@ body, h1, h2, h3, h4, h5, h6, p, a, button, input, select, textarea, summary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  width: 76px;
-  min-width: 76px;
-  max-width: 100%;
-  height: 34px;
-  min-height: 34px;
-  max-height: 34px;
-  padding: 0 8px;
-  font-size: 0.75rem;
+  gap: 6px;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  font-size: 0.85rem;
   font-weight: 700;
   font-family: var(--font-family);
-  border-radius: 8px;
-  border: 1.5px solid transparent;
-  background: #7b1230;
+  border-radius: 10px;
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
   color: #ffffff;
   cursor: pointer;
   transition: all var(--transition-fast);
   text-decoration: none;
-  line-height: 1;
   white-space: nowrap;
-  flex-shrink: 0;
   box-sizing: border-box;
 }
 
@@ -1475,9 +1472,9 @@ body.storybook .bb-book-grid {
 
 .catalogue-sidebar {
   position: sticky !important;
-  top: 80px !important;
-  max-height: calc(100vh - 90px) !important;
-  overflow-y: auto !important;
+  top: 88px !important;
+  max-height: calc(100vh - 104px) !important;
+  overflow: visible !important;
 }
 
 @media (max-width: 899px) {
@@ -1507,7 +1504,41 @@ body.storybook .bb-book-grid {
   .mobile-filter-toggle-btn {
     display: inline-flex !important;
   }
+  .mobile-drawer-header {
+    display: flex !important;
+  }
 }
+
+/* Simplified Filter Sidebar Dropdowns & Controls */
+.sidebar-dropdown-btn:hover {
+  border-color: var(--navy) !important;
+}
+.sidebar-dropdown-btn:focus-visible {
+  outline: 2px solid var(--navy) !important;
+  outline-offset: 1px;
+}
+.sidebar-pill-btn:hover {
+  border-color: var(--maroon) !important;
+}
+.sidebar-pill-btn:focus-visible {
+  outline: 2px solid var(--maroon) !important;
+  outline-offset: 1px;
+}
+.sidebar-menu-item:hover,
+.sidebar-menu-item:focus-visible {
+  background: #f1f5f9 !important;
+  color: var(--navy) !important;
+  outline: none;
+}
+.sidebar-menu-item.is-selected {
+  color: var(--maroon) !important;
+  font-weight: 700 !important;
+}
+.sidebar-submenu-wrap:hover > .sidebar-submenu,
+.sidebar-submenu-wrap:focus-within > .sidebar-submenu {
+  display: block !important;
+}
+
 
 @media (max-width: 479px) {
   .bb-book-grid,
@@ -1694,111 +1725,105 @@ body.bookbuddy-modern .bb-book-author {
   font-family: var(--font-family) !important;
 }
 
-/* 5. Bottom row: margin-top: auto */
+/* Card footer (replace the current bottom row: stacked layout) */
+.book-card__footer,
 .bb-card-bottom-row {
-  margin-top: auto !important;
   display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 6px !important;
-  flex-wrap: wrap !important;
+  flex-direction: column !important;      /* stacked */
+  gap: 8px !important;
+  margin-top: auto !important;
   width: 100% !important;
-  box-sizing: border-box !important;
   min-width: 0 !important;
+  box-sizing: border-box !important;
   padding-top: 4px !important;
 }
 
-/* Availability pill: 0.72rem, padding 3px 8px */
-.bb-avail-pill {
-  display: inline-flex !important;
-  align-items: center !important;
-  background: #0a2472 !important;
-  color: #ffffff !important;
-  font-size: 0.72rem !important;
-  font-weight: 700 !important;
-  border-radius: 6px !important;
-  padding: 3px 8px !important;
-  line-height: 1.2 !important;
-  white-space: nowrap !important;
-  user-select: none !important;
-  font-family: var(--font-family) !important;
-  flex-shrink: 1 !important;
-  min-width: 0 !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  max-width: calc(100% - 82px) !important;
-  box-sizing: border-box !important;
-}
-
-.bb-avail-pill.is-unavailable {
-  background: #64748b !important;
-  color: #ffffff !important;
-  max-width: 100% !important;
+.book-card__status,
+.bb-avail-pill {            /* the "Available: N" / "Unavailable" pill */
+  display: block !important;
   width: 100% !important;
-  justify-content: center !important;
+  box-sizing: border-box !important;
   text-align: center !important;
-  padding: 6px 8px !important;
+  white-space: nowrap !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  padding: 7px 10px !important;
+  border-radius: 8px !important;
+  overflow: visible !important;            /* never clip the number */
+  text-overflow: clip !important;
+  max-width: 100% !important;
+  background: var(--color-secondary, #0a2472) !important;
+  color: #fff !important;      /* Available */
 }
 
-/* Add button: ONE fixed size for all states: width: 76px, height: 34px, padding: 0 8px */
+.book-card__status--unavailable,
+.bb-avail-pill.is-unavailable {
+  background: #6b7280 !important;  /* grey */
+  color: #fff !important;
+}
+
+.book-card__action,
 .btn-cart-add,
-body .btn-cart-add {
+body .btn-cart-add {            /* the Add / Added button */
+  width: 100% !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 4px !important;
-  width: 76px !important;
-  min-width: 76px !important;
-  max-width: 100% !important;
-  height: 34px !important;
-  min-height: 34px !important;
-  max-height: 34px !important;
-  padding: 0 8px !important;
-  white-space: nowrap !important;
-  flex-shrink: 0 !important;
-  font-size: 0.75rem !important;
+  gap: 6px !important;
+  padding: 0 10px !important;
+  font-size: 0.85rem !important;
   font-weight: 700 !important;
-  border-radius: 8px !important;
-  border: 1.5px solid transparent !important;
-  background: #7b1230 !important;
-  color: #ffffff !important;
+  white-space: nowrap !important;
+  border-radius: 10px !important;
   cursor: pointer !important;
-  text-decoration: none !important;
   transition: all 0.15s ease !important;
-  box-sizing: border-box !important;
-  line-height: 1 !important;
-  font-family: var(--font-family) !important;
+  text-decoration: none !important;
 }
 
-.btn-cart-add:hover:not(:disabled) {
-  background: #5c0d24 !important;
+.book-card__action--add,
+.btn-cart-add:not(.is-in-cart):not(.book-card__action--added):not(:disabled) {
+  background: var(--color-primary, #740f28) !important;
+  color: #fff !important;
+  border: 1px solid var(--color-primary, #740f28) !important;
 }
 
-.btn-cart-add.is-in-cart {
-  background: transparent !important;
-  color: #0a2472 !important;
-  border-color: #0a2472 !important;
+.book-card__action--add:hover,
+.btn-cart-add:not(.is-in-cart):not(.book-card__action--added):not(:disabled):hover {
+  background: var(--maroon-dark, #580a1e) !important;
+  border-color: var(--maroon-dark, #580a1e) !important;
 }
 
-.btn-cart-add.is-in-cart:hover {
+.book-card__action--added,
+.btn-cart-add.is-in-cart,
+.btn-cart-add.book-card__action--added {
+  background: #fff !important;
+  color: var(--color-secondary, #0a2472) !important;
+  border: 1px solid var(--color-secondary, #0a2472) !important;
+}
+
+.book-card__action--added:hover,
+.btn-cart-add.is-in-cart:hover,
+.btn-cart-add.book-card__action--added:hover {
   background: rgba(10, 36, 114, 0.05) !important;
 }
 
-.btn-cart-add:disabled,
-.btn-cart-add.btn-cart-disabled {
-  background: #cbd5e1 !important;
-  color: #64748b !important;
-  cursor: not-allowed !important;
-  opacity: 0.7 !important;
-  border-color: transparent !important;
-  font-size: 0.7rem !important;
-  padding: 0 4px !important;
+.book-card__action[disabled],
+.btn-cart-disabled,
+.btn-cart-add:disabled {
+  display: none !important;   /* unavailable books show only the grey pill */
 }
 
 .btn-cart-add .cart-check-icon {
   width: 14px !important;
   height: 14px !important;
-  stroke: #0a2472 !important;
+  stroke: var(--color-secondary, #0a2472) !important;
   flex-shrink: 0 !important;
 }
 

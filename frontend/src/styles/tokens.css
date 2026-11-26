@@ -23,6 +23,9 @@
   --maroon-light: #8e1432;
   --maroon-tint: rgba(116, 15, 40, 0.08);
 
+  --color-primary: var(--maroon);
+  --color-secondary: var(--navy-light);
+
   --gold: #d97706;
   --gold-tint: #fef3c7;
 

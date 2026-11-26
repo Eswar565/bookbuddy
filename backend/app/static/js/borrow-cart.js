@@ -326,12 +326,14 @@
       var checkIcon = btn.querySelector('.cart-check-icon');
 
       if (inCart) {
-        btn.classList.add('is-in-cart');
+        btn.classList.add('is-in-cart', 'book-card__action--added');
+        btn.classList.remove('book-card__action--add');
         btn.setAttribute('aria-pressed', 'true');
         if (checkIcon) checkIcon.style.display = 'inline-block';
         if (labelEl) labelEl.textContent = 'Added';
       } else {
-        btn.classList.remove('is-in-cart');
+        btn.classList.remove('is-in-cart', 'book-card__action--added');
+        btn.classList.add('book-card__action--add');
         btn.setAttribute('aria-pressed', 'false');
         if (checkIcon) checkIcon.style.display = 'none';
         if (labelEl) labelEl.textContent = 'Add';

@@ -6,11 +6,14 @@ import {
   FileSpreadsheet,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  Check,
   X,
   Heart,
   Sliders,
-  Trash2,
+  Sparkles,
   Plus,
+  Trash2,
 } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
 import { BookCard, Book } from '../components/books/BookCard';
@@ -24,17 +27,59 @@ export const LibraryPage: React.FC = () => {
   // Search and filter state from URL params
   const q = searchParams.get('q') || '';
   const audience = searchParams.get('audience') || '';
-  const language = searchParams.get('language') || '';
-  const collection = searchParams.get('collection') || '';
-  const age_group = searchParams.get('age_group') || '';
-  const author = searchParams.get('author') || '';
-  const availability = searchParams.get('availability') || '';
+  const language = searchParams.get('language') || searchParams.get('lang') || '';
+  const category = searchParams.get('category') || '';
+  const isNew = searchParams.get('new') === '1';
   const sort = searchParams.get('sort') || 'newest';
   const page = parseInt(searchParams.get('page') || '1', 10);
 
   const [searchInput, setSearchInput] = useState(q);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [isFavsOpen, setIsFavsOpen] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [isCatOpen, setIsCatOpen] = useState(false);
+  const [isLangSubmenuOpen, setIsLangSubmenuOpen] = useState(false);
+
+  // Debounce search input sync
+  useEffect(() => {
+    setSearchInput(q);
+  }, [q]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchInput.trim() !== q) {
+        updateParam('q', searchInput.trim());
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  // Outside click & escape listener for dropdowns
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.sidebar-sort-container')) {
+        setIsSortOpen(false);
+      }
+      if (!target.closest('.sidebar-cat-container')) {
+        setIsCatOpen(false);
+        setIsLangSubmenuOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsSortOpen(false);
+        setIsCatOpen(false);
+        setIsLangSubmenuOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   // Local & Remote Favourites State
   const [wishlist, setWishlist] = useState<number[]>(() => {
@@ -116,16 +161,32 @@ export const LibraryPage: React.FC = () => {
     const next = new URLSearchParams(searchParams);
     if (value) {
       next.set(key, value);
+      if (key === 'lang') next.delete('language');
+      if (key === 'language') next.delete('lang');
     } else {
       next.delete(key);
+      if (key === 'lang') next.delete('language');
+      if (key === 'language') next.delete('lang');
     }
     next.set('page', '1');
     setSearchParams(next);
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateParam('q', searchInput.trim());
+  const updateMultipleParams = (updates: Record<string, string>) => {
+    const next = new URLSearchParams(searchParams);
+    Object.entries(updates).forEach(([k, v]) => {
+      if (v) {
+        next.set(k, v);
+        if (k === 'lang') next.delete('language');
+        if (k === 'language') next.delete('lang');
+      } else {
+        next.delete(k);
+        if (k === 'lang') next.delete('language');
+        if (k === 'language') next.delete('lang');
+      }
+    });
+    next.set('page', '1');
+    setSearchParams(next);
   };
 
   const handleClearAll = () => {
@@ -143,11 +204,11 @@ export const LibraryPage: React.FC = () => {
   const activeChips: { key: string; label: string }[] = [];
   if (q) activeChips.push({ key: 'q', label: `Search: "${q}"` });
   if (audience) activeChips.push({ key: 'audience', label: `Reader: ${audience === 'kids' ? 'Kids' : 'Adults'}` });
-  if (age_group) activeChips.push({ key: 'age_group', label: `Age: ${age_group} yrs` });
+  if (isNew) activeChips.push({ key: 'new', label: 'New Arrivals' });
+  if (category && category.toLowerCase() !== 'all') activeChips.push({ key: 'category', label: `Category: ${category}` });
   if (language) activeChips.push({ key: 'language', label: `Language: ${language}` });
-  if (collection) activeChips.push({ key: 'collection', label: `Category: ${collection}` });
-  if (author) activeChips.push({ key: 'author', label: `Author: ${author}` });
-  if (availability) activeChips.push({ key: 'availability', label: availability === 'available' ? 'Available Now' : 'Waitlist' });
+  if (sort && sort !== 'newest') activeChips.push({ key: 'sort', label: `Sort: ${sort === 'az' ? 'A–Z' : 'Z–A'}` });
+
 
   // Favourites list for the drawer
   const favBooksList: Book[] = favsData?.favourites?.length
@@ -399,241 +460,452 @@ export const LibraryPage: React.FC = () => {
             style={{
               position: 'sticky',
               top: '88px',
+              alignSelf: 'start',
               maxHeight: 'calc(100vh - 104px)',
-              overflowY: 'auto',
+              overflow: 'visible',
+              zIndex: 30,
               backgroundColor: '#ffffff',
               borderRadius: '12px',
-              padding: '20px',
+              padding: '18px',
               border: '1px solid var(--border-color, #e2e8f0)',
               boxShadow: '0 2px 12px rgba(10, 36, 114, 0.04)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '14px',
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--navy, #061446)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Sliders size={16} /> Refine Catalogue
-              </h3>
+            {/* 1. Search Box */}
+            <div style={{ position: 'relative', width: '100%' }}>
+              <label htmlFor="react-sidebar-q" style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--navy, #061446)', marginBottom: '4px' }}>
+                Search
+              </label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input
+                  id="react-sidebar-q"
+                  type="text"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      updateParam('q', searchInput.trim());
+                    }
+                  }}
+                  placeholder="Search title or author..."
+                  aria-label="Search title or author"
+                  style={{
+                    width: '100%',
+                    height: '40px',
+                    padding: '0 32px 0 12px',
+                    fontSize: '13px',
+                    fontFamily: 'inherit',
+                    borderRadius: '8px',
+                    border: '1.5px solid var(--border-color, #e2e8f0)',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    color: 'var(--navy, #061446)',
+                  }}
+                />
+                {searchInput && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchInput('');
+                      updateParam('q', '');
+                    }}
+                    aria-label="Clear search"
+                    style={{
+                      position: 'absolute',
+                      right: '8px',
+                      width: '20px',
+                      height: '20px',
+                      borderRadius: '50%',
+                      border: 'none',
+                      backgroundColor: '#f1f5f9',
+                      color: '#64748b',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      padding: 0,
+                    }}
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* 2. New Arrivals Toggle Button */}
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--navy, #061446)', marginBottom: '4px' }}>
+                Highlights
+              </label>
               <button
                 type="button"
-                onClick={handleClearAll}
-                style={{ background: 'none', border: 'none', color: 'var(--maroon, #7b1230)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer' }}
+                aria-pressed={isNew}
+                onClick={() => updateParam('new', isNew ? '' : '1')}
+                style={{
+                  width: '100%',
+                  height: '40px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  fontFamily: 'inherit',
+                  borderRadius: '8px',
+                  border: `1.5px solid ${isNew ? 'var(--maroon, #7b1230)' : 'var(--border-color, #e2e8f0)'}`,
+                  backgroundColor: isNew ? 'var(--maroon, #7b1230)' : '#ffffff',
+                  color: isNew ? '#ffffff' : 'var(--navy, #061446)',
+                  cursor: 'pointer',
+                  boxSizing: 'border-box',
+                  transition: 'all 0.15s ease',
+                }}
               >
-                Clear All
+                <Sparkles size={15} />
+                <span>New Arrivals</span>
               </button>
             </div>
 
-            <form onSubmit={handleSearchSubmit}>
-              {/* 1. Search */}
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main, #1e293b)', marginBottom: '4px' }}>
-                  Search
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <input
-                    type="search"
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    placeholder="Title, author, keyword..."
+            {/* 3. Sort By Dropdown */}
+            <div className="sidebar-sort-container" style={{ position: 'relative', width: '100%' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--navy, #061446)', marginBottom: '4px' }}>
+                Ordering
+              </label>
+              <button
+                type="button"
+                aria-haspopup="true"
+                aria-expanded={isSortOpen}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsCatOpen(false);
+                  setIsSortOpen((prev) => !prev);
+                }}
+                style={{
+                  width: '100%',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0 12px',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  fontFamily: 'inherit',
+                  borderRadius: '8px',
+                  border: '1.5px solid var(--border-color, #e2e8f0)',
+                  backgroundColor: '#ffffff',
+                  color: 'var(--navy, #061446)',
+                  cursor: 'pointer',
+                  boxSizing: 'border-box',
+                }}
+              >
+                <span>
+                  Sort By: {sort === 'az' ? 'A–Z' : sort === 'za' ? 'Z–A' : 'Newest'}
+                </span>
+                <ChevronDown size={14} />
+              </button>
+
+              {isSortOpen && (
+                <div
+                  role="menu"
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 4px)',
+                    left: 0,
+                    width: '100%',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid var(--border-color, #e2e8f0)',
+                    borderRadius: '8px',
+                    boxShadow: '0 8px 24px rgba(10,36,114,0.14)',
+                    zIndex: 100,
+                    padding: '6px',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  {[
+                    { val: 'newest', label: 'Newest' },
+                    { val: 'az', label: 'A–Z' },
+                    { val: 'za', label: 'Z–A' },
+                  ].map((item) => {
+                    const isSelected = (!sort && item.val === 'newest') || sort === item.val;
+                    return (
+                      <button
+                        key={item.val}
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          updateParam('sort', item.val);
+                          setIsSortOpen(false);
+                        }}
+                        style={{
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '8px 10px',
+                          fontSize: '13px',
+                          fontWeight: isSelected ? 700 : 600,
+                          color: isSelected ? 'var(--maroon, #7b1230)' : 'var(--navy, #061446)',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                        }}
+                      >
+                        <span>{item.label}</span>
+                        {isSelected && <Check size={14} color="var(--maroon, #7b1230)" strokeWidth={2.5} />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* 4. Categories Dropdown */}
+            <div className="sidebar-cat-container" style={{ position: 'relative', width: '100%' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--navy, #061446)', marginBottom: '4px' }}>
+                Categories
+              </label>
+              <button
+                type="button"
+                aria-haspopup="true"
+                aria-expanded={isCatOpen}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsSortOpen(false);
+                  setIsCatOpen((prev) => !prev);
+                }}
+                style={{
+                  width: '100%',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0 12px',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  fontFamily: 'inherit',
+                  borderRadius: '8px',
+                  border: '1.5px solid var(--border-color, #e2e8f0)',
+                  backgroundColor: '#ffffff',
+                  color: 'var(--navy, #061446)',
+                  cursor: 'pointer',
+                  boxSizing: 'border-box',
+                }}
+              >
+                <span>
+                  {category && category.toLowerCase() !== 'all'
+                    ? `${category}${language ? ` (${language})` : ''}`
+                    : 'Categories'}
+                </span>
+                <ChevronDown size={14} />
+              </button>
+
+              {isCatOpen && (
+                <div
+                  role="menu"
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 4px)',
+                    left: 0,
+                    width: '100%',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid var(--border-color, #e2e8f0)',
+                    borderRadius: '8px',
+                    boxShadow: '0 8px 24px rgba(10,36,114,0.14)',
+                    zIndex: 100,
+                    padding: '6px',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  {/* All Option */}
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      updateMultipleParams({ category: '', language: '', lang: '' });
+                      setIsCatOpen(false);
+                    }}
                     style={{
                       width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
                       padding: '8px 10px',
-                      fontSize: '0.85rem',
+                      fontSize: '13px',
+                      fontWeight: (!category || category.toLowerCase() === 'all') ? 700 : 600,
+                      color: (!category || category.toLowerCase() === 'all') ? 'var(--maroon, #7b1230)' : 'var(--navy, #061446)',
+                      backgroundColor: 'transparent',
+                      border: 'none',
                       borderRadius: '6px',
-                      border: '1px solid var(--border-color, #e2e8f0)',
-                      boxSizing: 'border-box',
+                      cursor: 'pointer',
+                      textAlign: 'left',
                     }}
-                  />
+                  >
+                    <span>All</span>
+                    {(!category || category.toLowerCase() === 'all') && (
+                      <Check size={14} color="var(--maroon, #7b1230)" strokeWidth={2.5} />
+                    )}
+                  </button>
+
+                  {['Baby', 'Toddler', 'Junior', 'Middle Grade', 'Young Adults', 'Adults', 'Fiction', 'Non Fiction'].map((cat) => {
+                    const isSelected = category.toLowerCase() === cat.toLowerCase();
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          updateMultipleParams({ category: cat, language: '', lang: '' });
+                          setIsCatOpen(false);
+                        }}
+                        style={{
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '8px 10px',
+                          fontSize: '13px',
+                          fontWeight: isSelected ? 700 : 600,
+                          color: isSelected ? 'var(--maroon, #7b1230)' : 'var(--navy, #061446)',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                        }}
+                      >
+                        <span>{cat}</span>
+                        {isSelected && <Check size={14} color="var(--maroon, #7b1230)" strokeWidth={2.5} />}
+                      </button>
+                    );
+                  })}
+
+                  {/* Languages Option with Submenu */}
+                  <div
+                    style={{ position: 'relative', width: '100%' }}
+                    onMouseEnter={() => setIsLangSubmenuOpen(true)}
+                    onMouseLeave={() => setIsLangSubmenuOpen(false)}
+                  >
+                    <button
+                      type="button"
+                      role="menuitem"
+                      aria-haspopup="true"
+                      aria-expanded={isLangSubmenuOpen}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsLangSubmenuOpen((prev) => !prev);
+                      }}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '8px 10px',
+                        fontSize: '13px',
+                        fontWeight: (category.toLowerCase() === 'languages' || language) ? 700 : 600,
+                        color: (category.toLowerCase() === 'languages' || language) ? 'var(--maroon, #7b1230)' : 'var(--navy, #061446)',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                      }}
+                    >
+                      <span>Languages</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        {language && <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--maroon, #7b1230)' }}>{language}</span>}
+                        <ChevronRight size={12} />
+                      </div>
+                    </button>
+
+                    {isLangSubmenuOpen && (
+                      <div
+                        role="menu"
+                        style={{
+                          position: 'absolute',
+                          left: '100%',
+                          top: 0,
+                          minWidth: '140px',
+                          backgroundColor: '#ffffff',
+                          border: '1px solid var(--border-color, #e2e8f0)',
+                          borderRadius: '8px',
+                          boxShadow: '0 8px 24px rgba(10,36,114,0.14)',
+                          zIndex: 110,
+                          padding: '6px',
+                          boxSizing: 'border-box',
+                        }}
+                      >
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            updateMultipleParams({ category: '', language: '', lang: '' });
+                            setIsCatOpen(false);
+                            setIsLangSubmenuOpen(false);
+                          }}
+                          style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '6px 10px',
+                            fontSize: '12px',
+                            fontWeight: !language ? 700 : 600,
+                            color: !language ? 'var(--maroon, #7b1230)' : 'var(--navy, #061446)',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                          }}
+                        >
+                          <span>All Languages</span>
+                          {!language && <Check size={12} color="var(--maroon, #7b1230)" strokeWidth={2.5} />}
+                        </button>
+
+                        {(filterOptions.languages || filterOptions.language || ['English', 'Tamil', 'Hindi', 'French', 'German']).map((langItem: string) => {
+                          const isSelected = language.toLowerCase() === langItem.toLowerCase();
+                          return (
+                            <button
+                              key={langItem}
+                              type="button"
+                              role="menuitem"
+                              onClick={() => {
+                                updateMultipleParams({ category: 'Languages', language: langItem, lang: langItem });
+                                setIsCatOpen(false);
+                                setIsLangSubmenuOpen(false);
+                              }}
+                              style={{
+                                width: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '6px 10px',
+                                fontSize: '12px',
+                                fontWeight: isSelected ? 700 : 600,
+                                color: isSelected ? 'var(--maroon, #7b1230)' : 'var(--navy, #061446)',
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                              }}
+                            >
+                              <span>{langItem}</span>
+                              {isSelected && <Check size={12} color="var(--maroon, #7b1230)" strokeWidth={2.5} />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-
-              {/* 2. Reader Type */}
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main, #1e293b)', marginBottom: '4px' }}>
-                  Reader Type
-                </label>
-                <select
-                  value={audience}
-                  onChange={(e) => updateParam('audience', e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 10px',
-                    fontSize: '0.85rem',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border-color, #e2e8f0)',
-                    backgroundColor: '#fff',
-                    boxSizing: 'border-box',
-                  }}
-                >
-                  <option value="">All Readers</option>
-                  <option value="adults">Adults &amp; Parents</option>
-                  <option value="kids">Children &amp; Young Readers</option>
-                </select>
-              </div>
-
-              {/* 3. Age Group */}
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main, #1e293b)', marginBottom: '4px' }}>
-                  Age Group
-                </label>
-                <select
-                  value={age_group}
-                  onChange={(e) => updateParam('age_group', e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 10px',
-                    fontSize: '0.85rem',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border-color, #e2e8f0)',
-                    backgroundColor: '#fff',
-                    boxSizing: 'border-box',
-                  }}
-                >
-                  <option value="">All Age Groups</option>
-                  {filterOptions.age_group?.map((age: string) => (
-                    <option key={age} value={age}>
-                      {age} yrs
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* 4. Genre / Category */}
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main, #1e293b)', marginBottom: '4px' }}>
-                  Genre / Category
-                </label>
-                <select
-                  value={collection}
-                  onChange={(e) => updateParam('collection', e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 10px',
-                    fontSize: '0.85rem',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border-color, #e2e8f0)',
-                    backgroundColor: '#fff',
-                    boxSizing: 'border-box',
-                  }}
-                >
-                  <option value="">All Categories</option>
-                  {filterOptions.collections?.map((col: string) => (
-                    <option key={col} value={col}>
-                      {col}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* 5. Author */}
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main, #1e293b)', marginBottom: '4px' }}>
-                  Author
-                </label>
-                <select
-                  value={author}
-                  onChange={(e) => updateParam('author', e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 10px',
-                    fontSize: '0.85rem',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border-color, #e2e8f0)',
-                    backgroundColor: '#fff',
-                    boxSizing: 'border-box',
-                  }}
-                >
-                  <option value="">All Authors</option>
-                  {filterOptions.author?.map((auth: string) => (
-                    <option key={auth} value={auth}>
-                      {auth}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* 6. Availability */}
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main, #1e293b)', marginBottom: '4px' }}>
-                  Availability
-                </label>
-                <select
-                  value={availability}
-                  onChange={(e) => updateParam('availability', e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 10px',
-                    fontSize: '0.85rem',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border-color, #e2e8f0)',
-                    backgroundColor: '#fff',
-                    boxSizing: 'border-box',
-                  }}
-                >
-                  <option value="">All Collection</option>
-                  <option value="available">Available Now</option>
-                  <option value="waitlist">On Loan / Waitlist</option>
-                </select>
-              </div>
-
-              {/* 7. Sort By */}
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main, #1e293b)', marginBottom: '4px' }}>
-                  Sort By
-                </label>
-                <select
-                  value={sort}
-                  onChange={(e) => updateParam('sort', e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 10px',
-                    fontSize: '0.85rem',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border-color, #e2e8f0)',
-                    backgroundColor: '#fff',
-                    boxSizing: 'border-box',
-                  }}
-                >
-                  <option value="newest">Newest Arrivals</option>
-                  <option value="title">Title (A–Z)</option>
-                  <option value="author">Author (A–Z)</option>
-                </select>
-              </div>
-
-              {/* 8. Clear & Apply */}
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  type="submit"
-                  style={{
-                    flex: 1,
-                    padding: '10px',
-                    backgroundColor: 'var(--navy, #061446)',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '0.85rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Apply
-                </button>
-                <button
-                  type="button"
-                  onClick={handleClearAll}
-                  style={{
-                    padding: '10px 14px',
-                    backgroundColor: '#f1f5f9',
-                    color: 'var(--navy, #061446)',
-                    border: '1px solid var(--border-color, #e2e8f0)',
-                    borderRadius: '6px',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Clear
-                </button>
-              </div>
-            </form>
+              )}
+            </div>
           </aside>
 
           {/* Right Main Column: Active Chips + Grid + Pagination */}
@@ -731,10 +1003,12 @@ export const LibraryPage: React.FC = () => {
                 }}
               >
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--navy, #061446)', margin: '0 0 8px' }}>
-                  No matching books found
+                  {category && category.toLowerCase() !== 'all' ? 'No books found in this category' : 'No matching books found'}
                 </h2>
                 <p style={{ color: 'var(--text-muted, #64748b)', margin: '0 0 16px', fontSize: '0.9rem' }}>
-                  Try adjusting your filters or search keywords to find titles.
+                  {category && category.toLowerCase() !== 'all'
+                    ? 'Try choosing another category or clearing your active filters to explore our shelves.'
+                    : 'Try adjusting your filters or search keywords to find titles.'}
                 </p>
                 <button
                   type="button"
@@ -855,69 +1129,133 @@ export const LibraryPage: React.FC = () => {
 
               {/* Mobile controls list */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {/* 1. Search */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '4px' }}>
-                    Reader Type
+                  <label htmlFor="mobile-search-q" style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '4px' }}>
+                    Search
                   </label>
-                  <select
-                    value={audience}
-                    onChange={(e) => updateParam('audience', e.target.value)}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.9rem' }}
-                  >
-                    <option value="">All Readers</option>
-                    <option value="adults">Adults &amp; Parents</option>
-                    <option value="kids">Children &amp; Young Readers</option>
-                  </select>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <input
+                      id="mobile-search-q"
+                      type="text"
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      placeholder="Title or author..."
+                      style={{
+                        width: '100%',
+                        padding: '10px 32px 10px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-color)',
+                        fontSize: '0.9rem',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                    {searchInput && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSearchInput('');
+                          updateParam('q', '');
+                        }}
+                        style={{
+                          position: 'absolute',
+                          right: '8px',
+                          background: '#f1f5f9',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '20px',
+                          height: '20px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
                 </div>
 
+                {/* 2. Highlights (New Arrivals) */}
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '4px' }}>
-                    Age Group
+                    Highlights
                   </label>
-                  <select
-                    value={age_group}
-                    onChange={(e) => updateParam('age_group', e.target.value)}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.9rem' }}
+                  <button
+                    type="button"
+                    aria-pressed={isNew}
+                    onClick={() => updateParam('new', isNew ? '' : '1')}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      borderRadius: '8px',
+                      border: `1.5px solid ${isNew ? 'var(--maroon, #7b1230)' : 'var(--border-color, #e2e8f0)'}`,
+                      backgroundColor: isNew ? 'var(--maroon, #7b1230)' : '#ffffff',
+                      color: isNew ? '#ffffff' : 'var(--navy, #061446)',
+                      fontWeight: 700,
+                      fontSize: '0.9rem',
+                      cursor: 'pointer',
+                    }}
                   >
-                    <option value="">All Age Groups</option>
-                    {filterOptions.age_group?.map((age: string) => (
-                      <option key={age} value={age}>
-                        {age} yrs
-                      </option>
-                    ))}
-                  </select>
+                    <Sparkles size={16} />
+                    <span>New Arrivals</span>
+                  </button>
                 </div>
 
+                {/* 3. Ordering (Sort By) */}
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '4px' }}>
-                    Genre / Category
-                  </label>
-                  <select
-                    value={collection}
-                    onChange={(e) => updateParam('collection', e.target.value)}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.9rem' }}
-                  >
-                    <option value="">All Categories</option>
-                    {filterOptions.collections?.map((col: string) => (
-                      <option key={col} value={col}>
-                        {col}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '4px' }}>
-                    Sort By
+                    Ordering
                   </label>
                   <select
                     value={sort}
                     onChange={(e) => updateParam('sort', e.target.value)}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.9rem' }}
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.9rem', backgroundColor: '#ffffff' }}
                   >
-                    <option value="newest">Newest Arrivals</option>
-                    <option value="title">Title (A–Z)</option>
-                    <option value="author">Author (A–Z)</option>
+                    <option value="newest">Sort By: Newest</option>
+                    <option value="az">Sort By: A–Z</option>
+                    <option value="za">Sort By: Z–A</option>
+                  </select>
+                </div>
+
+                {/* 4. Categories */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '4px' }}>
+                    Categories
+                  </label>
+                  <select
+                    value={language ? `lang:${language}` : (category || 'all')}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val.startsWith('lang:')) {
+                        const chosenLang = val.replace('lang:', '');
+                        updateMultipleParams({ category: 'Languages', language: chosenLang, lang: chosenLang });
+                      } else if (val === 'all') {
+                        updateMultipleParams({ category: '', language: '', lang: '' });
+                      } else {
+                        updateMultipleParams({ category: val, language: '', lang: '' });
+                      }
+                    }}
+                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.9rem', backgroundColor: '#ffffff' }}
+                  >
+                    <option value="all">All Categories</option>
+                    {['Baby', 'Toddler', 'Junior', 'Middle Grade', 'Young Adults', 'Adults', 'Fiction', 'Non Fiction'].map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                    <optgroup label="Languages">
+                      {(filterOptions.languages || filterOptions.language || ['English', 'Tamil', 'Hindi', 'French', 'German']).map((langItem: string) => (
+                        <option key={langItem} value={`lang:${langItem}`}>
+                          {langItem}
+                        </option>
+                      ))}
+                    </optgroup>
                   </select>
                 </div>
 

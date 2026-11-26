@@ -14,7 +14,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 # Only these fields can be edited. Password hashes are never exposed.
 MODELS = {
-    'books': ('Books', 'books', 'title author collection age_group language price stock description image_path is_active archived audience'),
+    'books': ('Books', 'books', 'title author collection age_group language category price stock description image_path is_active archived audience'),
     'events': ('Events', 'events', 'title description event_date event_time location fee capacity is_online is_active'),
     'publications': ('Publications', 'publications', 'title kind description edition file_path published_on is_active download_count'),
     'pages': ('Website pages', 'cms_pages', 'slug title summary body is_active'),
@@ -504,6 +504,11 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
                 except ValueError as exc:
                     errors.append(str(exc))
             if kind == 'books':
+                cats = request.form.getlist('category')
+                if cats:
+                    values['category'] = ', '.join([c.strip() for c in cats if c.strip()])
+                elif 'category' in request.form:
+                    values['category'] = request.form.get('category', '').strip()
                 if not values.get('audience') or values.get('audience') not in {'all', 'kids', 'adult'}:
                     values['audience'] = 'all'
                 if values.get('stock') is None or values.get('stock') == '' or (not record_id and values.get('stock') == 0 and request.form.get('stock') is None):

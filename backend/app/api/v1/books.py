@@ -16,10 +16,24 @@ def get_filter_options(db):
         key: [r[0] for r in db.execute(f"SELECT DISTINCT {key} FROM books WHERE archived=0 AND TRIM({key})<>'' ORDER BY {key}").fetchall()]
         for key in ["language", "age_group", "author", "product_type"]
     }
+    lang_set = set()
+    for l_val in options.get("language", []):
+        for single in (l_val or "").split(','):
+            s = single.strip()
+            if s: lang_set.add(s)
+    options["languages"] = sorted(lang_set) or ["English", "Tamil", "Hindi"]
     collections = [r[0] for r in db.execute(
         "SELECT DISTINCT collection FROM books WHERE archived=0 AND collection IS NOT NULL AND TRIM(collection)<>'' ORDER BY collection"
     ).fetchall()]
     options["collections"] = collections
+    options["categories"] = [
+        "Baby", "Toddler", "Junior", "Middle Grade", "Young Adults", "Adults", "Fiction", "Non Fiction", "Languages"
+    ]
+    options["sort_options"] = [
+        {"value": "newest", "label": "Newest"},
+        {"value": "az", "label": "A–Z"},
+        {"value": "za", "label": "Z–A"}
+    ]
     return options
 
 books_bp = Blueprint("api_books", __name__)
@@ -30,13 +44,17 @@ def list_books():
     args = request.args
 
     search = args.get("q", "").strip()[:120]
+    category = args.get("category", "").strip()[:120]
     collection = args.get("collection", "").strip()[:120]
     audience = args.get("audience", "").strip().lower()
-    language = args.get("language", "").strip()
+    lang = args.get("lang", "").strip()[:120] or args.get("language", "").strip()[:120]
+    if lang.lower() == "all":
+        lang = ""
     age_group = args.get("age_group", "").strip()
     author = args.get("author", "").strip()
     availability = args.get("availability", "").strip().lower()
     new_only = args.get("new", "").strip()
+    sort = args.get("sort", "newest").strip().lower()
 
     try:
         page = max(1, int(args.get("page", 1)))
@@ -52,17 +70,42 @@ def list_books():
     params = []
 
     if search:
-        conditions.append("(title LIKE ? OR author LIKE ? OR isbn LIKE ?)")
+        conditions.append("(title LIKE ? OR author LIKE ? OR isbn LIKE ? OR description LIKE ?)")
         wild = f"%{search}%"
-        params.extend([wild, wild, wild])
+        params.extend([wild, wild, wild, wild])
+
+    if category and category.lower() != "all":
+        cat_lower = category.lower()
+        if cat_lower == "baby":
+            conditions.append("(LOWER(category) LIKE '%baby%' OR age_group IN ('0-2', '0-3', 'Baby'))")
+        elif cat_lower == "toddler":
+            conditions.append("(LOWER(category) LIKE '%toddler%' OR age_group IN ('3-5', '2-4', 'Toddler'))")
+        elif cat_lower == "junior":
+            conditions.append("(LOWER(category) LIKE '%junior%' OR age_group IN ('5', '6-8', 'Junior'))")
+        elif cat_lower == "middle grade":
+            conditions.append("(LOWER(category) LIKE '%middle grade%' OR LOWER(category) LIKE '%middle-grade%' OR age_group IN ('9-12', 'Middle Grade'))")
+        elif cat_lower == "young adults":
+            conditions.append("(LOWER(category) LIKE '%young adult%' OR age_group IN ('12+', '13-18', 'Young Adults'))")
+        elif cat_lower == "adults":
+            conditions.append("(LOWER(category) LIKE '%adult%' OR LOWER(audience) IN ('adult', 'adults'))")
+        elif cat_lower == "fiction":
+            conditions.append("(LOWER(category) LIKE '%fiction%' AND LOWER(category) NOT LIKE '%non-fiction%' AND LOWER(category) NOT LIKE '%non fiction%' OR collection IN ('Picture Books', 'Chapter Books', 'Adventure', 'Classics', 'Sci-Fi', 'Fantasy', 'Folktales', 'Story') OR product_type = 'fiction')")
+        elif cat_lower in ("non fiction", "non-fiction"):
+            conditions.append("(LOWER(category) LIKE '%non fiction%' OR LOWER(category) LIKE '%non-fiction%' OR collection IN ('Non-Fiction', 'Non Fiction', 'AI') OR product_type = 'non-fiction')")
+        elif cat_lower == "languages":
+            if not lang:
+                conditions.append("(language IS NOT NULL AND TRIM(language) <> '')")
+        else:
+            conditions.append("(LOWER(category) LIKE ? OR LOWER(collection) LIKE ?)")
+            params.extend([f"%{cat_lower}%", f"%{cat_lower}%"])
+
+    if lang:
+        conditions.append("LOWER(language) LIKE ?")
+        params.append(f"%{lang.lower()}%")
 
     if collection:
         conditions.append("collection = ?")
         params.append(collection)
-
-    if language:
-        conditions.append("language = ?")
-        params.append(language)
 
     if age_group:
         conditions.append("age_group = ?")
@@ -80,10 +123,17 @@ def list_books():
     if new_only == "1":
         conditions.append("is_new_arrival = 1")
 
-    if audience == "adults":
-        conditions.append("LOWER(COALESCE(audience, '')) = 'adults'")
+    if audience in ("adult", "adults"):
+        conditions.append("LOWER(COALESCE(audience, '')) IN ('adult', 'adults', 'all')")
     elif audience == "kids":
-        conditions.append("LOWER(COALESCE(audience, '')) != 'adults'")
+        conditions.append("LOWER(COALESCE(audience, '')) IN ('kids', 'all')")
+
+    if sort in ('az', 'title'):
+        order_by = "title COLLATE NOCASE ASC, id ASC"
+    elif sort == 'za':
+        order_by = "title COLLATE NOCASE DESC, id DESC"
+    else:
+        order_by = "is_new_arrival DESC, id DESC"
 
     where_clause = " WHERE " + " AND ".join(conditions)
 
@@ -93,7 +143,7 @@ def list_books():
 
     offset = (page - 1) * page_size
     query = f"""SELECT * FROM books{where_clause}
-                ORDER BY is_new_arrival DESC, id DESC
+                ORDER BY {order_by}
                 LIMIT ? OFFSET ?"""
     rows = db.execute(query, tuple(params + [page_size, offset])).fetchall()
 

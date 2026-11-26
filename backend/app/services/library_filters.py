@@ -99,12 +99,49 @@ def get_filtered_books_for_export(db, args) -> list[dict]:
         filters.append("collection = ?")
         params.append(collection)
 
-    chosen = {k: str(args.get(k, "")).strip()[:120] for k in ['language', 'age_group', 'author', 'product_type', 'availability', 'new', 'sort', 'audience']}
+    category = str(args.get("category", "")).strip()[:120]
+    lang = str(args.get("lang", "") or args.get("language", "")).strip()[:120]
+    if lang.lower() == "all":
+        lang = ""
+
+    chosen = {k: str(args.get(k, "")).strip()[:120] for k in ['language', 'age_group', 'author', 'product_type', 'availability', 'new', 'sort', 'audience', 'category', 'lang']}
+    chosen['category'] = category
+    chosen['lang'] = lang
+
+    if category and category.lower() != "all":
+        cat_lower = category.lower()
+        if cat_lower == "baby":
+            filters.append("(LOWER(category) LIKE '%baby%' OR age_group IN ('0-2', '0-3', 'Baby'))")
+        elif cat_lower == "toddler":
+            filters.append("(LOWER(category) LIKE '%toddler%' OR age_group IN ('3-5', '2-4', 'Toddler'))")
+        elif cat_lower == "junior":
+            filters.append("(LOWER(category) LIKE '%junior%' OR age_group IN ('5', '6-8', 'Junior'))")
+        elif cat_lower == "middle grade":
+            filters.append("(LOWER(category) LIKE '%middle grade%' OR LOWER(category) LIKE '%middle-grade%' OR age_group IN ('9-12', 'Middle Grade'))")
+        elif cat_lower == "young adults":
+            filters.append("(LOWER(category) LIKE '%young adult%' OR age_group IN ('12+', '13-18', 'Young Adults'))")
+        elif cat_lower == "adults":
+            filters.append("(LOWER(category) LIKE '%adult%' OR LOWER(audience) IN ('adult', 'adults'))")
+        elif cat_lower == "fiction":
+            filters.append("(LOWER(category) LIKE '%fiction%' AND LOWER(category) NOT LIKE '%non-fiction%' AND LOWER(category) NOT LIKE '%non fiction%' OR collection IN ('Picture Books', 'Chapter Books', 'Adventure', 'Classics', 'Sci-Fi', 'Fantasy', 'Folktales', 'Story') OR product_type = 'fiction')")
+        elif cat_lower in ("non fiction", "non-fiction"):
+            filters.append("(LOWER(category) LIKE '%non fiction%' OR LOWER(category) LIKE '%non-fiction%' OR collection IN ('Non-Fiction', 'Non Fiction', 'AI') OR product_type = 'non-fiction')")
+        elif cat_lower == "languages":
+            if not lang:
+                filters.append("(language IS NOT NULL AND TRIM(language) <> '')")
+        else:
+            filters.append("(LOWER(category) LIKE ? OR LOWER(collection) LIKE ?)")
+            params.extend([f"%{cat_lower}%", f"%{cat_lower}%"])
+
+    if lang:
+        filters.append("LOWER(language) LIKE ?")
+        params.append(f"%{lang.lower()}%")
+
     if chosen['audience'] in {'adult', 'kids'}:
         filters.append("audience IN (?, 'all')")
         params.append(chosen['audience'])
 
-    for key in ['language', 'age_group', 'author', 'product_type']:
+    for key in ['age_group', 'author', 'product_type']:
         if chosen[key]:
             filters.append('LOWER(' + key + ') = LOWER(?)')
             params.append(chosen[key])
@@ -117,13 +154,13 @@ def get_filtered_books_for_export(db, args) -> list[dict]:
     if chosen['new'] == '1':
         filters.append('is_new_arrival=1')
 
-    ordering = {
-        'newest': 'is_new_arrival DESC, id DESC',
-        'title': 'title COLLATE NOCASE ASC, id',
-        'author': 'author COLLATE NOCASE ASC, id',
-        'price-low': 'price ASC, id',
-        'price-high': 'price DESC, id'
-    }.get(chosen['sort'], 'is_new_arrival DESC, id DESC')
+    sort_val = chosen.get('sort', 'newest').lower()
+    if sort_val in ('az', 'title'):
+        ordering = 'title COLLATE NOCASE ASC, id ASC'
+    elif sort_val == 'za':
+        ordering = 'title COLLATE NOCASE DESC, id DESC'
+    else:
+        ordering = 'is_new_arrival DESC, id DESC'
 
     where = f" WHERE {' AND '.join(filters)}" if filters else ""
     rows = db.execute(

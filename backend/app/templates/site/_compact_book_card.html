@@ -38,21 +38,20 @@
   <!-- 4. Author: maroon (#7b1230), 0.8rem, single line ellipsis -->
   <p class="bb-book-author" title="{{ (book.author or 'Author not listed')|e }}">{{ book.author or 'Author not listed' }}</p>
 
-  <!-- 5. Bottom row: margin-top: auto -->
-  <div class="bb-card-bottom-row">
+  <!-- 5. Card footer: stacked layout -->
+  <div class="book-card__footer bb-card-bottom-row">
     {% set is_active_loan = active_book_ids and (book.id in active_book_ids) %}
     {% if book.stock|int < 1 %}
-      <!-- BUG FIX: Single grey "Unavailable" pill, NO Add button -->
-      <span class="bb-avail-pill is-unavailable">Unavailable</span>
+      <span class="book-card__status book-card__status--unavailable bb-avail-pill is-unavailable">Unavailable</span>
     {% else %}
-      <span class="bb-avail-pill">Available: {{ book.stock }}</span>
+      <span class="book-card__status bb-avail-pill">Available: {{ book.stock|int }}</span>
       {% if is_active_loan %}
-        <button type="button" class="btn-cart-add btn-cart-disabled" disabled aria-disabled="true" title="Already in your active requests or loans">
+        <button type="button" class="book-card__action btn-cart-add btn-cart-disabled" disabled aria-disabled="true" title="Already in your active requests or loans">
           Active Request
         </button>
       {% else %}
         <button type="button"
-                class="btn-cart-add js-cart-btn"
+                class="book-card__action book-card__action--add btn-cart-add js-cart-btn"
                 data-add-to-cart
                 data-book-id="{{ book.id }}"
                 data-title="{{ book.title|e }}"

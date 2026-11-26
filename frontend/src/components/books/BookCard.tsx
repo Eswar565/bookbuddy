@@ -219,107 +219,38 @@ export const BookCard: React.FC<BookCardProps> = ({
         </div>
       </div>
 
-      {/* Bottom Action Row (margin-top: auto ensures alignment) */}
-      <div
-        style={{
-          marginTop: 'auto',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '6px',
-          flexWrap: 'wrap',
-          width: '100%',
-          boxSizing: 'border-box',
-          minWidth: 0,
-          paddingTop: '6px',
-        }}
-      >
+      {/* Card footer (replace the current bottom row: stacked layout) */}
+      <div className="book-card__footer">
         {!isAvailable ? (
-          <span
-            style={{
-              width: '100%',
-              textAlign: 'center',
-              backgroundColor: '#f1f5f9',
-              color: '#64748b',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              padding: '6px 8px',
-              borderRadius: '6px',
-              boxSizing: 'border-box',
-              minWidth: 0,
-            }}
-          >
+          <span className="book-card__status book-card__status--unavailable">
             Unavailable
           </span>
         ) : isAlreadyLoaned ? (
-          <span
-            style={{
-              width: '100%',
-              textAlign: 'center',
-              backgroundColor: '#fef3c7',
-              color: '#92400e',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              padding: '6px 8px',
-              borderRadius: '6px',
-              boxSizing: 'border-box',
-              minWidth: 0,
-            }}
-          >
-            Requested
-          </span>
+          <>
+            <span className="book-card__status">
+              Available: {book.available_copies ?? 0}
+            </span>
+            <button
+              type="button"
+              disabled
+              className="book-card__action"
+              title="Already in your active requests or loans"
+            >
+              Active Request
+            </button>
+          </>
         ) : (
           <>
-            <span
-              style={{
-                backgroundColor: 'var(--navy, #0a2472)',
-                color: '#ffffff',
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                padding: '3px 8px',
-                borderRadius: '6px',
-                whiteSpace: 'nowrap',
-                flexShrink: 1,
-                minWidth: 0,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                maxWidth: 'calc(100% - 82px)',
-                boxSizing: 'border-box',
-                lineHeight: 1.2,
-              }}
-            >
-              Available: {book.available_copies}
+            <span className="book-card__status">
+              Available: {book.available_copies ?? 0}
             </span>
 
             <button
               onClick={handleAddClick}
               type="button"
+              className={`book-card__action ${inCart ? 'book-card__action--added' : 'book-card__action--add'}`}
               aria-label={inCart ? `Remove ${book.title} from cart` : `Add ${book.title} to cart`}
-              style={{
-                width: '76px',
-                minWidth: '76px',
-                maxWidth: '100%',
-                height: '34px',
-                minHeight: '34px',
-                maxHeight: '34px',
-                padding: '0 8px',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                borderRadius: '8px',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '4px',
-                boxSizing: 'border-box',
-                lineHeight: 1,
-                border: inCart ? '1.5px solid var(--navy, #0a2472)' : '1.5px solid transparent',
-                backgroundColor: inCart ? 'transparent' : 'var(--maroon, #7b1230)',
-                color: inCart ? 'var(--navy, #0a2472)' : '#ffffff',
-                transition: 'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease',
-              }}
+              aria-pressed={inCart}
             >
               {inCart ? (
                 <>
