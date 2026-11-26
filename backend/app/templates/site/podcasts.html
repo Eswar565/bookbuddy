@@ -7,63 +7,93 @@
 {% endblock %}
 
 {% block body %}
-<main class="bb-media-page">
-  <div class="bb-media-container">
-    <!-- Header with Pill, Heading with accent word, and Subtitle -->
-    <header class="bb-media-header">
+<main class="bb-media-page" style="padding: 2.5rem 1rem 4rem; background-color: var(--tint, #fdfbf7);">
+  <div class="bb-media-container" style="max-width: 1140px; margin: 0 auto;">
+    <!-- Breadcrumb -->
+    <nav style="font-size: 0.85rem; margin-bottom: 16px; color: var(--ink-subtle, #6b7280);" aria-label="Breadcrumb">
+      <a href="/media/" style="color: var(--navy, #061446); text-decoration: none; font-weight: 600;">Media Hub</a>
+      <span style="margin: 0 6px;">/</span>
+      <span>Podcasts</span>
+    </nav>
+
+    <!-- Header with Pill, Heading and Subtitle -->
+    <header class="bb-media-header" style="margin-bottom: 32px;">
       <div class="bb-media-header-left">
-        <span class="bb-media-pill">{{ media_settings.podcast_pill or 'Media & Audio' }}</span>
-        {% set full_heading = media_settings.podcast_heading or 'The Podcast Archive' %}
-        {% set accent_word = media_settings.podcast_accent or 'Podcast' %}
-        <h1 class="bb-media-title">
-          {% if accent_word and accent_word in full_heading %}
-            {{ full_heading|replace(accent_word, '<span class="bb-accent">' ~ accent_word ~ '</span>')|safe }}
-          {% else %}
-            The <span class="bb-accent">Podcast</span> Archive
-          {% endif %}
+        <span class="bb-media-pill" style="display:inline-block; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:var(--maroon, #740f28); background:rgba(116, 15, 40, 0.08); padding:4px 14px; border-radius:20px; margin-bottom:8px;">
+          Media &amp; Audio
+        </span>
+        <h1 class="bb-media-title" style="font-size: 2.2rem; font-weight: 800; color: var(--navy, #061446); margin: 0 0 6px;">
+          The <span class="bb-accent" style="color: var(--maroon, #740f28);">Podcast</span> Archive
         </h1>
       </div>
-      <p class="bb-media-subtitle">{{ media_settings.podcast_subtitle or 'Exploring the world of stories and learning.' }}</p>
+      <p class="bb-media-subtitle" style="color: var(--ink-subtle, #4b5563); font-size: 1rem; margin: 0;">
+        Exploring bedtime stories, literary discussions, and learning journeys for young minds.
+      </p>
     </header>
 
-    <!-- 3-Column Podcasts Grid -->
+    <!-- Podcasts Grid -->
     {% if publications %}
-    <div class="bb-podcasts-grid" role="region" aria-label="Podcast episodes">
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;" role="region" aria-label="Podcast episodes">
       {% for item in publications %}
-      <article class="bb-podcast-card" id="episode-{{ item.id }}">
-        <!-- Header row -->
-        <div class="bb-podcast-header">
-          <span class="bb-podcast-label">
-            {{ item.episode_label|upper if item.episode_label else ('EPISODE ' ~ '%02d' % (loop.revindex)) }}
-          </span>
-          <button type="button" class="bb-share-icon-btn" data-bb-share data-share-title="{{ item.title }}" data-share-url="{{ request.host_url.rstrip('/') ~ '/podcasts/#episode-' ~ item.id }}" aria-label="Share episode">
-            <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-share"/></svg>
-          </button>
+      <article style="background: #ffffff; border: 1px solid var(--border, #e5e7eb); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(6, 20, 70, 0.05); display: flex; flex-direction: column;" id="episode-{{ item.id }}">
+        <!-- Cover Art or Player Area -->
+        <div style="width: 100%; aspect-ratio: 16/9; background: var(--navy, #061446); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+          {% if item.cover_path %}
+            <img src="{{ item.cover_path if item.cover_path.startswith(('http', '/')) else '/' ~ item.cover_path }}" alt="{{ item.title }} cover art" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">
+          {% else %}
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ffffff; padding: 20px; text-align: center;">
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-bottom: 8px; color: #93c5fd;">
+                <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/>
+                <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/>
+                <circle cx="12" cy="12" r="2"/>
+                <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/>
+                <path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/>
+              </svg>
+              <span style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #bfdbfe;">Book Buddy Stories</span>
+            </div>
+          {% endif %}
         </div>
 
-        <!-- Spotify Player or Fallback -->
-        {% set embed = item.embed_url|spotify_embed_filter if item.embed_url else '' %}
-        {% if embed %}
-        <div class="bb-podcast-player-wrap">
-          <iframe 
-            src="{{ embed }}" 
-            title="{{ item.title }} - Spotify Player"
-            width="100%"
-            height="352"
-            style="border-radius:12px; border:0;"
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            loading="lazy">
-          </iframe>
+        <div style="padding: 20px; display: flex; flex-direction: column; flex-grow: 1;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #1e40af; background: #eff6ff; padding: 2px 8px; border-radius: 12px; border: 1px solid #bfdbfe;">
+              {{ item.episode_label|upper if item.episode_label else ('EPISODE ' ~ loop.index) }}
+            </span>
+            <span style="font-size: 0.8rem; color: var(--ink-subtle, #6b7280);">
+              {{ item.published_on or 'Recent' }}
+            </span>
+          </div>
+
+          <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--navy, #061446); margin: 0 0 8px; line-height: 1.35;">
+            {{ item.title }}
+          </h2>
+
+          <p style="font-size: 0.85rem; color: var(--ink-subtle, #4b5563); line-height: 1.5; margin: 0 0 16px; flex-grow: 1;">
+            {{ item.description or 'A heartwarming audio story and literary adventure for children.' }}
+          </p>
+
+          <!-- Audio / Player Action -->
+          {% set embed = item.embed_url|spotify_embed_filter if item.embed_url else '' %}
+          {% if embed %}
+            <div style="margin-top: auto; margin-bottom: 12px; border-radius: 8px; overflow: hidden;">
+              <iframe 
+                src="{{ embed }}" 
+                title="{{ item.title }} - Spotify Player"
+                width="100%"
+                height="152"
+                style="border-radius: 8px; border: 0;"
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy">
+              </iframe>
+            </div>
+          {% else %}
+            <div style="margin-top: auto; padding-top: 8px;">
+              <a href="{{ item.file_path or 'https://open.spotify.com' }}" target="_blank" rel="noopener noreferrer" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--navy, #061446); color: #ffffff; padding: 10px 16px; border-radius: 8px; font-weight: 700; font-size: 0.875rem; text-decoration: none;">
+                Listen Now &rarr;
+              </a>
+            </div>
+          {% endif %}
         </div>
-        {% else %}
-        <h2 class="bb-podcast-title">{{ item.title }}</h2>
-        <div class="bb-podcast-fallback-card">
-          <p style="font-size:13px; color:#64748b; margin:0;">{{ item.description|truncate(120) if item.description else 'Listen to this episode directly on Spotify.' }}</p>
-          <a href="{{ item.file_path or 'https://open.spotify.com' }}" target="_blank" rel="noopener noreferrer" class="bb-btn-primary-maroon" style="padding:8px 16px; font-size:13px;">
-            Open on Spotify &rarr;
-          </a>
-        </div>
-        {% endif %}
       </article>
       {% endfor %}
     </div>
@@ -75,7 +105,4 @@
     {% endif %}
   </div>
 </main>
-
-<script src="/static/js/bb-media.js?v=1" defer></script>
 {% endblock %}
-

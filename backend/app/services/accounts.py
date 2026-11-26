@@ -14,7 +14,7 @@ from flask import abort, flash, redirect, render_template, request, session, url
 from werkzeug.security import generate_password_hash, check_password_hash
 
 PUBLIC_EXACT = {'/', '/about/', '/contact/', '/membership/', '/plans/', '/how-to-borrow/',
-    '/collaborators/', '/community/', '/community/media/', '/gallery/',
+    '/collaborators/', '/community/', '/community/media/', '/media/', '/newspaper/', '/magazine/', '/podcasts/', '/publications/', '/gallery/',
     '/maths/', '/english/', '/financial-literacy/', '/ba/',
     '/accounts/login/', '/account/login/', '/login/', '/accounts/signup/', '/account/signup/', '/signup/',
     '/accounts/password/reset/', '/account/password/reset/', '/membership-options/', '/privacy-policy/', '/terms/', '/refund-policy/', '/library/favourites/', '/robots.txt', '/sitemap.xml', '/favicon.ico'}

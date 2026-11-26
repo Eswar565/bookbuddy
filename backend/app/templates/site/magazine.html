@@ -7,114 +7,164 @@
 {% endblock %}
 
 {% block body %}
-<main class="bb-media-page">
-  <div class="bb-media-container">
-    <!-- Header with Pill, Heading with accent word, and Subtitle -->
-    <header class="bb-media-header">
+<main class="bb-media-page" style="padding: 2.5rem 1rem 4rem; background-color: var(--tint, #fdfbf7);">
+  <div class="bb-media-container" style="max-width: 1140px; margin: 0 auto;">
+    <!-- Breadcrumb -->
+    <nav style="font-size: 0.85rem; margin-bottom: 16px; color: var(--ink-subtle, #6b7280);" aria-label="Breadcrumb">
+      <a href="/media/" style="color: var(--navy, #061446); text-decoration: none; font-weight: 600;">Media Hub</a>
+      <span style="margin: 0 6px;">/</span>
+      <span>Magazines</span>
+    </nav>
+
+    <!-- Header with Pill, Heading and Subtitle -->
+    <header class="bb-media-header" style="margin-bottom: 32px;">
       <div class="bb-media-header-left">
-        <span class="bb-media-pill">{{ media_settings.magazine_pill or 'Publication & Media' }}</span>
-        {% set full_heading = media_settings.magazine_heading or 'The Magazine Archive' %}
-        {% set accent_word = media_settings.magazine_accent or 'Magazine' %}
-        <h1 class="bb-media-title">
-          {% if accent_word and accent_word in full_heading %}
-            {{ full_heading|replace(accent_word, '<span class="bb-accent">' ~ accent_word ~ '</span>')|safe }}
-          {% else %}
-            The <span class="bb-accent">Magazine</span> Archive
-          {% endif %}
+        <span class="bb-media-pill" style="display:inline-block; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:var(--maroon, #740f28); background:rgba(116, 15, 40, 0.08); padding:4px 14px; border-radius:20px; margin-bottom:8px;">
+          Publication &amp; Media
+        </span>
+        <h1 class="bb-media-title" style="font-size: 2.2rem; font-weight: 800; color: var(--navy, #061446); margin: 0 0 6px;">
+          The <span class="bb-accent" style="color: var(--maroon, #740f28);">Magazine</span> Archive
         </h1>
       </div>
-      <p class="bb-media-subtitle">{{ media_settings.magazine_subtitle or 'Celebrating creativity and community through every page.' }}</p>
+      <p class="bb-media-subtitle" style="color: var(--ink-subtle, #4b5563); font-size: 1rem; margin: 0;">
+        Celebrating creativity and community through every page of our quarterly digests.
+      </p>
     </header>
 
-    <!-- 2-Column Magazine Grid -->
-    {% if publications %}
-    <div class="bb-magazine-grid" role="region" aria-label="Magazine editions">
-      {% for item in publications %}
-      <article class="bb-magazine-card" id="mag-{{ item.id }}">
-        <!-- Card Header Row -->
-        <div class="bb-magazine-card-header">
-          <h2 class="bb-magazine-card-title">{{ item.edition or item.title }}</h2>
-          {% if item.badge_label %}
-          <div class="bb-magazine-card-badges">
-            <span class="bb-mag-badge">{{ item.badge_label }}</span>
-          </div>
+    {% if featured_issue %}
+    <!-- Featured Issue on Top -->
+    <section style="background: #ffffff; border: 1px solid var(--border, #e5e7eb); border-radius: 12px; padding: 32px 28px; margin-bottom: 40px; box-shadow: 0 4px 20px rgba(6, 20, 70, 0.06);">
+      <div style="display: flex; gap: 32px; align-items: center; flex-wrap: wrap;">
+        <!-- Left Cover -->
+        <div style="width: 260px; min-width: 220px; aspect-ratio: 3/4; background: var(--tint, #fdfbf7); border-radius: 10px; overflow: hidden; border: 1px solid var(--border, #e5e7eb); box-shadow: 0 4px 14px rgba(6, 20, 70, 0.08); flex-shrink: 0;">
+          {% if featured_issue.cover_path %}
+            <img src="{{ featured_issue.cover_path if featured_issue.cover_path.startswith(('http', '/')) else '/' ~ featured_issue.cover_path }}" alt="{{ featured_issue.title }} cover" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">
+          {% else %}
+            <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(217, 119, 6, 0.08); color: #b45309; padding: 20px; text-align: center;">
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-bottom: 8px;">
+                <path d="m16 6 4 14"/>
+                <path d="M12 6v14"/>
+                <path d="M8 8v12"/>
+                <path d="M4 4v16"/>
+              </svg>
+              <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">Literary Magazine</span>
+            </div>
           {% endif %}
         </div>
 
-        <!-- Cover Preview Area (sized to cover, dark background) -->
-        <div class="bb-magazine-preview-area">
-          {% set target_link = ('/publications/' ~ item.id ~ '/view/') if item.file_path else (item.cover_path or item.file_path) %}
-          <a href="{{ target_link if target_link.startswith(('http', '/')) else '/' ~ target_link }}" target="_blank" rel="noopener noreferrer" class="bb-magazine-cover-link" aria-label="Read {{ item.title }}">
-            {% if item.cover_path %}
-            <img class="bb-magazine-cover-img" src="{{ item.cover_path if item.cover_path.startswith(('http', '/')) else '/' ~ item.cover_path }}" alt="{{ item.title }} cover" loading="lazy">
+        <!-- Right Content -->
+        <div style="flex: 1; min-width: 280px;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+            <span style="background: var(--maroon, #740f28); color: #ffffff; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 12px; border-radius: 20px;">
+              Featured Issue
+            </span>
+            <span style="font-size: 0.85rem; color: var(--ink-subtle, #6b7280);">
+              {{ featured_issue.edition or featured_issue.volume or 'Latest Edition' }} · {{ featured_issue.published_on or 'Recent' }}
+            </span>
+          </div>
+
+          <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--navy, #061446); margin: 0 0 12px; line-height: 1.3;">
+            {{ featured_issue.title }}
+          </h2>
+
+          <p style="font-size: 0.95rem; color: var(--ink-subtle, #4b5563); line-height: 1.6; margin: 0 0 24px;">
+            {{ featured_issue.description or 'A rich quarterly collection featuring student artwork, short fiction, poetry, and book reflections from young readers.' }}
+          </p>
+
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            {% if featured_issue.file_path %}
+              <a href="/publications/{{ featured_issue.id }}/view/" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 8px; background: var(--maroon, #740f28); color: #ffffff; padding: 11px 22px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; text-decoration: none;">
+                Read Issue &rarr;
+              </a>
+              <a href="/publications/{{ featured_issue.id }}/download/" style="display: inline-flex; align-items: center; gap: 8px; background: #ffffff; border: 1px solid var(--border, #e5e7eb); color: var(--navy, #061446); padding: 11px 18px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; text-decoration: none;">
+                Download PDF
+              </a>
+            {% elif featured_issue.embed_url %}
+              <a href="{{ featured_issue.embed_url }}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 8px; background: var(--maroon, #740f28); color: #ffffff; padding: 11px 22px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; text-decoration: none;">
+                Read Interactive &rarr;
+              </a>
             {% else %}
-            <img class="bb-magazine-cover-img" src="/static/img/art/06-magazine.png" alt="Book Buddy Magazine Cover" width="1240" height="840" loading="lazy">
+              <span style="font-size: 0.9rem; color: var(--ink-subtle, #6b7280);">Available in library reading room</span>
             {% endif %}
-          </a>
-        </div>
-
-        <!-- Card Bottom Action -->
-        <div class="bb-magazine-actions">
-          <span style="font-size:13px; color:#64748b; font-weight:600;">{{ item.title }}</span>
-          <div class="bb-magazine-actions-row">
-            {% if item.file_path %}
-            <a href="/publications/{{ item.id }}/view/" target="_blank" rel="noopener noreferrer" class="bb-btn-primary-maroon" style="padding: 8px 14px; font-size: 13px;" aria-label="View {{ item.title }} PDF">
-              <svg class="bb-icon" style="width:15px;height:15px;" aria-hidden="true" focusable="false"><use href="#i-eye"/></svg>
-              View PDF
-            </a>
-            <a href="/publications/{{ item.id }}/download/" download="{{ make_friendly_pdf_name(item) }}" class="bb-btn-outline" style="padding: 8px 14px; font-size: 13px;" aria-label="Download {{ item.title }} PDF">
-              <svg class="bb-icon" style="width:15px;height:15px;" aria-hidden="true" focusable="false"><use href="#i-download"/></svg>
-              Download PDF
-            </a>
-            {% elif item.embed_url %}
-            <a href="{{ item.embed_url }}" target="_blank" rel="noopener noreferrer" class="bb-btn-primary-maroon" style="padding: 8px 14px; font-size: 13px;">
-              Read Interactive &rarr;
-            </a>
-            {% endif %}
-
-            <div class="bb-share-dropdown-wrap">
-              <button type="button" class="bb-btn-outline bb-share-trigger" data-bb-share data-share-title="{{ item.title }}" data-share-url="{{ request.host_url.rstrip('/') ~ '/magazine/#mag-' ~ item.id }}" style="padding: 8px 14px; font-size: 13px;" aria-haspopup="true" aria-expanded="false" aria-label="Share {{ item.title }}">
-                <svg class="bb-icon" style="width:15px;height:15px;" aria-hidden="true" focusable="false"><use href="#i-share"/></svg>
-                Share
-              </button>
-              <div class="bb-share-menu" role="menu" aria-label="Share options">
-                <button type="button" class="bb-share-menu-item" data-share-action="copy" role="menuitem">
-                  <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-link"/></svg>
-                  <span>Copy Link</span>
-                </button>
-                <a href="https://api.whatsapp.com/send?text={{ (item.title ~ ' - Read on Book Buddy: ' ~ request.host_url.rstrip('/') ~ '/magazine/#mag-' ~ item.id)|urlencode }}" target="_blank" rel="noopener noreferrer" class="bb-share-menu-item" role="menuitem">
-                  <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-whatsapp"/></svg>
-                  <span>WhatsApp</span>
-                </a>
-                <a href="mailto:?subject={{ (item.title ~ ' · Book Buddy')|urlencode }}&body={{ ('Check out ' ~ item.title ~ ' on Book Buddy: ' ~ request.host_url.rstrip('/') ~ '/magazine/#mag-' ~ item.id)|urlencode }}" class="bb-share-menu-item" role="menuitem">
-                  <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-mail"/></svg>
-                  <span>Email</span>
-                </a>
-              </div>
-            </div>
           </div>
         </div>
-      </article>
-      {% endfor %}
-    </div>
-    {% else %}
-    <div style="background:#fff; border:1px solid rgba(6,20,70,0.08); border-radius:14px; padding:48px; text-align:center;">
-      <h3 style="font-family:'Hind',sans-serif; color:#061446; margin:0 0 8px;">No magazine editions published yet</h3>
-      <p style="color:#64748b; margin:0;">Check back soon for new issues of our community magazine!</p>
-    </div>
+      </div>
+    </section>
     {% endif %}
 
-    <!-- Magazine CTA Box -->
-    <section class="bb-magazine-cta" aria-labelledby="bb-cta-heading">
-      <h2 id="bb-cta-heading" class="bb-magazine-cta-title">{{ media_settings.magazine_cta_heading or 'Have something amazing to share?' }}</h2>
-      <p class="bb-magazine-cta-desc">{{ media_settings.magazine_cta_text or 'We are always looking for creative stories, artwork, and articles from our young readers. Submit your contribution for a chance to be featured in our next magazine!' }}</p>
-      <a href="/submit-contribution/" class="bb-btn-primary-maroon" style="padding: 12px 28px; font-size: 15px;">
-        {{ media_settings.magazine_cta_btn or 'Submit Your Work' }}
-      </a>
+    <!-- Past Issues Grid -->
+    {% if past_issues %}
+    <section>
+      <div style="margin-bottom: 24px;">
+        <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--navy, #061446); margin: 0 0 4px;">Past Magazine Issues</h2>
+        <p style="color: var(--ink-subtle, #6b7280); font-size: 0.9rem; margin: 0;">Explore previous editions from our community archives.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;" role="region" aria-label="Past magazine editions">
+        {% for item in past_issues %}
+        <article style="background: #ffffff; border: 1px solid var(--border, #e5e7eb); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(6, 20, 70, 0.05); display: flex; flex-direction: column;" id="mag-{{ item.id }}">
+          <!-- Cover preview -->
+          <div style="width: 100%; aspect-ratio: 16/10; background: var(--tint, #fdfbf7); position: relative; overflow: hidden; border-bottom: 1px solid var(--border, #e5e7eb);">
+            {% if item.cover_path %}
+              <img src="{{ item.cover_path if item.cover_path.startswith(('http', '/')) else '/' ~ item.cover_path }}" alt="{{ item.title }} cover" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">
+            {% else %}
+              <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(217, 119, 6, 0.06); color: #b45309; padding: 16px;">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-bottom: 6px;">
+                  <path d="m16 6 4 14"/>
+                  <path d="M12 6v14"/>
+                  <path d="M8 8v12"/>
+                  <path d="M4 4v16"/>
+                </svg>
+                <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">Magazine Archive</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <div style="padding: 20px; display: flex; flex-direction: column; flex-grow: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #b45309; background: #fffbeb; padding: 2px 8px; border-radius: 12px; border: 1px solid #fde68a;">
+                {{ item.edition or 'Quarterly Issue' }}
+              </span>
+              <span style="font-size: 0.8rem; color: var(--ink-subtle, #6b7280);">
+                {{ item.published_on or '' }}
+              </span>
+            </div>
+
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--navy, #061446); margin: 0 0 8px; line-height: 1.35;">
+              {{ item.title }}
+            </h3>
+
+            <p style="font-size: 0.85rem; color: var(--ink-subtle, #4b5563); line-height: 1.5; margin: 0 0 20px; flex-grow: 1;">
+              {{ item.description or 'A creative edition of the Book Buddy literary magazine.' }}
+            </p>
+
+            <div style="display: flex; gap: 8px; margin-top: auto;">
+              {% if item.file_path %}
+                <a href="/publications/{{ item.id }}/view/" target="_blank" rel="noopener noreferrer" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; background: var(--maroon, #740f28); color: #ffffff; padding: 9px 14px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
+                  Read / View
+                </a>
+                <a href="/publications/{{ item.id }}/download/" style="display: inline-flex; align-items: center; justify-content: center; background: #ffffff; border: 1px solid var(--border, #e5e7eb); color: var(--navy, #061446); padding: 9px 12px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none;" title="Download PDF">
+                  Download
+                </a>
+              {% else %}
+                <a href="/magazine/" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; background: var(--navy, #061446); color: #ffffff; padding: 9px 14px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
+                  Read / View
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
     </section>
+    {% endif %}
+
+    {% if not featured_issue and not past_issues %}
+    <div style="background:#fff; border:1px solid rgba(6,20,70,0.08); border-radius:14px; padding:48px; text-align:center;">
+      <h3 style="font-family:'Hind',sans-serif; color:#061446; margin:0 0 8px;">No magazine editions published yet</h3>
+      <p style="color:#64748b; margin:0;">Check back soon for new editions of our literary magazine!</p>
+    </div>
+    {% endif %}
   </div>
 </main>
-
-<script src="/static/js/bb-media.js?v=1" defer></script>
 {% endblock %}
-

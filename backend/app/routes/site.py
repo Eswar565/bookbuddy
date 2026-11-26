@@ -1291,26 +1291,22 @@ def community_hub() -> Response:
     return render_site("community", "community", upcoming_events=upcoming_events, latest_media=latest_media)
 
 
+@app.get("/media/", endpoint="media_landing")
 @app.get("/community/media/", endpoint="community_media")
 def community_media() -> Response:
+    tab = flask_request.args.get("tab", "").strip().lower()
+    if tab in {"newspapers", "newspaper", "news"}:
+        return redirect("/newspaper/", code=301)
+    elif tab in {"magazines", "magazine"}:
+        return redirect("/magazine/", code=301)
+    elif tab in {"podcasts", "podcast"}:
+        return redirect("/podcasts/", code=301)
+
     db = get_db()
-    active_tab = flask_request.args.get("tab", "").strip().lower()
-    if not active_tab or active_tab not in {"newspapers", "newspaper", "news", "magazines", "magazine", "podcasts", "podcast"}:
-        active_tab = "all"
-    elif active_tab in {"newspaper", "news"}:
-        active_tab = "newspapers"
-    elif active_tab == "magazine":
-        active_tab = "magazines"
-    elif active_tab == "podcast":
-        active_tab = "podcasts"
-
-    access_filter = flask_request.args.get("access", "").strip().lower()
-    access_clause = " AND is_paid=0" if access_filter == "free" else (" AND is_paid=1" if access_filter == "paid" else "")
-
-    newspapers = [dict(r) for r in db.execute(f"SELECT * FROM publications WHERE is_active=1 AND kind='news'{access_clause} ORDER BY published_on DESC, id DESC").fetchall()]
-    magazines = [dict(r) for r in db.execute(f"SELECT * FROM publications WHERE is_active=1 AND kind='magazine'{access_clause} ORDER BY published_on DESC, id DESC").fetchall()]
-    podcasts = [dict(r) for r in db.execute(f"SELECT * FROM publications WHERE is_active=1 AND kind='podcast'{access_clause} ORDER BY published_on DESC, id DESC").fetchall()]
-    return render_site("media_hub", "community", active_tab=active_tab, newspapers=newspapers, magazines=magazines, podcasts=podcasts)
+    newspapers = [dict(r) for r in db.execute("SELECT * FROM publications WHERE is_active=1 AND kind='news' ORDER BY published_on DESC, id DESC").fetchall()]
+    magazines = [dict(r) for r in db.execute("SELECT * FROM publications WHERE is_active=1 AND kind='magazine' ORDER BY published_on DESC, id DESC").fetchall()]
+    podcasts = [dict(r) for r in db.execute("SELECT * FROM publications WHERE is_active=1 AND kind='podcast' ORDER BY published_on DESC, id DESC").fetchall()]
+    return render_site("media_hub", "community", newspapers=newspapers, magazines=magazines, podcasts=podcasts)
 
 
 @app.get("/events/", endpoint="events_page")
@@ -1402,25 +1398,39 @@ def register_event(event_id: int) -> Response:
 @app.get("/publications/", endpoint="publications_page")
 def publications_page() -> Response:
     kind = flask_request.args.get("kind", "").strip().lower()
-    if kind in {"news", "newspaper"}:
-        return redirect("/community/media/?tab=newspapers", code=301)
-    elif kind == "magazine":
-        return redirect("/community/media/?tab=magazines", code=301)
-    elif kind == "podcast":
-        return redirect("/community/media/?tab=podcasts", code=301)
-    qs = flask_request.query_string.decode("utf-8")
-    suffix = f"?{qs}" if qs else ""
-    return redirect(f"/community/media/{suffix}", code=301)
+    if kind in {"news", "newspaper", "newspapers"}:
+        return redirect("/newspaper/", code=301)
+    elif kind in {"magazine", "magazines"}:
+        return redirect("/magazine/", code=301)
+    elif kind in {"podcast", "podcasts"}:
+        return redirect("/podcasts/", code=301)
+
+    access = flask_request.args.get("access", "").strip().lower()
+    if access in {"free", "paid"}:
+        db = get_db()
+        query = "SELECT * FROM publications WHERE (is_active=1 OR is_active IS NULL)"
+        params: list[Any] = []
+        if access == "free":
+            query += " AND (is_paid = 0 OR is_paid IS NULL)"
+        elif access == "paid":
+            query += " AND is_paid = 1"
+        query += " ORDER BY published_on DESC, id DESC"
+        publications = [dict(r) for r in db.execute(query, params).fetchall()]
+        return render_site("media_catalogue", "community", publications=publications, selected_kind="")
+
+    return redirect("/media/", code=301)
 
 
 @app.get("/podcasts/", endpoint="podcasts_page")
 def podcasts_page() -> Response:
-    return redirect("/community/media/?tab=podcasts", code=301)
+    db = get_db()
+    items = [dict(r) for r in db.execute("SELECT * FROM publications WHERE is_active=1 AND kind='podcast' ORDER BY published_on DESC, id DESC").fetchall()]
+    return render_site("podcasts", "community", publications=items)
 
 
 @app.get("/news/", endpoint="news_page")
 def news_page() -> Response:
-    return redirect("/community/media/?tab=newspapers", code=301)
+    return redirect("/newspaper/", code=301)
 
 
 @app.get("/reading-circles/", endpoint="reading_circles_page")
@@ -1960,17 +1970,60 @@ def refund_policy() -> Response:
 
 @app.get("/magazine/", endpoint="magazine")
 def magazine() -> Response:
-    return redirect("/community/media/?tab=magazines", code=301)
+    db = get_db()
+    items = [dict(r) for r in db.execute("SELECT * FROM publications WHERE is_active=1 AND kind='magazine' ORDER BY published_on DESC, id DESC").fetchall()]
+    featured = items[0] if items else None
+    past_issues = items[1:] if len(items) > 1 else []
+    return render_site("magazine", "community",
+                       publications=items,
+                       featured_issue=featured,
+                       past_issues=past_issues)
 
 
 @app.get("/newspaper/", endpoint="newspaper_page")
 def newspaper_page() -> Response:
-    return redirect("/community/media/?tab=newspapers", code=301)
+    db = get_db()
+    year = flask_request.args.get("year", "").strip()
+    month = flask_request.args.get("month", "").strip()
+    page = max(1, flask_request.args.get("page", 1, type=int))
+    per_page = 6
+    offset = (page - 1) * per_page
+
+    where_clauses = ["is_active=1", "kind='news'"]
+    params = []
+    if year:
+        where_clauses.append("strftime('%Y', published_on) = ?")
+        params.append(year)
+    if month:
+        try:
+            where_clauses.append("strftime('%m', published_on) = ?")
+            params.append(f"{int(month):02d}")
+        except ValueError:
+            pass
+
+    where_sql = " AND ".join(where_clauses)
+    total_count = db.execute(f"SELECT count(*) FROM publications WHERE {where_sql}", params).fetchone()[0]
+    total_pages = max(1, (total_count + per_page - 1) // per_page)
+
+    query = f"SELECT * FROM publications WHERE {where_sql} ORDER BY published_on DESC, id DESC LIMIT ? OFFSET ?"
+    items = [dict(r) for r in db.execute(query, params + [per_page, offset]).fetchall()]
+
+    all_dates = [r[0] for r in db.execute("SELECT DISTINCT published_on FROM publications WHERE is_active=1 AND kind='news' AND published_on IS NOT NULL").fetchall()]
+    available_years = sorted(list({d.split("-")[0] for d in all_dates if d and len(d) >= 4}), reverse=True)
+
+    return render_site("newspaper", "community",
+                       publications=items,
+                       total_count=total_count,
+                       current_page=page,
+                       total_pages=total_pages,
+                       selected_year=year,
+                       selected_month=month,
+                       available_years=available_years)
 
 
 @app.get("/newspaper-2026/", endpoint="newspaper_2026")
 def newspaper_2026() -> Response:
-    return redirect("/community/media/?tab=newspapers", code=301)
+    return redirect("/newspaper/", code=301)
 
 
 @app.get("/google-login/", endpoint="google_login")

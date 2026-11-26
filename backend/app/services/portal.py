@@ -246,7 +246,7 @@ def install_release17(app,db,render,admin,root):
                 if not path.startswith(allowed) and path!='/admin/password/':abort(403,'Your staff role cannot access this section.')
         if path.startswith(('/media/users/','/media/interns/','/media/resumes/','/static/resumes/')) and not privileged():abort(404)
         # Deny raw legacy media documents unless entitled; new files are outside public directories.
-        if path.startswith(('/media/','/static/uploads/')) and Path(path).suffix.lower() not in {'.png','.jpg','.jpeg','.webp','.gif','.svg','.ico','.css','.js','.woff','.woff2','.ttf'}:
+        if path not in {'/media', '/media/'} and path.startswith(('/media/','/static/uploads/')) and Path(path).suffix.lower() not in {'.png','.jpg','.jpeg','.webp','.gif','.svg','.ico','.css','.js','.woff','.woff2','.ttf'}:
             if not staff():
                 u=require_user()
                 if not sub(u['id']):abort(403,'An active membership is needed for this resource.')

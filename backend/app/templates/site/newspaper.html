@@ -3,111 +3,170 @@
 {% block title %}The Chronicle Archive · Book Buddy Newspaper{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/static/css/bb-media.css?v=1">
+<link rel="stylesheet" href="/static/css/bb-media.css?v=2">
 {% endblock %}
 
 {% block body %}
-<main class="bb-media-page">
-  <div class="bb-media-container">
-    <!-- Header with Pill, Heading with accent word, and Subtitle -->
-    <header class="bb-media-header">
+<main class="bb-media-page" style="padding: 2.5rem 1rem 4rem; background-color: var(--tint, #fdfbf7);">
+  <div class="bb-media-container" style="max-width: 1140px; margin: 0 auto;">
+    <!-- Breadcrumb -->
+    <nav style="font-size: 0.85rem; margin-bottom: 16px; color: var(--ink-subtle, #6b7280);" aria-label="Breadcrumb">
+      <a href="/media/" style="color: var(--navy, #061446); text-decoration: none; font-weight: 600;">Media Hub</a>
+      <span style="margin: 0 6px;">/</span>
+      <span>Newspapers</span>
+    </nav>
+
+    <!-- Header with Pill, Heading and Subtitle -->
+    <header class="bb-media-header" style="margin-bottom: 28px;">
       <div class="bb-media-header-left">
-        <span class="bb-media-pill">{{ media_settings.newspaper_pill or 'Press & Media' }}</span>
-        {% set full_heading = media_settings.newspaper_heading or 'The Chronicle Archive' %}
-        {% set accent_word = media_settings.newspaper_accent or 'Chronicle' %}
-        <h1 class="bb-media-title">
-          {% if accent_word and accent_word in full_heading %}
-            {{ full_heading|replace(accent_word, '<span class="bb-accent">' ~ accent_word ~ '</span>')|safe }}
-          {% else %}
-            The <span class="bb-accent">Chronicle</span> Archive
-          {% endif %}
+        <span class="bb-media-pill" style="display:inline-block; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:var(--maroon, #740f28); background:rgba(116, 15, 40, 0.08); padding:4px 14px; border-radius:20px; margin-bottom:8px;">
+          Press &amp; Media
+        </span>
+        <h1 class="bb-media-title" style="font-size: 2.2rem; font-weight: 800; color: var(--navy, #061446); margin: 0 0 6px;">
+          The <span class="bb-accent" style="color: var(--maroon, #740f28);">Chronicle</span> Archive
         </h1>
       </div>
-      <p class="bb-media-subtitle">{{ media_settings.newspaper_subtitle or 'Exploring the intersection of stories and learning.' }}</p>
+      <p class="bb-media-subtitle" style="color: var(--ink-subtle, #4b5563); font-size: 1rem; margin: 0;">
+        Exploring stories, journalism, and student voices from our reading community.
+      </p>
     </header>
 
-    <!-- Newspaper Issues Vertical List -->
+    <!-- Filter Bar (Year / Month) -->
+    <div style="background: #ffffff; border: 1px solid var(--border, #e5e7eb); border-radius: 12px; padding: 16px 20px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; box-shadow: 0 2px 8px rgba(6, 20, 70, 0.04);">
+      <form method="get" action="/newspaper/" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <label style="font-size: 0.875rem; font-weight: 700; color: var(--navy, #061446);">Filter Editions:</label>
+        
+        <select name="year" style="padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border, #e5e7eb); font-size: 0.875rem; color: var(--ink, #111827); background: #ffffff;">
+          <option value="">All Years</option>
+          {% for y in available_years %}
+            <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
+          {% endfor %}
+        </select>
+
+        <select name="month" style="padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border, #e5e7eb); font-size: 0.875rem; color: var(--ink, #111827); background: #ffffff;">
+          <option value="">All Months</option>
+          <option value="1" {% if selected_month == '1' %}selected{% endif %}>January</option>
+          <option value="2" {% if selected_month == '2' %}selected{% endif %}>February</option>
+          <option value="3" {% if selected_month == '3' %}selected{% endif %}>March</option>
+          <option value="4" {% if selected_month == '4' %}selected{% endif %}>April</option>
+          <option value="5" {% if selected_month == '5' %}selected{% endif %}>May</option>
+          <option value="6" {% if selected_month == '6' %}selected{% endif %}>June</option>
+          <option value="7" {% if selected_month == '7' %}selected{% endif %}>July</option>
+          <option value="8" {% if selected_month == '8' %}selected{% endif %}>August</option>
+          <option value="9" {% if selected_month == '9' %}selected{% endif %}>September</option>
+          <option value="10" {% if selected_month == '10' %}selected{% endif %}>October</option>
+          <option value="11" {% if selected_month == '11' %}selected{% endif %}>November</option>
+          <option value="12" {% if selected_month == '12' %}selected{% endif %}>December</option>
+        </select>
+
+        <button type="submit" style="padding: 8px 16px; border-radius: 8px; border: none; background: var(--navy, #061446); color: #ffffff; font-weight: 700; font-size: 0.875rem; cursor: pointer;">
+          Apply Filter
+        </button>
+
+        {% if selected_year or selected_month %}
+          <a href="/newspaper/" style="font-size: 0.85rem; color: var(--maroon, #740f28); text-decoration: none; font-weight: 600;">
+            Clear Filter
+          </a>
+        {% endif %}
+      </form>
+
+      <span style="font-size: 0.875rem; color: var(--ink-subtle, #6b7280);">
+        Showing <strong>{{ publications|length }}</strong> of <strong>{{ total_count }}</strong> editions
+      </span>
+    </div>
+
+    <!-- Newspaper Issues Grid -->
     {% if publications %}
-    <div class="bb-newspaper-list" role="feed" aria-label="Newspaper issues archive">
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; margin-bottom: 36px;" role="feed" aria-label="Newspaper issues archive">
       {% for item in publications %}
-      <article class="bb-newspaper-card" id="issue-{{ item.id }}">
-        <!-- Left: Cover image -->
-        <div class="bb-newspaper-cover-wrap">
+      <article style="background: #ffffff; border: 1px solid var(--border, #e5e7eb); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(6, 20, 70, 0.05); display: flex; flex-direction: column;" id="issue-{{ item.id }}">
+        <!-- Cover preview image -->
+        <div style="width: 100%; aspect-ratio: 16/10; background: var(--tint, #fdfbf7); position: relative; overflow: hidden; border-bottom: 1px solid var(--border, #e5e7eb);">
           {% if item.cover_path %}
-          <img class="bb-newspaper-cover" src="{{ item.cover_path if item.cover_path.startswith(('http', '/')) else '/' ~ item.cover_path }}" alt="{{ item.title }} cover" loading="lazy">
+            <img src="{{ item.cover_path if item.cover_path.startswith(('http', '/')) else '/' ~ item.cover_path }}" alt="{{ item.title }} cover" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">
           {% else %}
-          <img class="bb-newspaper-cover" src="/static/img/art/07-newspaper.png" alt="Book Buddy Chronicle Cover" width="1240" height="840" loading="lazy">
+            <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(6, 20, 70, 0.04); color: var(--navy, #061446); padding: 20px; text-align: center;">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-bottom: 8px;">
+                <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+                <path d="M18 14h-8"/>
+                <path d="M15 18h-5"/>
+                <path d="M10 6h8v4h-8V6Z"/>
+              </svg>
+              <span style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--navy, #061446);">Book Buddy Chronicle</span>
+            </div>
           {% endif %}
         </div>
 
-        <!-- Right: Issue Details -->
-        <div class="bb-newspaper-content">
-          <span class="bb-newspaper-vol">
-            {{ item.volume or 'VOLUME 01' }} | {{ item.issue_number or item.edition or 'ISSUE 01' }}
-          </span>
-
-          <h2 class="bb-newspaper-heading">{{ item.title }}</h2>
-
-          {% if item.published_on %}
-          <div class="bb-newspaper-meta">Published on {{ item.published_on }}</div>
-          {% endif %}
-
-          {% if item.description %}
-          <div class="bb-newspaper-desc clamped" id="desc-{{ item.id }}">
-            {{ item.description|replace('\n', '<br>')|safe }}
-          </div>
-          {% if item.description|length > 220 %}
-          <button type="button" class="bb-read-more-btn" data-read-more-btn data-target="desc-{{ item.id }}" aria-expanded="false">Read more</button>
-          {% endif %}
-          {% endif %}
-
-          <!-- Bottom Action Buttons -->
-          <div class="bb-newspaper-actions">
-            {% if item.file_path %}
-            <a href="/publications/{{ item.id }}/view/" target="_blank" rel="noopener noreferrer" class="bb-btn-primary-maroon" aria-label="View {{ item.title }} PDF in new tab">
-              <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-eye"/></svg>
-              View PDF
-            </a>
-            <a href="/publications/{{ item.id }}/download/" download="{{ make_friendly_pdf_name(item) }}" class="bb-btn-outline" aria-label="Download {{ item.title }} PDF">
-              <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-download"/></svg>
-              Download PDF
-            </a>
+        <!-- Issue Details -->
+        <div style="padding: 20px; display: flex; flex-direction: column; flex-grow: 1;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--maroon, #740f28); background: rgba(116, 15, 40, 0.08); padding: 2px 8px; border-radius: 12px;">
+              {{ item.volume or 'VOLUME 01' }} · {{ item.issue_number or item.edition or 'ISSUE 01' }}
+            </span>
+            {% if item.published_on %}
+              <span style="font-size: 0.8rem; color: var(--ink-subtle, #6b7280);">
+                {{ item.published_on }}
+              </span>
             {% endif %}
+          </div>
 
-            <div class="bb-share-dropdown-wrap">
-              <button type="button" class="bb-btn-outline bb-share-trigger" data-bb-share data-share-title="{{ item.title }}" data-share-url="{{ request.host_url.rstrip('/') ~ '/newspaper/#issue-' ~ item.id }}" aria-haspopup="true" aria-expanded="false" aria-label="Share this newspaper issue">
-                <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-share"/></svg>
-                Share
-              </button>
-              <div class="bb-share-menu" role="menu" aria-label="Share options">
-                <button type="button" class="bb-share-menu-item" data-share-action="copy" role="menuitem">
-                  <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-link"/></svg>
-                  <span>Copy Link</span>
-                </button>
-                <a href="https://api.whatsapp.com/send?text={{ (item.title ~ ' - Read on Book Buddy: ' ~ request.host_url.rstrip('/') ~ '/newspaper/#issue-' ~ item.id)|urlencode }}" target="_blank" rel="noopener noreferrer" class="bb-share-menu-item" role="menuitem">
-                  <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-whatsapp"/></svg>
-                  <span>WhatsApp</span>
-                </a>
-                <a href="mailto:?subject={{ (item.title ~ ' · Book Buddy')|urlencode }}&body={{ ('Check out ' ~ item.title ~ ' on Book Buddy: ' ~ request.host_url.rstrip('/') ~ '/newspaper/#issue-' ~ item.id)|urlencode }}" class="bb-share-menu-item" role="menuitem">
-                  <svg class="bb-icon" style="width:16px;height:16px;" aria-hidden="true" focusable="false"><use href="#i-mail"/></svg>
-                  <span>Email</span>
-                </a>
-              </div>
-            </div>
+          <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--navy, #061446); margin: 0 0 8px; line-height: 1.35;">
+            {{ item.title }}
+          </h2>
+
+          <p style="font-size: 0.85rem; color: var(--ink-subtle, #4b5563); line-height: 1.5; margin: 0 0 20px; flex-grow: 1;">
+            {{ item.description or 'A fresh edition of the Book Buddy community newspaper.' }}
+          </p>
+
+          <!-- Action Buttons -->
+          <div style="display: flex; gap: 8px; margin-top: auto;">
+            {% if item.file_path %}
+              <a href="/publications/{{ item.id }}/view/" target="_blank" rel="noopener noreferrer" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--maroon, #740f28); color: #ffffff; padding: 9px 14px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
+                View / Read
+              </a>
+              <a href="/publications/{{ item.id }}/download/" style="display: inline-flex; align-items: center; justify-content: center; background: #ffffff; border: 1px solid var(--border, #e5e7eb); color: var(--navy, #061446); padding: 9px 12px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none;" title="Download PDF">
+                Download
+              </a>
+            {% else %}
+              <a href="/newspaper/" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; background: var(--navy, #061446); color: #ffffff; padding: 9px 14px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
+                View / Read
+              </a>
+            {% endif %}
           </div>
         </div>
       </article>
       {% endfor %}
     </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <nav style="display: flex; justify-content: center; align-items: center; gap: 8px; margin: 32px 0;" aria-label="Newspaper pagination">
+      {% if current_page > 1 %}
+        <a href="?page={{ current_page - 1 }}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}" style="padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border, #e5e7eb); background: #ffffff; color: var(--navy, #061446); text-decoration: none; font-weight: 700; font-size: 0.85rem;">
+          &larr; Previous
+        </a>
+      {% endif %}
+
+      {% for p in range(1, total_pages + 1) %}
+        <a href="?page={{ p }}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}" style="padding: 8px 12px; border-radius: 8px; border: 1px solid {% if p == current_page %}var(--maroon, #740f28){% else %}var(--border, #e5e7eb){% endif %}; background: {% if p == current_page %}var(--maroon, #740f28){% else %}#ffffff{% endif %}; color: {% if p == current_page %}#ffffff{% else %}var(--ink, #111827){% endif %}; text-decoration: none; font-weight: 700; font-size: 0.85rem;">
+          {{ p }}
+        </a>
+      {% endfor %}
+
+      {% if current_page < total_pages %}
+        <a href="?page={{ current_page + 1 }}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}" style="padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border, #e5e7eb); background: #ffffff; color: var(--navy, #061446); text-decoration: none; font-weight: 700; font-size: 0.85rem;">
+          Next &rarr;
+        </a>
+      {% endif %}
+    </nav>
+    {% endif %}
+
     {% else %}
     <div style="background:#fff; border:1px solid rgba(6,20,70,0.08); border-radius:14px; padding:48px; text-align:center;">
-      <h3 style="font-family:'Hind',sans-serif; color:#061446; margin:0 0 8px;">No newspaper issues published yet</h3>
-      <p style="color:#64748b; margin:0;">Check back soon for new editions of The Book Buddy Chronicle!</p>
+      <h3 style="font-family:'Hind',sans-serif; color:#061446; margin:0 0 8px;">No newspaper issues found</h3>
+      <p style="color:#64748b; margin:0;">Try adjusting your filter or check back soon for new editions!</p>
     </div>
     {% endif %}
   </div>
 </main>
-
-<script src="/static/js/bb-media.js?v=1" defer></script>
 {% endblock %}
-

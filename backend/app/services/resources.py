@@ -135,23 +135,21 @@ def install_release9(app,db,render,admin,root):
         path=request.path.strip('/')
         if path=='gallery' or path.startswith('gallery/'):
             return None
-        if path in {'newspaper','news-paper','news'}:
-            return redirect('/community/media/?tab=newspapers', code=301)
-        if path in {'magazine'}:
-            return redirect('/community/media/?tab=magazines', code=301)
-        if path in {'podcasts','podcast'}:
-            return redirect('/community/media/?tab=podcasts', code=301)
+        if path in {'newspaper', 'magazine', 'podcasts'}:
+            return None
+        if path in {'news-paper', 'news'}:
+            return redirect('/newspaper/', code=301)
+        if path in {'podcast'}:
+            return redirect('/podcasts/', code=301)
         if path=='publications':
             kind = request.args.get('kind', '').strip().lower()
             if kind in {'news', 'newspaper'}:
-                return redirect('/community/media/?tab=newspapers', code=301)
-            elif kind == 'magazine':
-                return redirect('/community/media/?tab=magazines', code=301)
-            elif kind == 'podcast':
-                return redirect('/community/media/?tab=podcasts', code=301)
-            qs = request.query_string.decode('utf-8')
-            suffix = f"?{qs}" if qs else ""
-            return redirect(f'/community/media/{suffix}', code=301)
+                return redirect('/newspaper/', code=301)
+            elif kind in {'magazine', 'magazines'}:
+                return redirect('/magazine/', code=301)
+            elif kind in {'podcast', 'podcasts'}:
+                return redirect('/podcasts/', code=301)
+            return None
         if path in {'reading-circles','reading-circle'}:
             return redirect('/events/?type=reading-circle', code=301)
         if path in {'contests','contest'}:

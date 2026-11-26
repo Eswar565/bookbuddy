@@ -49,10 +49,10 @@ def test_gallery_category_urls_return_200(client):
 def test_old_urls_redirect(client):
     """Verify that old URLs redirect cleanly to their new destinations."""
     redirect_checks = [
-        ("/publications/", "/community/media/"),
-        ("/newspaper/", "/community/media/?tab=newspapers"),
-        ("/magazine/", "/community/media/?tab=magazines"),
-        ("/podcasts/", "/community/media/?tab=podcasts"),
+        ("/publications/", "/media/"),
+        ("/publications/?kind=news", "/newspaper/"),
+        ("/publications/?kind=magazine", "/magazine/"),
+        ("/publications/?kind=podcast", "/podcasts/"),
         ("/reading-circles/", "/events/?type=reading-circle"),
         ("/contests/", "/events/?type=contest"),
     ]
