@@ -17,6 +17,7 @@ import { MagazinePage } from './pages/MagazinePage';
 import { PodcastPage } from './pages/PodcastPage';
 import { GalleryPage } from './pages/GalleryPage';
 import { CollaboratorsPage } from './pages/CollaboratorsPage';
+import { PartnerPage } from './pages/PartnerPage';
 import { ContactPage } from './pages/ContactPage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
@@ -47,6 +48,9 @@ export const App: React.FC = () => {
               <Route path="gallery" element={<GalleryPage />} />
               <Route path="gallery/:slug" element={<GalleryPage />} />
               <Route path="collaborators" element={<CollaboratorsPage />} />
+              <Route path="work-with-us" element={<PartnerPage />} />
+              <Route path="become-a-partner" element={<PartnerPage />} />
+              <Route path="partner" element={<PartnerPage />} />
               <Route path="contact" element={<ContactPage />} />
               <Route path="privacy-policy" element={<LegalPage type="privacy" />} />
               <Route path="terms" element={<LegalPage type="terms" />} />

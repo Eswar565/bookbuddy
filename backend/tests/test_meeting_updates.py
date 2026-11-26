@@ -204,3 +204,71 @@ def test_admin_created_events_appear_on_public_page(client):
             db.execute("DELETE FROM events WHERE id IN (?,?,?)", (e_workshop_id, e_contest_id, e_circle_id))
             db.commit()
 
+
+def test_become_a_partner_page_and_submissions(client):
+    """Verify that Become a Partner page renders compact form, handles redirects, and processes submissions."""
+    from app import get_db
+
+    # Redirect checks
+    res_redir1 = client.get("/partner/", follow_redirects=False)
+    assert res_redir1.status_code in (301, 302)
+    assert res_redir1.location.endswith("/work-with-us/")
+
+    res_redir2 = client.get("/become-a-partner/", follow_redirects=False)
+    assert res_redir2.status_code in (301, 302)
+    assert res_redir2.location.endswith("/work-with-us/")
+
+    # Form render check
+    res_page = client.get("/work-with-us/")
+    assert res_page.status_code == 200
+    html = res_page.get_data(as_text=True)
+    assert "Partner with Book Buddy" in html
+    assert "Tell us about your proposal" in html
+    assert "full_name" in html
+    assert "proposal_type" in html
+
+    # Submit HTML Form
+    import re
+    csrf_m = re.search(r'name=["\']csrf_token["\']\s+value=["\']([^"\']+)["\']', html)
+    csrf = csrf_m.group(1) if csrf_m else ""
+    if not csrf:
+        with client.session_transaction() as sess:
+            csrf = sess.get("csrf_token", "")
+
+    res_post = client.post("/work-with-us/", data={
+        "csrf_token": csrf,
+        "full_name": "QA Partner Tester",
+        "email": "partner-qa@example.com",
+        "phone": "+91 99999 88888",
+        "organisation": "QA Reading Advocates",
+        "proposal_type": "Reading Circle Partner",
+        "message": "We would love to co-organise weekly reading circles.",
+    }, follow_redirects=True)
+    assert res_post.status_code == 200
+
+    with client.application.app_context():
+        db = get_db()
+        row = db.execute("SELECT * FROM partner_submissions WHERE email='partner-qa@example.com'").fetchone()
+        assert row is not None
+        assert row["full_name"] == "QA Partner Tester"
+        db.execute("DELETE FROM partner_submissions WHERE email='partner-qa@example.com'")
+        db.commit()
+
+    # Submit API JSON
+    res_api = client.post("/api/v1/partners", json={
+        "full_name": "QA API Partner",
+        "email": "api-partner@example.com",
+        "phone": "+91 98888 77777",
+        "organisation": "API Community Library",
+        "proposal_type": "School Library Outreach",
+        "message": "Proposal submitted via API endpoint.",
+    })
+    assert res_api.status_code == 201
+    assert res_api.json["ok"] is True
+
+    with client.application.app_context():
+        db = get_db()
+        db.execute("DELETE FROM partner_submissions WHERE email='api-partner@example.com'")
+        db.commit()
+
+

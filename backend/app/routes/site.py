@@ -1450,9 +1450,36 @@ def contests_page() -> Response:
     return redirect("/events/?type=contest", code=301)
 
 
-@app.get("/work-with-us/", endpoint="work_with_us_page")
+@app.route("/work-with-us/", methods=["GET", "POST"], endpoint="work_with_us_page")
 def work_with_us_page() -> Response:
+    if flask_request.method == "POST":
+        full_name = flask_request.form.get("full_name", "").strip()
+        email = flask_request.form.get("email", "").strip().lower()
+        phone = flask_request.form.get("phone", "").strip()
+        organisation = flask_request.form.get("organisation", "").strip()
+        proposal_type = flask_request.form.get("proposal_type", "Other").strip()
+        message = flask_request.form.get("message", "").strip()
+
+        if not full_name or not email or not message:
+            flash("Please provide your name, email, and proposal message.", "danger")
+            return render_site("work_with_us", "collaborators")
+
+        db = get_db()
+        db.execute(
+            "INSERT INTO partner_submissions (full_name, email, phone, organisation, proposal_type, message, status) VALUES (?, ?, ?, ?, ?, ?, 'New')",
+            (full_name, email, phone, organisation, proposal_type, message)
+        )
+        db.commit()
+        flash("Thank you! Your partnership proposal has been submitted. Our team will get in touch shortly.", "success")
+        return redirect(flask_url_for("work_with_us_page"))
+
     return render_site("work_with_us", "collaborators")
+
+
+@app.get("/become-a-partner/")
+@app.get("/partner/")
+def partner_redirects() -> Response:
+    return redirect("/work-with-us/", code=301)
 
 
 @app.get("/shop/", endpoint="shop")

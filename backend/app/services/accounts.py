@@ -15,6 +15,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 PUBLIC_EXACT = {'/', '/about/', '/contact/', '/membership/', '/plans/', '/how-to-borrow/',
     '/collaborators/', '/community/', '/community/media/', '/media/', '/newspaper/', '/magazine/', '/podcasts/', '/publications/', '/gallery/',
+    '/work-with-us/', '/become-a-partner/', '/partner/',
     '/maths/', '/english/', '/financial-literacy/', '/ba/',
     '/accounts/login/', '/account/login/', '/login/', '/accounts/signup/', '/account/signup/', '/signup/',
     '/accounts/password/reset/', '/account/password/reset/', '/membership-options/', '/privacy-policy/', '/terms/', '/refund-policy/', '/library/favourites/', '/robots.txt', '/sitemap.xml', '/favicon.ico'}
