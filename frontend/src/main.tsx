@@ -16,11 +16,13 @@ const queryClient = new QueryClient({
   },
 });
 
+const basename = window.location.pathname.startsWith('/react') ? '/react' : undefined;
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
+        <BrowserRouter basename={basename}>
           <App />
         </BrowserRouter>
       </QueryClientProvider>

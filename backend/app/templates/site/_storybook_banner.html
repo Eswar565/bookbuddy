@@ -1,6 +1,5 @@
 {% set sbpath=request.path %}
-{% if sbpath == '/library/' %}{% set sbdata=('THE COLLECTION','Book Catalogue','Search the shelves, find a favorite and make it yours.','library-shelf.svg') %}
-{% elif sbpath.startswith('/reading-circles/') %}{% set sbdata=('STORIES ARE BETTER TOGETHER','Come read with us!','Join our friendly reading circles and share wonderful stories.','reading-circle.svg') %}
+{% if sbpath.startswith('/reading-circles/') %}{% set sbdata=('STORIES ARE BETTER TOGETHER','Come read with us!','Join our friendly reading circles and share wonderful stories.','reading-circle.svg') %}
 {% elif sbpath.startswith('/contests/') %}{% set sbdata=('TIME TO SHINE','A space for bright ideas.','Get creative and join our fun reading contests.','contest.svg') %}
 {% elif sbpath.startswith('/events/') %}{% set sbdata=('MARK YOUR CALENDAR','Your community calendar.','Reading circles, contests and unforgettable library days.','reading-circle.svg') %}
 {% elif sbpath.startswith('/podcasts/') %}{% set sbdata=('STORYTIME FOR YOUR EARS','Listen, imagine, smile.','Hear stories, conversations and the voices of our reading community.','podcast.svg') %}

@@ -161,20 +161,12 @@ export const LibraryPage: React.FC = () => {
         description="Browse thousands of curated children, teen, and adult books in Chennai. Add books to your borrow cart for doorstep delivery or pickup."
       />
 
-      <div style={{ maxWidth: '1360px', margin: '0 auto', padding: '2rem 1.5rem 4rem' }}>
-        {/* Page Header (No Discover your next read) */}
-        <div style={{ marginBottom: '1.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
-          <div>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--maroon, #7b1230)', backgroundColor: 'rgba(123, 18, 48, 0.08)', padding: '4px 10px', borderRadius: '4px' }}>
-              The Book Buddy Library
-            </span>
-            <h1 style={{ fontSize: '2.1rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: '8px 0 0' }}>
-              Book Catalogue
-            </h1>
-            <p style={{ color: 'var(--text-muted, #475569)', marginTop: '0.4rem', fontSize: '0.95rem' }}>
-              Browse through our curated collection of illustrated picture books, chapter novels, non-fiction, and classics.
-            </p>
-          </div>
+      <div style={{ maxWidth: '1360px', margin: '0 auto', padding: '1.5rem 1.5rem 4rem' }}>
+        {/* Single compact heading row */}
+        <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <h1 style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: 0, lineHeight: 1.2 }}>
+            Book Catalogue
+          </h1>
           <Link
             to="/members/dashboard"
             style={{
@@ -406,8 +398,8 @@ export const LibraryPage: React.FC = () => {
           <aside
             style={{
               position: 'sticky',
-              top: '80px',
-              maxHeight: 'calc(100vh - 90px)',
+              top: '88px',
+              maxHeight: 'calc(100vh - 104px)',
               overflowY: 'auto',
               backgroundColor: '#ffffff',
               borderRadius: '12px',

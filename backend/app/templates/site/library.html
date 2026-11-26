@@ -4,14 +4,10 @@
 {% block body %}
 <main class="section bb-catalogue-page">
   <div class="bb8-container" style="max-width:1280px; margin:0 auto; padding:0 20px;">
-    <!-- Page Header -->
-    <div class="bb-catalogue-heading" style="margin-bottom:24px;">
-      <div>
-        <span class="gallery-badge">The Book Buddy Library</span>
-        <h1 style="font-size:clamp(26px, 4vw, 36px); font-weight:800; color:var(--navy); margin:8px 0;">Book Catalogue</h1>
-        <p style="color:var(--text-muted); font-size:15px; margin:0;">Browse through our curated collection of illustrated picture books, chapter novels, non-fiction, and classics.</p>
-      </div>
-      <a class="bb-catalogue-basket" href="/members/dashboard/">
+    <!-- Page Header: Single compact heading row with h1 and My Borrowed Books button -->
+    <div class="bb-catalogue-heading" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:24px; padding-top:8px;">
+      <h1 style="font-size:1.85rem; font-weight:800; color:var(--navy); margin:0; line-height:1.2;">Book Catalogue</h1>
+      <a class="bb-catalogue-basket" href="/members/dashboard/" style="margin:0;">
         <svg class="bb-icon" style="width:16px;height:16px;margin-right:6px;"><use href="#i-book"/></svg> My Borrowed Books
       </a>
     </div>
@@ -78,7 +74,7 @@
     <!-- Main Layout: Sidebar Filters + Books Grid -->
     <div class="catalogue-layout">
       <!-- Filter Panel (Sticky on desktop, collapses to bottom-sheet drawer on mobile) -->
-      <aside class="catalogue-sidebar" id="catalogue-sidebar" style="position:sticky; top:80px; max-height:calc(100vh - 90px); overflow-y:auto;">
+      <aside class="catalogue-sidebar" id="catalogue-sidebar" style="position:sticky; top:88px; max-height:calc(100vh - 104px); overflow-y:auto;">
         <div class="catalogue-filter-bar">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
             <h3 style="font-size:16px; font-weight:700; color:var(--navy); margin:0; display:flex; align-items:center; gap:6px;">

@@ -202,7 +202,7 @@
 
   <!-- Main Content Area -->
   <div id="main-content" tabindex="-1">
-    {% if request.path not in ('/','/about/','/work-with-us/','/gallery/') and not request.path.startswith(('/members/','/books/','/users/')) %}
+    {% if request.path not in ('/','/about/','/work-with-us/','/gallery/','/library/') and not request.path.startswith(('/library/','/members/','/books/','/users/')) %}
       {% include 'site/_storybook_banner.html' %}
     {% endif %}
     {% block body %}{% endblock %}
