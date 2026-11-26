@@ -3,48 +3,30 @@
    Matching the project's maroon/navy branding tokens
    ============================================================ */
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .bb-membership-page {
-  padding: 3rem 1rem 5rem;
-  background-color: var(--tint, #fdfbf7);
+  padding: 24px 0 48px;
+  background-color: var(--surface-body, #fdfbf7);
   color: var(--ink, #111827);
-  font-family: inherit;
+  font-family: 'Inter', var(--font-body, sans-serif);
 }
 
 .bb-mem-container {
-  max-width: 1080px;
+  max-width: 1100px;
+  width: 92%;
   margin-inline: auto;
-  width: 100%;
-}
-
-/* Header Section */
-.bb-mem-header {
-  text-align: center;
-  max-width: 1080px;
-  margin: 0 auto 40px;
-}
-
-.bb-mem-kicker {
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--maroon, #740f28);
-  margin-bottom: 0.5rem;
-}
-
-.bb-mem-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--maroon, #740f28);
-  line-height: 1.25;
-  margin: 0 0 8px;
-}
-
-.bb-mem-subtitle {
-  font-size: 1.1rem;
-  color: var(--ink-subtle, #6b7280);
-  margin: 0;
-  line-height: 1.5;
+  box-sizing: border-box;
 }
 
 /* Remove injected folio table tools */
@@ -93,9 +75,9 @@ body.folio .bb-compare-table td,
 
 /* Label Column (Column 1) */
 .bb-col-feature {
-  width: 30%;
-  min-width: 280px;
-  padding: 20px 22px !important;
+  width: 28%;
+  min-width: 170px;
+  padding: 12px 14px !important;
   text-align: left;
   vertical-align: middle !important;
   background: var(--surface-card, #ffffff) !important;
@@ -105,43 +87,39 @@ body.folio .bb-compare-table td,
 /* Header label cell (Features & Plans) */
 .bb-col-feature.bb-header-label-cell,
 thead .bb-col-feature {
-  font-family: var(--font-heading, inherit);
-  font-size: clamp(14px, 0.95rem, 16px);
+  font-family: inherit;
+  font-size: 0.88rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   color: var(--ink-subtle, #6b7280) !important;
   vertical-align: middle !important;
 }
 
-/* Main label: bold uppercase 16-18px, line-height 1.25 */
+/* Main label: bold 15-16px, line-height 1.25 */
 .bb-col-feature strong,
 .bb-col-feature .bb-row-title {
   display: block;
-  font-family: var(--font-heading, inherit);
-  font-size: clamp(16px, 1.05rem, 18px);
+  font-family: inherit;
+  font-size: 0.95rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  color: var(--maroon, #740f28);
+  color: var(--navy, #061446);
   line-height: 1.25;
   white-space: normal !important;
   overflow-wrap: anywhere !important;
   word-break: normal !important;
 }
 
-/* Sub-label: 12-13px, letter-spacing about .04em, weight 600, line-height 1.4, muted color, wrapped, 6px space above */
+/* Sub-label: 12px, weight 500, line-height 1.35, muted color, wrapped, 3px space above */
 .bb-col-feature small,
 .bb-col-feature .bb-row-sub {
   display: block;
-  font-family: var(--font-body, inherit);
-  font-size: clamp(12px, 0.8rem, 13px);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
   color: var(--ink-subtle, #6b7280);
-  line-height: 1.4;
-  margin-top: 6px;
+  line-height: 1.35;
+  margin-top: 3px;
   white-space: normal !important;
   overflow-wrap: anywhere !important;
   word-break: normal !important;
@@ -149,8 +127,9 @@ thead .bb-col-feature {
 
 /* Plan Columns */
 .bb-col-plan {
-  width: calc(70% / 3);
-  min-width: 190px;
+  width: calc(72% / 3);
+  min-width: 125px;
+  padding: 12px 14px !important;
   text-align: center;
   vertical-align: middle !important;
   background: var(--surface-card, #ffffff);
@@ -160,13 +139,13 @@ thead .bb-col-feature {
 .bb-col-plan.is-nine-months,
 th.is-nine-months,
 td.is-nine-months {
-  background-color: #f2f5f3 !important;
+  background-color: #f8fafc !important;
   border-right: 2px solid var(--navy, #0b1f6b) !important;
 }
 
 /* Column Header Styling */
 .bb-plan-header-cell {
-  padding: 20px 14px 18px;
+  padding: 12px 10px 10px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -175,11 +154,11 @@ td.is-nine-months {
 }
 
 .bb-badge-wrap {
-  min-height: 28px;
+  min-height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   width: 100%;
 }
 
@@ -188,81 +167,84 @@ td.is-nine-months {
   align-items: center;
   justify-content: center;
   background: var(--maroon, #740f28);
-  color: var(--white, #ffffff);
-  font-size: 0.75rem;
-  font-weight: 700;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 0.25rem 0.75rem;
+  padding: 2px 8px;
   border-radius: var(--radius-pill, 9999px);
   border: none;
-  line-height: 1.4;
+  line-height: 1.3;
   white-space: nowrap !important;
 }
 
 .bb-plan-duration-name {
-  font-size: 1.4rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--navy, #061446);
-  margin: 0 0 4px;
+  margin: 0 0 2px;
   line-height: 1.25;
   text-align: center;
+  white-space: nowrap !important;
+  text-transform: none !important;
 }
 
 .bb-plan-tagline {
-  font-size: 0.9rem;
-  font-weight: 400;
+  font-size: 0.8rem;
+  font-weight: 500;
   color: var(--ink-subtle, #6b7280);
   margin: 0;
   line-height: 1.35;
   text-align: center;
+  text-transform: none !important;
 }
 
 /* Price rows */
 .bb-price-cell {
-  padding: 24px 16px !important;
+  padding: 12px 14px !important;
   text-align: center;
   vertical-align: middle !important;
 }
 
 .bb-price-val {
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 800;
   color: var(--maroon, #740f28);
   display: block;
   line-height: 1.2;
 }
 
 .bb-price-sub {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   color: var(--ink-subtle, #6b7280);
   display: block;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 /* Total Books row */
 .bb-books-cell {
-  padding: 20px 16px !important;
+  padding: 10px 14px !important;
   text-align: center;
   vertical-align: middle !important;
 }
 
 .bb-books-val {
-  font-size: 1rem;
+  font-size: 0.92rem;
   color: var(--ink, #111827);
   font-weight: 600;
   margin: 0;
 }
 
 .bb-books-meta {
-  font-size: 0.88rem;
+  font-size: 0.8rem;
   color: var(--ink-muted, #4b5563);
-  margin-top: 3px;
+  margin-top: 2px;
 }
 
 /* Benefits cell */
 .bb-benefits-cell {
-  padding: 20px 18px !important;
+  padding: 12px 14px !important;
   text-align: left;
   vertical-align: middle !important;
 }
@@ -274,26 +256,26 @@ td.is-nine-months {
   text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .bb-benefits-list li {
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   line-height: 1.4;
   color: var(--ink, #111827);
   display: grid;
-  grid-template-columns: 18px 1fr;
+  grid-template-columns: 16px 1fr;
   align-items: start;
-  gap: 10px;
+  gap: 8px;
   white-space: normal !important;
 }
 
 .bb-benefits-list .bb-check-icon {
-  width: 18px;
-  height: 18px;
-  min-width: 18px;
-  min-height: 18px;
-  margin-top: 1px;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  margin-top: 2px;
   flex-shrink: 0;
   color: var(--status-green, #059669);
 }
@@ -308,7 +290,7 @@ td.is-nine-months {
 
 /* Subscribe button in table */
 .bb-action-cell {
-  padding: 20px 18px !important;
+  padding: 12px 14px !important;
   text-align: center;
   vertical-align: middle !important;
 }
@@ -318,10 +300,10 @@ td.is-nine-months {
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 40px;
+  height: 36px;
   background: var(--navy, #0b1f6b);
-  color: var(--white, #ffffff);
-  font-size: 1rem;
+  color: #ffffff;
+  font-size: 0.88rem;
   font-weight: 700;
   border-radius: var(--radius-pill, 9999px);
   border: none;
@@ -338,84 +320,72 @@ td.is-nine-months {
 
 /* Service Modes Section */
 .bb-modes-section {
-  max-width: 1080px;
-  margin-inline: auto;
+  max-width: 1100px;
+  margin: 32px auto 0;
   width: 100%;
 }
 
 .bb-modes-header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 20px;
 }
 
 .bb-modes-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #740f28;
-  margin: 0 0 8px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--navy, #061446);
+  margin: 0 0 4px;
 }
 
 .bb-modes-subtitle {
-  color: #6b7280;
-  font-size: 1.05rem;
+  color: var(--ink-subtle, #6b7280);
+  font-size: 0.925rem;
+  line-height: 1.45;
   margin: 0;
 }
 
 .bb-modes-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  gap: 20px;
   align-items: stretch;
 }
 
 .bb-mode-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--surface-card, #ffffff);
+  border: 1px solid var(--border, #e5e7eb);
   border-radius: 12px;
-  padding: 28px 24px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
-  height: 100%;
   box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(10, 36, 114, 0.04);
 }
 
 .bb-mode-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-/* 44px rounded-square badge */
-.bb-mode-badge-icon {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  min-height: 44px;
-  border-radius: 10px;
-  background: rgba(116, 15, 40, 0.08); /* light maroon tint */
-  color: #740f28; /* maroon icon */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.bb-mode-badge-icon svg {
-  width: 24px;
-  height: 24px;
-  display: block;
-  stroke: currentColor;
-  stroke-width: 1.75;
-  fill: none;
+.bb-mode-name {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--navy, #061446);
 }
 
 .bb-mode-badge {
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: 0.35rem 0.8rem;
-  border-radius: 9999px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
 }
 
 .bb-badge-offline {
@@ -430,35 +400,30 @@ td.is-nine-months {
   border: 1px solid #bfdbfe;
 }
 
-.bb-mode-card h3 {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #0b1f6b;
-  margin: 0 0 10px;
-}
-
 .bb-mode-desc {
-  color: #4b5563;
+  color: var(--ink-muted, #4b5563);
   font-size: 0.95rem;
-  line-height: 1.55;
-  margin-bottom: 20px;
+  line-height: 1.5;
+  margin: 0 0 12px;
 }
 
 .bb-mode-meta {
   margin-top: auto;
-  padding-top: 16px;
-  border-top: 1px solid #f3f4f6;
-  font-size: 0.92rem;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .bb-mode-meta-item {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 12px;
-  font-size: 0.95rem;
+  gap: 8px;
+  font-size: 0.9rem;
   line-height: 1.45;
-  color: #374151;
+  color: var(--ink, #374151);
+  margin-bottom: 0;
 }
 
 .bb-mode-meta-item:last-child {
@@ -466,15 +431,12 @@ td.is-nine-months {
 }
 
 .bb-mode-meta-item .bb-line-icon {
-  width: 18px;
-  height: 18px;
-  min-width: 18px;
-  min-height: 18px;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
   margin-top: 2px;
-  color: #740f28; /* maroon icon */
-  stroke: currentColor;
-  stroke-width: 1.75;
-  fill: none;
+  color: var(--maroon, #740f28);
   flex-shrink: 0;
 }
 
@@ -717,6 +679,9 @@ td.is-nine-months {
 
 /* Responsive Overrides */
 @media (max-width: 900px) {
+  .bb8-btn-partner {
+    display: none !important;
+  }
   .bb-table-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -757,173 +722,14 @@ td.is-nine-months {
   .bb-modal-header {
     padding: 1.25rem;
   }
-}
-
-
-
-/* Split Layout for Single-page View */
-.bb-mem-split-layout {
-  display: grid;
-  grid-template-columns: 310px 1fr;
-  gap: 20px;
-  align-items: start;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.bb-modes-col {
-  display: flex;
-  flex-direction: column;
-}
-
-.bb-modes-col .bb-modes-header {
-  text-align: left;
-  margin-bottom: 12px;
-}
-
-.bb-modes-col .bb-modes-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--maroon, #740f28);
-  margin: 0 0 4px;
-}
-
-.bb-modes-col .bb-modes-subtitle {
-  font-size: 0.8rem;
-  color: var(--ink-subtle, #6b7280);
-  margin: 0;
-  line-height: 1.4;
-}
-
-.bb-modes-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.bb-modes-stack .bb-mode-card {
-  padding: 12px 14px;
-  border-radius: 10px;
-}
-
-.bb-modes-stack .bb-mode-desc {
-  font-size: 0.8rem;
-  line-height: 1.4;
-  margin-bottom: 10px;
-}
-
-.bb-modes-stack .bb-mode-meta {
-  padding-top: 8px;
-  gap: 6px;
-  display: flex;
-  flex-direction: column;
-}
-
-.bb-modes-stack .bb-mode-meta-item {
-  font-size: 0.8rem;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-
-.bb-plan-table-col .bb-table-wrapper {
-  margin-bottom: 0;
-}
-
-/* Desktop compact sizing so 1366x768 requires NO scrolling */
-@media (min-width: 1024px) {
-  .bb-membership-page {
-    padding: 1.25rem 1rem 1.5rem;
-  }
-  .bb-mem-header {
-    margin: 0 auto 16px;
-  }
-  .bb-mem-title {
-    font-size: 1.6rem;
-    margin: 0 0 4px;
-  }
-  .bb-mem-subtitle {
-    font-size: 0.92rem;
-  }
-  .bb-col-feature {
-    padding: 10px 12px !important;
-  }
-  .bb-col-feature strong,
-  .bb-col-feature .bb-row-title {
-    font-size: 0.95rem;
-  }
-  .bb-col-feature small,
-  .bb-col-feature .bb-row-sub {
-    font-size: 0.75rem;
-    margin-top: 2px;
-  }
-  .bb-plan-header-cell {
-    padding: 10px 8px 8px;
-  }
-  .bb-plan-duration-name {
-    font-size: 1.15rem;
-    margin: 0 0 2px;
-  }
-  .bb-plan-tagline {
-    font-size: 0.78rem;
-  }
-  .bb-price-cell {
-    padding: 10px 8px !important;
-  }
-  .bb-price-val {
-    font-size: 1.35rem;
-  }
-  .bb-price-sub {
-    font-size: 0.75rem;
-    margin-top: 2px;
-  }
-  .bb-books-cell {
-    padding: 8px 8px !important;
-  }
-  .bb-books-val {
-    font-size: 0.88rem;
-  }
-  .bb-books-meta {
-    font-size: 0.78rem;
-  }
-  .bb-benefits-cell {
-    padding: 8px 10px !important;
-  }
-  .bb-benefits-list {
-    gap: 4px;
-  }
-  .bb-benefits-list li {
-    font-size: 0.8rem;
-    gap: 6px;
-  }
-  .bb-action-cell {
-    padding: 8px 10px !important;
-  }
-  .bb-btn-subscribe {
-    height: 34px;
-    font-size: 0.88rem;
-  }
-}
-
-/* Responsive order: on tablet and mobile, plans first, service modes second */
-@media (max-width: 1023px) {
-  .bb-mem-split-layout {
+  .bb-modes-grid {
     grid-template-columns: 1fr;
-    gap: 28px;
-  }
-  .bb-plan-table-col {
-    order: 1;
-  }
-  .bb-modes-col {
-    order: 2;
-  }
-  .bb-modes-stack {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
     gap: 16px;
   }
 }
+
 @media (max-width: 640px) {
-  .bb-modes-stack {
-    grid-template-columns: 1fr;
+  .bb-membership-page {
+    padding: 20px 0 36px;
   }
 }
