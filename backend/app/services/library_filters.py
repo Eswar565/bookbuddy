@@ -128,14 +128,14 @@ def get_filtered_books_for_export(db, args) -> list[dict]:
             filters.append("(LOWER(category) LIKE '%non fiction%' OR LOWER(category) LIKE '%non-fiction%' OR collection IN ('Non-Fiction', 'Non Fiction', 'AI') OR product_type = 'non-fiction')")
         elif cat_lower == "languages":
             if not lang:
-                filters.append("(language IS NOT NULL AND TRIM(language) <> '')")
+                filters.append("id IN (SELECT book_id FROM book_languages WHERE language IS NOT NULL AND TRIM(language) <> '')")
         else:
             filters.append("(LOWER(category) LIKE ? OR LOWER(collection) LIKE ?)")
             params.extend([f"%{cat_lower}%", f"%{cat_lower}%"])
 
     if lang:
-        filters.append("LOWER(language) LIKE ?")
-        params.append(f"%{lang.lower()}%")
+        filters.append("id IN (SELECT book_id FROM book_languages WHERE LOWER(language) = LOWER(?))")
+        params.append(lang)
 
     if chosen['audience'] in {'adult', 'kids'}:
         filters.append("audience IN (?, 'all')")
@@ -205,12 +205,19 @@ def export_books_excel(books: list[dict]) -> Response:
     )
     alt_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
 
+    try:
+        from app.services.languages import parse_languages
+    except ImportError:
+        try:
+            from languages import parse_languages
+        except ImportError:
+            from .languages import parse_languages
     for idx, b in enumerate(books, start=2):
         row_data = [
             b.get("title", ""),
             b.get("author", ""),
             b.get("category", ""),
-            b.get("language", ""),
+            ", ".join(parse_languages(b.get("language", ""))),
             b.get("reader_type", ""),
             b.get("availability", "Available")
         ]

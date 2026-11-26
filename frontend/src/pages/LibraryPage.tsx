@@ -133,11 +133,20 @@ export const LibraryPage: React.FC = () => {
   });
 
   // Query favourite books details for the favourites drawer
-  const { data: favsData, refetch: refetchFavs } = useQuery({
-    queryKey: ['favourites'],
+  const {
+    data: favsData,
+    refetch: refetchFavs,
+    isLoading: isFavsLoading,
+    isError: isFavsError,
+  } = useQuery({
+    queryKey: ['favourites', wishlist.join(',')],
     queryFn: async () => {
-      const res = await apiGet('/api/v1/library/favourites');
-      if (res.ok && res.data) {
+      const param = wishlist.length > 0 ? `?ids=${wishlist.join(',')}` : '';
+      const res = await apiGet(`/api/v1/library/favourites${param}`);
+      if (!res.ok) {
+        throw new Error(res.error?.message || 'Failed to fetch favourites');
+      }
+      if (res.data) {
         if (!res.data.is_guest && res.data.book_ids) {
           const serverIds = res.data.book_ids as number[];
           setWishlist(serverIds);
@@ -382,7 +391,7 @@ export const LibraryPage: React.FC = () => {
                 }}
               >
                 <option value="">All Languages</option>
-                {filterOptions.language?.map((lang: string) => (
+                {(filterOptions.languages || filterOptions.language || []).map((lang: string) => (
                   <option key={lang} value={lang}>
                     {lang}
                   </option>
@@ -1303,106 +1312,188 @@ export const LibraryPage: React.FC = () => {
                 </button>
               </div>
 
+              {/* Guest Banner */}
+              {favsData?.is_guest && (
+                <div
+                  style={{
+                    backgroundColor: '#fef3c7',
+                    borderBottom: '1px solid #fde68a',
+                    color: '#92400e',
+                    padding: '10px 16px',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '8px',
+                  }}
+                >
+                  <span>Log in to save your favourites to your account</span>
+                  <Link
+                    to="/login"
+                    style={{
+                      backgroundColor: '#92400e',
+                      color: '#ffffff',
+                      padding: '4px 10px',
+                      borderRadius: '4px',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      textDecoration: 'none',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Log In
+                  </Link>
+                </div>
+              )}
+
               {/* Drawer Book List */}
               <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
-                {favBooksList.length > 0 ? (
+                {isFavsError ? (
+                  <div style={{ textAlign: 'center', padding: '32px 16px', color: '#991b1b', backgroundColor: '#fef2f2', borderRadius: '8px' }}>
+                    <p style={{ margin: '0 0 10px', fontSize: '0.875rem', fontWeight: 600 }}>
+                      Something went wrong loading your favourites.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => refetchFavs()}
+                      style={{
+                        padding: '6px 14px',
+                        backgroundColor: '#991b1b',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Retry
+                    </button>
+                  </div>
+                ) : isFavsLoading ? (
+                  <div style={{ textAlign: 'center', padding: '32px 16px', color: 'var(--text-muted, #64748b)' }}>
+                    Loading favourites...
+                  </div>
+                ) : favBooksList.length > 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {favBooksList.map((b) => (
-                      <div
-                        key={b.id}
-                        style={{
-                          display: 'flex',
-                          gap: '12px',
-                          padding: '10px',
-                          borderRadius: '8px',
-                          border: '1px solid var(--border-color, #e2e8f0)',
-                          backgroundColor: '#f8fafc',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <img
-                          src={b.image_url || b.image_path || '/static/img/placeholder-book.png'}
-                          alt={b.title}
-                          style={{ width: '48px', height: '64px', objectFit: 'cover', borderRadius: '4px', backgroundColor: '#e2e8f0' }}
-                          onError={(e) => {
-                            (e.target as HTMLElement).style.display = 'none';
+                    {favBooksList.map((b) => {
+                      const isAvail = (b.available_copies ?? b.stock ?? 1) > 0;
+                      return (
+                        <div
+                          key={b.id}
+                          style={{
+                            display: 'flex',
+                            gap: '12px',
+                            padding: '10px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border-color, #e2e8f0)',
+                            backgroundColor: '#f8fafc',
+                            alignItems: 'center',
                           }}
-                        />
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <h4
-                            style={{
-                              margin: '0 0 2px',
-                              fontSize: '0.875rem',
-                              fontWeight: 700,
-                              color: 'var(--navy, #061446)',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
+                        >
+                          <img
+                            src={b.image_url || b.image_path || '/static/img/placeholder-book.png'}
+                            alt={b.title}
+                            style={{ width: '48px', height: '64px', objectFit: 'cover', borderRadius: '4px', backgroundColor: '#e2e8f0' }}
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = 'none';
                             }}
-                          >
-                            {b.title}
-                          </h4>
-                          <p
-                            style={{
-                              margin: '0 0 6px',
-                              fontSize: '0.775rem',
-                              color: 'var(--maroon, #7b1230)',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                            }}
-                          >
-                            {b.author || 'Author not listed'}
-                          </p>
-                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                addItem({ id: b.id, title: b.title, author: b.author || 'Author not listed' });
-                              }}
+                          />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <h4
                               style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                padding: '4px 8px',
-                                borderRadius: '4px',
-                                backgroundColor: 'var(--navy, #061446)',
-                                color: '#ffffff',
-                                border: 'none',
-                                fontSize: '0.75rem',
+                                margin: '0 0 2px',
+                                fontSize: '0.875rem',
                                 fontWeight: 700,
-                                cursor: 'pointer',
+                                color: 'var(--navy, #061446)',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
                               }}
                             >
-                              <Plus size={12} /> Add to Cart
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => toggleWishlist(b.id)}
+                              {b.title}
+                            </h4>
+                            <p
                               style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                padding: '4px 6px',
-                                borderRadius: '4px',
-                                backgroundColor: 'transparent',
-                                color: '#ef4444',
-                                border: 'none',
-                                fontSize: '0.75rem',
-                                cursor: 'pointer',
+                                margin: '0 0 4px',
+                                fontSize: '0.775rem',
+                                color: 'var(--maroon, #7b1230)',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
                               }}
                             >
-                              <Trash2 size={13} /> Remove
-                            </button>
+                              {b.author || 'Author not listed'}
+                            </p>
+                            <div style={{ marginBottom: '6px' }}>
+                              <span
+                                style={{
+                                  display: 'inline-block',
+                                  fontSize: '0.7rem',
+                                  fontWeight: 700,
+                                  padding: '2px 8px',
+                                  borderRadius: '4px',
+                                  backgroundColor: isAvail ? 'var(--color-secondary, #15803d)' : '#6b7280',
+                                  color: '#ffffff',
+                                }}
+                              >
+                                {isAvail ? `Available: ${b.available_copies ?? b.stock ?? 1}` : 'Unavailable'}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                              <button
+                                type="button"
+                                disabled={!isAvail}
+                                onClick={() => {
+                                  addItem({ id: b.id, title: b.title, author: b.author || 'Author not listed' });
+                                }}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  padding: '4px 8px',
+                                  borderRadius: '4px',
+                                  backgroundColor: isAvail ? 'var(--navy, #061446)' : '#94a3b8',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 700,
+                                  cursor: isAvail ? 'pointer' : 'not-allowed',
+                                }}
+                              >
+                                <Plus size={12} /> Add
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => toggleWishlist(b.id)}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  padding: '4px 6px',
+                                  borderRadius: '4px',
+                                  backgroundColor: 'transparent',
+                                  color: '#ef4444',
+                                  border: 'none',
+                                  fontSize: '0.75rem',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <Trash2 size={13} /> Remove
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div style={{ textAlign: 'center', padding: '48px 16px', color: 'var(--text-muted, #64748b)' }}>
                     <Heart size={40} color="#cbd5e1" style={{ marginBottom: '12px' }} />
-                    <p style={{ margin: '0 0 8px', fontWeight: 700, color: 'var(--navy, #061446)' }}>No favourites saved yet</p>
+                    <p style={{ margin: '0 0 8px', fontWeight: 700, color: 'var(--navy, #061446)' }}>
+                      No favourites yet. Tap the heart on a book to save it.
+                    </p>
                     <p style={{ margin: 0, fontSize: '0.85rem' }}>
                       Click the heart button on any book card to save it to your reading list.
                     </p>

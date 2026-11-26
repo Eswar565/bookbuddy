@@ -5,6 +5,8 @@ import pytest
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ORIGINAL_DB = BASE_DIR / "instance" / "book_buddy.sqlite3"
+if not ORIGINAL_DB.exists() and (BASE_DIR.parent / "instance" / "book_buddy.sqlite3").exists():
+    ORIGINAL_DB = BASE_DIR.parent / "instance" / "book_buddy.sqlite3"
 TEST_DB = BASE_DIR / "instance" / "book_buddy_test.sqlite3"
 
 

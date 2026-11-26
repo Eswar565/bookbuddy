@@ -486,6 +486,10 @@ def init_db() -> None:
     )
     connection.execute("CREATE INDEX IF NOT EXISTS idx_member_favourites_user ON member_favourites(user_id);")
 
+    # Migrate and populate book_languages join table
+    from languages import ensure_book_languages_table
+    ensure_book_languages_table(connection)
+
     # Migrate Summer Special to Beginner Plan across all existing plan records
     has_lending_plans = bool(connection.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='lending_plans'").fetchone())
     if has_lending_plans:
@@ -923,14 +927,14 @@ def paged_books(*, collection_filter: bool = True) -> dict[str, Any]:
             filters.append("(LOWER(category) LIKE '%non fiction%' OR LOWER(category) LIKE '%non-fiction%' OR collection IN ('Non-Fiction', 'Non Fiction', 'AI') OR product_type = 'non-fiction')")
         elif cat_lower == "languages":
             if not lang:
-                filters.append("(language IS NOT NULL AND TRIM(language) <> '')")
+                filters.append("books.id IN (SELECT book_id FROM book_languages WHERE language IS NOT NULL AND TRIM(language) <> '')")
         else:
             filters.append("(LOWER(category) LIKE ? OR LOWER(collection) LIKE ?)")
             params.extend([f"%{cat_lower}%", f"%{cat_lower}%"])
 
     if lang:
-        filters.append("LOWER(language) LIKE ?")
-        params.append(f"%{lang.lower()}%")
+        filters.append("books.id IN (SELECT book_id FROM book_languages WHERE LOWER(language) = LOWER(?))")
+        params.append(lang)
 
     if chosen['audience'] in {'adult', 'kids'}:
         filters.append("audience IN (?, 'all')")
@@ -973,17 +977,12 @@ def paged_books(*, collection_filter: bool = True) -> dict[str, Any]:
     collections = [row[0] for row in db.execute(
         "SELECT DISTINCT collection FROM books WHERE collection IS NOT NULL AND TRIM(collection) <> '' ORDER BY collection"
     ).fetchall()] if collection_filter else []
-    options = {key: [r[0] for r in db.execute('SELECT DISTINCT ' + key + ' FROM books WHERE archived=0 AND TRIM(' + key + ")<>'' ORDER BY " + key)] for key in ['language', 'age_group', 'author', 'product_type']}
 
-    # Available distinct languages
-    lang_rows = db.execute("SELECT DISTINCT language FROM books WHERE archived=0 AND language IS NOT NULL AND TRIM(language)<>'' ORDER BY language").fetchall()
-    lang_set = set()
-    for lr in lang_rows:
-        for s in (lr[0] or "").split(","):
-            val = s.strip()
-            if val:
-                lang_set.add(val)
-    available_languages = sorted(lang_set) or ["English", "Tamil", "Hindi"]
+    from languages import get_distinct_languages
+    available_languages = get_distinct_languages(db)
+    options = {key: [r[0] for r in db.execute('SELECT DISTINCT ' + key + ' FROM books WHERE archived=0 AND TRIM(' + key + ")<>'' ORDER BY " + key)] for key in ['age_group', 'author', 'product_type']}
+    options['language'] = available_languages
+    options['languages'] = available_languages
 
     categories_list = [
         "Baby", "Toddler", "Junior", "Middle Grade", "Young Adults", "Adults", "Fiction", "Non Fiction", "Languages"
@@ -1106,7 +1105,8 @@ def library_favourites() -> Response:
     u = current_user()
     db = get_db()
     fav_books = []
-    if u and u.is_authenticated:
+    is_guest = not (u and u.is_authenticated)
+    if not is_guest:
         rows = db.execute(
             """SELECT b.* FROM books b
                JOIN member_favourites mf ON b.id = mf.book_id
@@ -1115,7 +1115,7 @@ def library_favourites() -> Response:
             (u.id,)
         ).fetchall()
         fav_books = [row_dict(r) for r in rows]
-    return render_site("library", "favourites", fav_books=fav_books, user=u)
+    return render_site("favourites", "favourites", fav_books=fav_books, user=u, is_guest=is_guest)
 
 
 @app.post("/library/checkout/", endpoint="library_checkout")

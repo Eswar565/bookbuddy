@@ -14,14 +14,12 @@ from ...services.library_filters import (
 def get_filter_options(db):
     options = {
         key: [r[0] for r in db.execute(f"SELECT DISTINCT {key} FROM books WHERE archived=0 AND TRIM({key})<>'' ORDER BY {key}").fetchall()]
-        for key in ["language", "age_group", "author", "product_type"]
+        for key in ["age_group", "author", "product_type"]
     }
-    lang_set = set()
-    for l_val in options.get("language", []):
-        for single in (l_val or "").split(','):
-            s = single.strip()
-            if s: lang_set.add(s)
-    options["languages"] = sorted(lang_set) or ["English", "Tamil", "Hindi"]
+    from ...services.languages import get_distinct_languages
+    distinct_langs = get_distinct_languages(db)
+    options["language"] = distinct_langs
+    options["languages"] = distinct_langs
     collections = [r[0] for r in db.execute(
         "SELECT DISTINCT collection FROM books WHERE archived=0 AND collection IS NOT NULL AND TRIM(collection)<>'' ORDER BY collection"
     ).fetchall()]
@@ -94,14 +92,14 @@ def list_books():
             conditions.append("(LOWER(category) LIKE '%non fiction%' OR LOWER(category) LIKE '%non-fiction%' OR collection IN ('Non-Fiction', 'Non Fiction', 'AI') OR product_type = 'non-fiction')")
         elif cat_lower == "languages":
             if not lang:
-                conditions.append("(language IS NOT NULL AND TRIM(language) <> '')")
+                conditions.append("books.id IN (SELECT book_id FROM book_languages WHERE language IS NOT NULL AND TRIM(language) <> '')")
         else:
             conditions.append("(LOWER(category) LIKE ? OR LOWER(collection) LIKE ?)")
             params.extend([f"%{cat_lower}%", f"%{cat_lower}%"])
 
     if lang:
-        conditions.append("LOWER(language) LIKE ?")
-        params.append(f"%{lang.lower()}%")
+        conditions.append("books.id IN (SELECT book_id FROM book_languages WHERE LOWER(language) = LOWER(?))")
+        params.append(lang)
 
     if collection:
         conditions.append("collection = ?")
@@ -205,6 +203,32 @@ def export_books(fmt: str):
 @books_bp.get("/books/favourites/")
 def list_favourites():
     user_id = session.get("user_id")
+    db = get_db()
+
+    # If ids parameter is provided (e.g. from guest's localStorage), query those books directly
+    ids_param = request.args.get("ids", "").strip() or request.args.get("book_ids", "").strip()
+    if ids_param:
+        try:
+            ids = [int(x.strip()) for x in ids_param.split(",") if x.strip()]
+        except (ValueError, TypeError):
+            ids = []
+        if ids:
+            placeholders = ",".join(["?"] * len(ids))
+            rows = db.execute(
+                f"SELECT * FROM books WHERE id IN ({placeholders}) AND archived = 0",
+                ids
+            ).fetchall()
+            books = [dict(r) for r in rows]
+            return jsonify({
+                "ok": True,
+                "data": {
+                    "favourites": books,
+                    "book_ids": [b["id"] for b in books],
+                    "count": len(books),
+                    "is_guest": not bool(user_id)
+                }
+            })
+
     if not user_id:
         return jsonify({
             "ok": True,
@@ -216,7 +240,6 @@ def list_favourites():
             }
         })
 
-    db = get_db()
     rows = db.execute(
         """SELECT b.* FROM books b
            JOIN member_favourites mf ON b.id = mf.book_id

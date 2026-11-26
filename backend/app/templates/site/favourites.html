@@ -30,6 +30,20 @@
       </div>
     </div>
 
+    <!-- Guest Banner -->
+    <div id="bb-guest-favs-banner" style="{% if not is_guest %}display:none;{% endif %} background:#fef3c7; border:1px solid #fde68a; color:#92400e; padding:12px 18px; border-radius:var(--radius-md); font-size:14px; font-weight:600; margin-bottom:20px; display:{% if is_guest %}flex{% else %}none{% endif %}; align-items:center; justify-content:space-between; gap:12px;">
+      <span>Log in to save your favourites to your account</span>
+      <a href="/login/?next=/library/favourites/" style="background:#92400e; color:#fff; padding:6px 14px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:700;">Log In</a>
+    </div>
+
+    <!-- Inline Error Box with Retry -->
+    <div id="bb-favs-error" style="display:none; background:#fef2f2; border:1px solid #fee2e2; color:#991b1b; padding:14px 18px; border-radius:8px; text-align:center; font-size:14px; margin-bottom:20px;">
+      <span id="bb-favs-error-msg">Something went wrong loading your favourites.</span>
+      <button type="button" id="bb-favs-retry-btn" style="margin-left:12px; padding:6px 14px; background:#991b1b; color:#ffffff; border:none; border-radius:6px; font-size:13px; font-weight:700; cursor:pointer;">
+        Retry
+      </button>
+    </div>
+
     <!-- Favourites Content Area -->
     <div id="bb-favs-container">
       {% if fav_books %}
@@ -45,7 +59,7 @@
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
             </svg>
           </div>
-          <h2 style="font-size:20px; font-weight:700; color:var(--navy); margin:0 0 8px;">No favourites saved yet</h2>
+          <h2 style="font-size:20px; font-weight:700; color:var(--navy); margin:0 0 8px;">No favourites yet. Tap the heart on a book to save it.</h2>
           <p style="color:var(--text-muted); font-size:14px; margin:0 0 24px; max-width:420px; margin-left:auto; margin-right:auto;">
             Click the heart icon on any book in the catalogue to save it to your personal reading list.
           </p>
@@ -55,4 +69,160 @@
     </div>
   </div>
 </main>
+
+<script>
+(function() {
+  const isGuest = {{ 'true' if is_guest else 'false' }};
+  const container = document.getElementById('bb-favs-container');
+  const errorBox = document.getElementById('bb-favs-error');
+  const retryBtn = document.getElementById('bb-favs-retry-btn');
+  const guestBanner = document.getElementById('bb-guest-favs-banner');
+
+  function getLocalWishlist() {
+    try {
+      const raw = localStorage.getItem('bb_wishlist');
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function setLocalWishlist(ids) {
+    try {
+      localStorage.setItem('bb_wishlist', JSON.stringify(ids));
+    } catch (e) {}
+  }
+
+  function renderEmptyState() {
+    container.innerHTML = `
+      <div class="bb-catalogue-empty" id="bb-favs-empty" style="background:var(--surface-card); padding:56px 24px; text-align:center; border-radius:var(--radius-lg); border:1px dashed var(--border-color);">
+        <div style="width:56px; height:56px; border-radius:50%; background:#fce7f3; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
+          <svg class="bb-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--maroon)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+        </div>
+        <h2 style="font-size:20px; font-weight:700; color:var(--navy); margin:0 0 8px;">No favourites yet. Tap the heart on a book to save it.</h2>
+        <p style="color:var(--text-muted); font-size:14px; margin:0 0 24px; max-width:420px; margin-left:auto; margin-right:auto;">
+          Click the heart icon on any book in the catalogue to save it to your personal reading list.
+        </p>
+        <a href="/library/" class="btn-export" style="background:var(--navy); color:#fff; border-color:var(--navy); padding:10px 20px; font-weight:700;">Browse Book Catalogue</a>
+      </div>
+    `;
+  }
+
+  function loadFavourites() {
+    if (errorBox) errorBox.style.display = 'none';
+
+    if (isGuest) {
+      if (guestBanner) guestBanner.style.display = 'flex';
+      const localIds = getLocalWishlist();
+      if (!localIds || localIds.length === 0) {
+        renderEmptyState();
+        return;
+      }
+
+      fetch('/api/v1/library/favourites?ids=' + encodeURIComponent(localIds.join(',')))
+        .then(function(res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        })
+        .then(function(data) {
+          const books = data && data.data && data.data.favourites ? data.data.favourites : [];
+          if (books.length === 0) {
+            renderEmptyState();
+            return;
+          }
+          let html = '<div class="bb-book-grid" id="bb-favs-grid" aria-label="Favourite books">';
+          books.forEach(function(b) {
+            const isAvail = (b.stock > 0 || b.available_copies > 0);
+            const statusLabel = isAvail ? 'Available: ' + (b.available_copies || b.stock || 1) : 'Unavailable';
+            const statusClass = isAvail ? '' : 'book-card__status--unavailable';
+            const cover = b.image_url || b.image_path || '/static/img/placeholder-book.png';
+            html += `
+              <div class="book-card js-book-card" data-book-id="${b.id}" style="position:relative;">
+                <button type="button" class="book-card__wishlist-btn js-wishlist-toggle is-active" data-book-id="${b.id}" aria-label="Remove ${b.title} from favourites" style="position:absolute; top:8px; right:8px; z-index:10; width:32px; height:32px; border-radius:50%; background:#fff; border:1px solid #e2e8f0; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.08);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--maroon)" stroke="var(--maroon)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                </button>
+                <div class="book-card__media">
+                  <img src="${cover}" alt="${b.title}" loading="lazy" onerror="this.src='/static/img/placeholder-book.png'">
+                </div>
+                <div class="book-card__body">
+                  <h3 class="book-card__title" title="${b.title}">${b.title}</h3>
+                  <p class="book-card__author">${b.author || 'Author not listed'}</p>
+                  <div class="book-card__footer">
+                    <span class="book-card__status ${statusClass}">${statusLabel}</span>
+                    <button type="button" class="book-card__action book-card__action--add js-borrow-btn" data-book-id="${b.id}" data-book-title="${b.title}" data-book-author="${b.author || ''}" ${isAvail ? '' : 'disabled'}>
+                      Add
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+          html += '</div>';
+          container.innerHTML = html;
+        })
+        .catch(function(err) {
+          console.error('Failed to load guest favourites:', err);
+          if (errorBox) {
+            errorBox.style.display = 'block';
+            const msg = document.getElementById('bb-favs-error-msg');
+            if (msg) msg.innerText = 'Failed to load favourites. Please try again.';
+          }
+        });
+    }
+  }
+
+  if (retryBtn) {
+    retryBtn.addEventListener('click', function() {
+      loadFavourites();
+    });
+  }
+
+  // Handle Remove / Wishlist Click in Favourites view
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.js-wishlist-toggle');
+    if (!btn) return;
+    const bookId = parseInt(btn.getAttribute('data-book-id'), 10);
+    if (!bookId) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Remove from local wishlist
+    let local = getLocalWishlist();
+    local = local.filter(id => id !== bookId);
+    setLocalWishlist(local);
+
+    // If logged in, call DELETE API
+    if (!isGuest) {
+      fetch('/api/v1/library/favourites/' + bookId, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      }).catch(function(err) {
+        console.warn('Failed to delete favourite on server:', err);
+      });
+    }
+
+    // Remove card from DOM
+    const card = btn.closest('.book-card');
+    if (card) {
+      card.remove();
+    }
+
+    // Check if grid is now empty
+    const remainingCards = container.querySelectorAll('.book-card');
+    if (remainingCards.length === 0) {
+      renderEmptyState();
+    }
+  });
+
+  // Initial load for guest
+  if (isGuest) {
+    loadFavourites();
+  }
+})();
+</script>
 {% endblock %}
