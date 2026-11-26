@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Check, ShieldCheck } from 'lucide-react';
+import { Check, ShieldCheck, MapPin, Truck, Calendar, Sparkles } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -52,7 +52,13 @@ export const MembershipPage: React.FC = () => {
     }
   };
 
-  const plans = data || [];
+  const rawPlans = data || [];
+  // Ensure "Summer Special" is renamed to "Beginner Plan" if coming from any legacy cache/API
+  const plans = rawPlans.map(p => ({
+    ...p,
+    name: p.name.replace(/Summer Special/gi, 'Beginner Plan'),
+    description: p.description?.replace(/Summer Special/gi, 'Beginner Plan'),
+  }));
 
   return (
     <>
@@ -61,30 +67,30 @@ export const MembershipPage: React.FC = () => {
         description="Choose a flexible reading plan that fits your family. Enjoy curated children books, unlimited swaps, and doorstep delivery across Chennai."
       />
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '3rem 1.5rem 5rem' }}>
-        {/* Header */}
-        <div style={{ textAlign: 'center', maxWidth: '720px', margin: '0 auto 3.5rem' }}>
+      <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '1.5rem 1rem 2rem' }}>
+        {/* Compact Header */}
+        <div style={{ textAlign: 'center', maxWidth: '720px', margin: '0 auto 1.25rem' }}>
           <span
             style={{
               display: 'inline-block',
               backgroundColor: 'var(--maroon-tint, rgba(116, 15, 40, 0.08))',
               color: 'var(--maroon, #740f28)',
-              fontSize: '0.8rem',
+              fontSize: '0.75rem',
               fontWeight: 800,
-              padding: '6px 14px',
+              padding: '4px 12px',
               borderRadius: '20px',
               textTransform: 'uppercase',
               letterSpacing: '0.5px',
-              marginBottom: '12px',
+              marginBottom: '6px',
             }}
           >
             Flexible Lending Plans
           </span>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: '0 0 12px' }}>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: '0 0 6px' }}>
             Nurture Lifelong Reading Habits
           </h1>
-          <p style={{ color: 'var(--text-muted, #475569)', fontSize: '1.05rem', lineHeight: 1.6, margin: 0 }}>
-            Borrow verified, age-appropriate children and young adult books with simple doorstep exchange in Chennai.
+          <p style={{ color: 'var(--text-muted, #475569)', fontSize: '0.925rem', lineHeight: 1.45, margin: 0 }}>
+            Pick the plan that fits your family's reading appetite.
           </p>
         </div>
 
@@ -94,25 +100,25 @@ export const MembershipPage: React.FC = () => {
             style={{
               backgroundColor: '#f0fdf4',
               border: '1.5px solid #86efac',
-              borderRadius: '12px',
-              padding: '16px 20px',
-              marginBottom: '2.5rem',
+              borderRadius: '10px',
+              padding: '10px 16px',
+              marginBottom: '1.25rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               flexWrap: 'wrap',
-              gap: '12px',
+              gap: '10px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <ShieldCheck size={24} color="#16a34a" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ShieldCheck size={20} color="#16a34a" />
               <div>
-                <strong style={{ color: '#166534', fontSize: '0.95rem' }}>
-                  Current Active Plan: {activeSubscription.name}
+                <strong style={{ color: '#166534', fontSize: '0.9rem' }}>
+                  Current Active Plan: {activeSubscription.name.replace(/Summer Special/gi, 'Beginner Plan')}
                 </strong>
-                <div style={{ fontSize: '0.825rem', color: '#15803d', marginTop: '2px' }}>
-                  Allows up to {activeSubscription.book_limit} books at a time. Active until {activeSubscription.expires_on}.
-                </div>
+                <span style={{ fontSize: '0.8rem', color: '#15803d', marginLeft: '8px' }}>
+                  ({activeSubscription.book_limit} books at a time · Active until {activeSubscription.expires_on})
+                </span>
               </div>
             </div>
             <Link
@@ -120,10 +126,10 @@ export const MembershipPage: React.FC = () => {
               style={{
                 backgroundColor: 'var(--navy, #061446)',
                 color: '#ffffff',
-                padding: '8px 16px',
-                borderRadius: '8px',
+                padding: '6px 12px',
+                borderRadius: '6px',
                 fontWeight: 700,
-                fontSize: '0.85rem',
+                fontSize: '0.8rem',
                 textDecoration: 'none',
               }}
             >
@@ -132,141 +138,200 @@ export const MembershipPage: React.FC = () => {
           </div>
         )}
 
-        {/* Plans Grid */}
-        {isLoading ? (
-          <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>Loading plans...</div>
-        ) : plans.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>No plans published currently.</div>
-        ) : (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: '24px',
-            }}
-          >
-            {plans.map((plan, idx) => {
-              const isFeatured = idx === 1 || plan.name.toLowerCase().includes('standard') || plan.name.toLowerCase().includes('popular');
-              const isCurrentPlan = activeSubscription?.plan_id === plan.id;
+        {/* Split Layout: Left = Service Modes, Right = Plan Comparison Table / Cards */}
+        <div className="bb-mem-split-layout">
+          {/* LEFT: Flexible Service Modes (Stacked Vertically) */}
+          <aside className="bb-modes-col" aria-labelledby="react-service-modes-heading">
+            <div className="bb-modes-header">
+              <h2 className="bb-modes-title" id="react-service-modes-heading">Flexible Service Modes</h2>
+              <p className="bb-modes-subtitle">Choose how you'd like your books delivered.</p>
+            </div>
 
-              return (
-                <div
-                  key={plan.id}
-                  style={{
-                    backgroundColor: '#ffffff',
-                    borderRadius: '16px',
-                    padding: '32px 28px',
-                    border: isFeatured ? '2px solid var(--maroon, #740f28)' : '1px solid var(--border-color)',
-                    boxShadow: isFeatured ? '0 12px 32px rgba(116, 15, 40, 0.12)' : '0 4px 18px rgba(10, 36, 114, 0.05)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    position: 'relative',
-                  }}
-                >
-                  {isFeatured && (
-                    <span
-                      style={{
-                        position: 'absolute',
-                        top: '-12px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        backgroundColor: 'var(--maroon, #740f28)',
-                        color: '#ffffff',
-                        fontSize: '0.75rem',
-                        fontWeight: 800,
-                        textTransform: 'uppercase',
-                        padding: '4px 14px',
-                        borderRadius: '20px',
-                        letterSpacing: '0.5px',
-                      }}
-                    >
-                      Most Popular
-                    </span>
-                  )}
-
-                  <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: '0 0 6px' }}>
-                    {plan.name}
-                  </h3>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', minHeight: '38px', margin: '0 0 16px' }}>
-                    {plan.description || `Ideal for eager young readers exploring stories.`}
-                  </p>
-
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', margin: '0 0 24px' }}>
-                    <span style={{ fontSize: '2.2rem', fontWeight: 900, color: 'var(--navy, #061446)' }}>
-                      ₹{plan.price}
-                    </span>
-                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                      / {plan.duration_months} {plan.duration_months === 1 ? 'month' : 'months'}
-                    </span>
+            <div className="bb-modes-stack">
+              {/* Mode 1: Offline Self-Pickup */}
+              <article className="bb-mode-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--navy, #061446)' }}>Offline (Self-Pickup)</h3>
+                  <span className="bb-mode-badge bb-badge-offline">Included Free</span>
+                </div>
+                <p className="bb-mode-desc">
+                  Visit our welcoming library to browse curated shelves and pick up books in person.
+                </p>
+                <div className="bb-mode-meta">
+                  <div className="bb-mode-meta-item">
+                    <MapPin size={15} color="var(--maroon, #740f28)" />
+                    <span><strong>Address:</strong> Velachery, Chennai - 600042</span>
                   </div>
-
-                  {/* Feature Checklist */}
-                  <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <li style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem', color: 'var(--text-main)' }}>
-                      <Check size={18} color="var(--maroon, #740f28)" />
-                      <span><strong>{plan.book_limit} books</strong> at a time</span>
-                    </li>
-                    <li style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem', color: 'var(--text-main)' }}>
-                      <Check size={18} color="var(--maroon, #740f28)" />
-                      <span>Unlimited book swaps across term</span>
-                    </li>
-                    <li style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem', color: 'var(--text-main)' }}>
-                      <Check size={18} color="var(--maroon, #740f28)" />
-                      <span>Doorstep delivery & pickup available</span>
-                    </li>
-                    <li style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem', color: 'var(--text-main)' }}>
-                      <Check size={18} color="var(--maroon, #740f28)" />
-                      <span>Access to reader circles & contests</span>
-                    </li>
-                  </ul>
-
-                  {/* Subscribe / Action Button */}
-                  <div style={{ marginTop: 'auto' }}>
-                    {isCurrentPlan ? (
-                      <button
-                        disabled
-                        type="button"
-                        style={{
-                          width: '100%',
-                          padding: '12px',
-                          borderRadius: '10px',
-                          border: '1.5px solid #16a34a',
-                          backgroundColor: '#f0fdf4',
-                          color: '#16a34a',
-                          fontWeight: 700,
-                          fontSize: '0.9rem',
-                          cursor: 'default',
-                        }}
-                      >
-                        Your Current Plan
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleSubscribe(plan)}
-                        disabled={subscribingId === plan.id}
-                        type="button"
-                        style={{
-                          width: '100%',
-                          padding: '12px',
-                          borderRadius: '10px',
-                          border: 'none',
-                          backgroundColor: isFeatured ? 'var(--maroon, #740f28)' : 'var(--navy, #061446)',
-                          color: '#ffffff',
-                          fontWeight: 700,
-                          fontSize: '0.925rem',
-                          cursor: subscribingId === plan.id ? 'not-allowed' : 'pointer',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                        }}
-                      >
-                        {subscribingId === plan.id ? 'Processing...' : user ? 'Select Plan' : 'Sign In to Join'}
-                      </button>
-                    )}
+                  <div className="bb-mode-meta-item">
+                    <Check size={15} color="var(--status-green, #059669)" />
+                    <span><strong>Logistics fee:</strong> Free (included in plan)</span>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
+              </article>
+
+              {/* Mode 2: Online Doorstep Delivery */}
+              <article className="bb-mode-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--navy, #061446)' }}>Online (Doorstep Delivery)</h3>
+                  <span className="bb-mode-badge bb-badge-online">+₹150/month</span>
+                </div>
+                <p className="bb-mode-desc">
+                  Enjoy fixed weekly book deliveries and returns right to your doorstep across Chennai.
+                </p>
+                <div className="bb-mode-meta">
+                  <div className="bb-mode-meta-item">
+                    <Truck size={15} color="var(--maroon, #740f28)" />
+                    <span><strong>Area:</strong> Greater Chennai City limits</span>
+                  </div>
+                  <div className="bb-mode-meta-item">
+                    <Calendar size={15} color="var(--maroon, #740f28)" />
+                    <span><strong>Schedule:</strong> Every Wednesday &amp; Saturday</span>
+                  </div>
+                  <div className="bb-mode-meta-item">
+                    <Sparkles size={15} color="var(--maroon, #740f28)" />
+                    <span><strong>Logistics fee:</strong> +₹150 / month</span>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </aside>
+
+          {/* RIGHT: Compact Plans Grid / Comparison */}
+          <section className="bb-plan-table-col" aria-label="Membership plans">
+            {isLoading ? (
+              <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-muted)' }}>Loading plans...</div>
+            ) : plans.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-muted)' }}>No plans published currently.</div>
+            ) : (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                  gap: '14px',
+                  alignItems: 'stretch',
+                }}
+              >
+                {plans.map((plan, idx) => {
+                  const isFeatured = idx === 1 || plan.name.toLowerCase().includes('popular') || plan.name.toLowerCase().includes('annual') || plan.name.toLowerCase().includes('9 months');
+                  const isCurrentPlan = activeSubscription?.plan_id === plan.id;
+
+                  return (
+                    <div
+                      key={plan.id}
+                      style={{
+                        backgroundColor: '#ffffff',
+                        borderRadius: '12px',
+                        padding: '18px 16px',
+                        border: isFeatured ? '2px solid var(--maroon, #740f28)' : '1px solid var(--border-color, #e5e7eb)',
+                        boxShadow: isFeatured ? '0 6px 20px rgba(116, 15, 40, 0.1)' : '0 2px 10px rgba(10, 36, 114, 0.04)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        position: 'relative',
+                      }}
+                    >
+                      {isFeatured && (
+                        <span
+                          style={{
+                            position: 'absolute',
+                            top: '-10px',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            backgroundColor: 'var(--maroon, #740f28)',
+                            color: '#ffffff',
+                            fontSize: '0.68rem',
+                            fontWeight: 800,
+                            textTransform: 'uppercase',
+                            padding: '2px 10px',
+                            borderRadius: '20px',
+                            letterSpacing: '0.5px',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          Best Value
+                        </span>
+                      )}
+
+                      <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: '0 0 4px', textAlign: 'center' }}>
+                        {plan.name}
+                      </h3>
+                      <p style={{ color: 'var(--text-muted, #64748b)', fontSize: '0.78rem', minHeight: '30px', margin: '0 0 10px', textAlign: 'center', lineHeight: 1.35 }}>
+                        {plan.description || `Ideal for eager young readers exploring stories.`}
+                      </p>
+
+                      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '3px', margin: '0 0 14px' }}>
+                        <span style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--maroon, #740f28)' }}>
+                          ₹{plan.price}
+                        </span>
+                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted, #64748b)' }}>
+                          / {plan.duration_months} mo
+                        </span>
+                      </div>
+
+                      {/* Feature Checklist */}
+                      <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <li style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-main, #1e293b)' }}>
+                          <Check size={15} color="var(--maroon, #740f28)" />
+                          <span><strong>{plan.book_limit} books</strong> at a time</span>
+                        </li>
+                        <li style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-main, #1e293b)' }}>
+                          <Check size={15} color="var(--maroon, #740f28)" />
+                          <span>Unlimited book swaps</span>
+                        </li>
+                        <li style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-main, #1e293b)' }}>
+                          <Check size={15} color="var(--maroon, #740f28)" />
+                          <span>Doorstep pickup available</span>
+                        </li>
+                      </ul>
+
+                      {/* Subscribe / Action Button */}
+                      <div style={{ marginTop: 'auto' }}>
+                        {isCurrentPlan ? (
+                          <button
+                            disabled
+                            type="button"
+                            style={{
+                              width: '100%',
+                              padding: '8px',
+                              borderRadius: '8px',
+                              border: '1.5px solid #16a34a',
+                              backgroundColor: '#f0fdf4',
+                              color: '#16a34a',
+                              fontWeight: 700,
+                              fontSize: '0.82rem',
+                              cursor: 'default',
+                            }}
+                          >
+                            Current Plan
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleSubscribe(plan)}
+                            disabled={subscribingId === plan.id}
+                            type="button"
+                            style={{
+                              width: '100%',
+                              padding: '8px',
+                              borderRadius: '8px',
+                              border: 'none',
+                              backgroundColor: isFeatured ? 'var(--maroon, #740f28)' : 'var(--navy, #061446)',
+                              color: '#ffffff',
+                              fontWeight: 700,
+                              fontSize: '0.85rem',
+                              cursor: subscribingId === plan.id ? 'not-allowed' : 'pointer',
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                            }}
+                          >
+                            {subscribingId === plan.id ? 'Processing...' : user ? 'Subscribe' : 'Join Now'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        </div>
       </div>
     </>
   );

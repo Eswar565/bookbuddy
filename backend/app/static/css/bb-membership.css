@@ -759,3 +759,171 @@ td.is-nine-months {
   }
 }
 
+
+
+/* Split Layout for Single-page View */
+.bb-mem-split-layout {
+  display: grid;
+  grid-template-columns: 310px 1fr;
+  gap: 20px;
+  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.bb-modes-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.bb-modes-col .bb-modes-header {
+  text-align: left;
+  margin-bottom: 12px;
+}
+
+.bb-modes-col .bb-modes-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--maroon, #740f28);
+  margin: 0 0 4px;
+}
+
+.bb-modes-col .bb-modes-subtitle {
+  font-size: 0.8rem;
+  color: var(--ink-subtle, #6b7280);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.bb-modes-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bb-modes-stack .bb-mode-card {
+  padding: 12px 14px;
+  border-radius: 10px;
+}
+
+.bb-modes-stack .bb-mode-desc {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+.bb-modes-stack .bb-mode-meta {
+  padding-top: 8px;
+  gap: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bb-modes-stack .bb-mode-meta-item {
+  font-size: 0.8rem;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.bb-plan-table-col .bb-table-wrapper {
+  margin-bottom: 0;
+}
+
+/* Desktop compact sizing so 1366x768 requires NO scrolling */
+@media (min-width: 1024px) {
+  .bb-membership-page {
+    padding: 1.25rem 1rem 1.5rem;
+  }
+  .bb-mem-header {
+    margin: 0 auto 16px;
+  }
+  .bb-mem-title {
+    font-size: 1.6rem;
+    margin: 0 0 4px;
+  }
+  .bb-mem-subtitle {
+    font-size: 0.92rem;
+  }
+  .bb-col-feature {
+    padding: 10px 12px !important;
+  }
+  .bb-col-feature strong,
+  .bb-col-feature .bb-row-title {
+    font-size: 0.95rem;
+  }
+  .bb-col-feature small,
+  .bb-col-feature .bb-row-sub {
+    font-size: 0.75rem;
+    margin-top: 2px;
+  }
+  .bb-plan-header-cell {
+    padding: 10px 8px 8px;
+  }
+  .bb-plan-duration-name {
+    font-size: 1.15rem;
+    margin: 0 0 2px;
+  }
+  .bb-plan-tagline {
+    font-size: 0.78rem;
+  }
+  .bb-price-cell {
+    padding: 10px 8px !important;
+  }
+  .bb-price-val {
+    font-size: 1.35rem;
+  }
+  .bb-price-sub {
+    font-size: 0.75rem;
+    margin-top: 2px;
+  }
+  .bb-books-cell {
+    padding: 8px 8px !important;
+  }
+  .bb-books-val {
+    font-size: 0.88rem;
+  }
+  .bb-books-meta {
+    font-size: 0.78rem;
+  }
+  .bb-benefits-cell {
+    padding: 8px 10px !important;
+  }
+  .bb-benefits-list {
+    gap: 4px;
+  }
+  .bb-benefits-list li {
+    font-size: 0.8rem;
+    gap: 6px;
+  }
+  .bb-action-cell {
+    padding: 8px 10px !important;
+  }
+  .bb-btn-subscribe {
+    height: 34px;
+    font-size: 0.88rem;
+  }
+}
+
+/* Responsive order: on tablet and mobile, plans first, service modes second */
+@media (max-width: 1023px) {
+  .bb-mem-split-layout {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .bb-plan-table-col {
+    order: 1;
+  }
+  .bb-modes-col {
+    order: 2;
+  }
+  .bb-modes-stack {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+}
+@media (max-width: 640px) {
+  .bb-modes-stack {
+    grid-template-columns: 1fr;
+  }
+}

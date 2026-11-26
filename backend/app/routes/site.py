@@ -484,6 +484,14 @@ def init_db() -> None:
         """
     )
     connection.execute("CREATE INDEX IF NOT EXISTS idx_member_favourites_user ON member_favourites(user_id);")
+
+    # Migrate Summer Special to Beginner Plan across all existing plan records
+    has_lending_plans = bool(connection.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='lending_plans'").fetchone())
+    if has_lending_plans:
+        connection.execute("UPDATE lending_plans SET tagline='Beginner Plan' WHERE tagline='Summer Special'")
+        connection.execute("UPDATE lending_plans SET name=REPLACE(name, 'Summer Special', 'Beginner Plan') WHERE name LIKE '%Summer Special%'")
+        connection.execute("UPDATE lending_plans SET description=REPLACE(description, 'Summer Special', 'Beginner Plan') WHERE description LIKE '%Summer Special%'")
+
     connection.commit()
     connection.close()
 
@@ -771,7 +779,7 @@ def base_context(template_name: str = "") -> dict[str, Any]:
     books = [row_to_book(row) for row in db.execute("SELECT * FROM books ORDER BY id DESC").fetchall()]
     now = datetime.now(timezone.utc)
     plans = [
-        CompatObject({"id": 1, "plan_type": "2 Months", "tagline": "Summer Special", "solo_price": 800, "family_price": 1200, "total_books": 2, "get_plan_type_display": "2 Months", "get_features_list": ["2 books at a time", "Reading circle access"]}),
+        CompatObject({"id": 1, "plan_type": "2 Months", "tagline": "Beginner Plan", "solo_price": 800, "family_price": 1200, "total_books": 2, "get_plan_type_display": "2 Months", "get_features_list": ["2 books at a time", "Reading circle access"]}),
         CompatObject({"id": 2, "plan_type": "3 Months", "tagline": "Regular Explorer", "solo_price": 1100, "family_price": 1600, "total_books": 3, "get_plan_type_display": "3 Months", "get_features_list": ["3 books at a time", "Learning activities"]}),
         CompatObject({"id": 3, "plan_type": "9 Months", "tagline": "Academic Year", "solo_price": 2800, "family_price": 4000, "total_books": 9, "get_plan_type_display": "9 Months", "get_features_list": ["9 books at a time", "All learning modules"]}),
     ]

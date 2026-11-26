@@ -17,222 +17,198 @@
       <p class="bb-mem-subtitle">Pick the plan that fits your family's reading appetite.</p>
     </header>
 
-    <!-- Comparison Table -->
-    <div class="bb-table-wrapper" data-no-filter>
-      <table class="bb-compare-table" data-no-filter>
-        <colgroup>
-          <col class="bb-col-feature-cg" style="width: 30%; min-width: 280px;">
-          {% for g in duration_groups %}
-            <col class="bb-col-plan-cg {% if g.months == 9 %}col-nine-months{% endif %}" style="width: calc(70% / {{ duration_groups|length }}); min-width: 190px;">
-          {% endfor %}
-        </colgroup>
-        <thead>
-          <tr>
-            <th class="bb-col-feature bb-header-label-cell" scope="col">Features &amp; Plans</th>
-            {% for g in duration_groups %}
-              <th class="bb-col-plan {% if g.months == 9 %}is-nine-months{% endif %} {% if g.is_best_value %}is-highlighted{% endif %}" scope="col">
-                <div class="bb-plan-header-cell">
-                  <div class="bb-badge-wrap">
-                    {% if g.badge %}
-                      <span class="bb-plan-badge">★ {{ g.badge }}</span>
-                    {% endif %}
-                  </div>
-                  <h2 class="bb-plan-duration-name">{{ g.label }}</h2>
-                  {% if g.tagline %}
-                    <p class="bb-plan-tagline">{{ g.tagline }}</p>
-                  {% endif %}
-                </div>
-              </th>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Solo Explorer Row -->
-          <tr>
-            <th class="bb-col-feature" scope="row">
-              <span class="bb-row-title">Solo Explorer</span>
-              <span class="bb-row-sub">1 Reader · 2 Books at a time</span>
-            </th>
-            {% for g in duration_groups %}
-              <td class="bb-col-plan bb-price-cell {% if g.months == 9 %}is-nine-months{% endif %} {% if g.is_best_value %}is-highlighted{% endif %}">
-                <span class="bb-price-val">₹{{ g.solo_price }}</span>
-                <span class="bb-price-sub">₹{{ (g.solo_price / g.months)|round|int }} / month</span>
-              </td>
-            {% endfor %}
-          </tr>
+    <!-- Two-column Desktop Layout (Left: Service Modes stacked, Right: Plan Table) -->
+    <div class="bb-mem-split-layout">
+      <!-- LEFT SIDE: Flexible Service Modes (Stacked Vertically) -->
+      <aside class="bb-modes-col" aria-labelledby="service-modes-heading">
+        <div class="bb-modes-header">
+          <h2 class="bb-modes-title" id="service-modes-heading">Flexible Service Modes</h2>
+          <p class="bb-modes-subtitle">Choose how you'd like your books delivered — in person or to your doorstep.</p>
+        </div>
 
-          <!-- Family Pack / Elite Row -->
-          <tr>
-            <th class="bb-col-feature" scope="row">
-              <span class="bb-row-title">Family Pack / Elite</span>
-              <span class="bb-row-sub">Family sharing · 4 Books at a time</span>
-            </th>
-            {% for g in duration_groups %}
-              <td class="bb-col-plan bb-price-cell {% if g.months == 9 %}is-nine-months{% endif %} {% if g.is_best_value %}is-highlighted{% endif %}">
-                <span class="bb-price-val">₹{{ g.family_price }}</span>
-                <span class="bb-price-sub">₹{{ (g.family_price / g.months)|round|int }} / month</span>
-              </td>
-            {% endfor %}
-          </tr>
+        <div class="bb-modes-stack">
+          <!-- Mode 1: Offline Self-Pickup -->
+          <article class="bb-mode-card">
+            <div class="bb-mode-top" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <h3 style="margin:0; font-size:0.95rem; font-weight:700; color:var(--navy);">Offline (Self-Pickup)</h3>
+              <span class="bb-mode-badge bb-badge-offline">Included Free</span>
+            </div>
+            <p class="bb-mode-desc">
+              Visit our welcoming library to browse curated shelves, participate in quiet reading, and pick up books in person.
+            </p>
+            <div class="bb-mode-meta">
+              <div class="bb-mode-meta-item">
+                <svg class="bb-line-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m2 7 4.418-4.418A2 2 0 0 1 7.832 2h8.336a2 2 0 0 1 1.414.582L22 7" />
+                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                  <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4" />
+                  <path d="M2 7h20" />
+                </svg>
+                <span><strong>Address:</strong> {{ pickup_address }}</span>
+              </div>
+              <div class="bb-mode-meta-item">
+                <svg class="bb-line-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="m9 12 2 2 4-4" />
+                </svg>
+                <span><strong>Logistics fee:</strong> Free (included in plan)</span>
+              </div>
+            </div>
+          </article>
 
-          <!-- Total Books Row -->
-          <tr>
-            <th class="bb-col-feature" scope="row">
-              <span class="bb-row-title">Total Books</span>
-              <span class="bb-row-sub">Cumulative reading quota</span>
-            </th>
-            {% for g in duration_groups %}
-              <td class="bb-col-plan bb-books-cell {% if g.months == 9 %}is-nine-months{% endif %} {% if g.is_best_value %}is-highlighted{% endif %}">
-                <div class="bb-books-val">{{ g.solo_books }} books (Solo)</div>
-                <div class="bb-books-meta">{{ g.family_books }} books (Family)</div>
-              </td>
-            {% endfor %}
-          </tr>
+          <!-- Mode 2: Online Doorstep Delivery -->
+          <article class="bb-mode-card">
+            <div class="bb-mode-top" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <h3 style="margin:0; font-size:0.95rem; font-weight:700; color:var(--navy);">Online (Doorstep Delivery)</h3>
+              <span class="bb-mode-badge bb-badge-online">+₹{{ delivery_fee_monthly }}/month</span>
+            </div>
+            <p class="bb-mode-desc">
+              Enjoy fixed weekly book deliveries and returns right to your home in Chennai.
+            </p>
+            <div class="bb-mode-meta">
+              <div class="bb-mode-meta-item">
+                <svg class="bb-line-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                <span><strong>Area:</strong> {{ delivery_area }}</span>
+              </div>
+              <div class="bb-mode-meta-item">
+                <svg class="bb-line-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M8 2v4" />
+                  <path d="M16 2v4" />
+                  <rect width="18" height="18" x="3" y="4" rx="2" />
+                  <path d="M3 10h18" />
+                </svg>
+                <span><strong>Schedule:</strong> {{ delivery_day }}</span>
+              </div>
+              <div class="bb-mode-meta-item">
+                <svg class="bb-line-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 6v12" />
+                  <path d="M16 10H9.5a2.5 2.5 0 0 0 0 5H14a2.5 2.5 0 0 1 0 5H8" />
+                </svg>
+                <span><strong>Logistics fee:</strong> +₹{{ delivery_fee_monthly }}/month</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </aside>
 
-          <!-- Benefits Included Row -->
-          <tr>
-            <th class="bb-col-feature" scope="row">
-              <span class="bb-row-title">Benefits Included</span>
-              <span class="bb-row-sub">Everything included with all plans</span>
-            </th>
-            {% for g in duration_groups %}
-              <td class="bb-col-plan bb-benefits-cell {% if g.months == 9 %}is-nine-months{% endif %} {% if g.is_best_value %}is-highlighted{% endif %}">
-                <ul class="bb-benefits-list">
-                  {% for benefit in g.benefits %}
-                    <li>
-                      <svg class="bb-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                      </svg>
-                      <span class="bb-benefit-text">{{ benefit }}</span>
-                    </li>
-                  {% endfor %}
-                </ul>
-              </td>
-            {% endfor %}
-          </tr>
+      <!-- RIGHT SIDE: Compact Plan Comparison Table -->
+      <section class="bb-plan-table-col" aria-label="Membership comparison table">
+        <div class="bb-table-wrapper" data-no-filter>
+          <table class="bb-compare-table" data-no-filter>
+            <colgroup>
+              <col class="bb-col-feature-cg" style="width: 28%; min-width: 170px;">
+              {% for g in duration_groups %}
+                <col class="bb-col-plan-cg {% if g.months == 9 %}col-nine-months{% endif %}" style="width: calc(72% / {{ duration_groups|length }}); min-width: 125px;">
+              {% endfor %}
+            </colgroup>
+            <thead>
+              <tr>
+                <th class="bb-col-feature bb-header-label-cell" scope="col">Features &amp; Plans</th>
+                {% for g in duration_groups %}
+                  <th class="bb-col-plan {% if g.months == 9 %}is-nine-months{% endif %} {% if g.is_best_value %}is-highlighted{% endif %}" scope="col">
+                    <div class="bb-plan-header-cell">
+                      <div class="bb-badge-wrap">
+                        {% if g.badge %}
+                          <span class="bb-plan-badge">★ {{ g.badge }}</span>
+                        {% endif %}
+                      </div>
+                      <h2 class="bb-plan-duration-name">{{ g.label }}</h2>
+                      {% if g.tagline %}
+                        <p class="bb-plan-tagline">{{ g.tagline }}</p>
+                      {% endif %}
+                    </div>
+                  </th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Solo Explorer Row -->
+              <tr>
+                <th class="bb-col-feature" scope="row">
+                  <span class="bb-row-title">Solo Explorer</span>
+                  <span class="bb-row-sub">1 Reader · 2 Books at a time</span>
+                </th>
+                {% for g in duration_groups %}
+                  <td class="bb-col-plan bb-price-cell {% if g.months == 9 %}is-nine-months{% endif %} {% if g.is_best_value %}is-highlighted{% endif %}">
+                    <span class="bb-price-val">₹{{ g.solo_price }}</span>
+                    <span class="bb-price-sub">₹{{ (g.solo_price / g.months)|round|int }} / mo</span>
+                  </td>
+                {% endfor %}
+              </tr>
 
-          <!-- Action Row -->
-          <tr>
-            <th class="bb-col-feature" scope="row">
-              <span class="bb-row-title">Choose Duration</span>
-            </th>
-            {% for g in duration_groups %}
-              <td class="bb-col-plan bb-action-cell {% if g.months == 9 %}is-nine-months{% endif %} {% if g.is_best_value %}is-highlighted{% endif %}">
-                <button type="button" class="bb-btn-subscribe" data-duration="{{ g.months }}" data-tagline="{{ g.tagline }}">
-                  Subscribe
-                </button>
-              </td>
-            {% endfor %}
-          </tr>
-        </tbody>
-      </table>
+              <!-- Family Pack / Elite Row -->
+              <tr>
+                <th class="bb-col-feature" scope="row">
+                  <span class="bb-row-title">Family Pack / Elite</span>
+                  <span class="bb-row-sub">Family sharing · 4 Books</span>
+                </th>
+                {% for g in duration_groups %}
+                  <td class="bb-col-plan bb-price-cell {% if g.months == 9 %}is-nine-months{% endif %} {% if g.is_best_value %}is-highlighted{% endif %}">
+                    <span class="bb-price-val">₹{{ g.family_price }}</span>
+                    <span class="bb-price-sub">₹{{ (g.family_price / g.months)|round|int }} / mo</span>
+                  </td>
+                {% endfor %}
+              </tr>
+
+              <!-- Total Books Row -->
+              <tr>
+                <th class="bb-col-feature" scope="row">
+                  <span class="bb-row-title">Total Books</span>
+                  <span class="bb-row-sub">Cumulative reading quota</span>
+                </th>
+                {% for g in duration_groups %}
+                  <td class="bb-col-plan bb-books-cell {% if g.months == 9 %}is-nine-months{% endif %} {% if g.is_best_value %}is-highlighted{% endif %}">
+                    <div class="bb-books-val">{{ g.solo_books }} books (Solo)</div>
+                    <div class="bb-books-meta">{{ g.family_books }} books (Family)</div>
+                  </td>
+                {% endfor %}
+              </tr>
+
+              <!-- Benefits Included Row -->
+              <tr>
+                <th class="bb-col-feature" scope="row">
+                  <span class="bb-row-title">Benefits Included</span>
+                  <span class="bb-row-sub">Everything included</span>
+                </th>
+                {% for g in duration_groups %}
+                  <td class="bb-col-plan bb-benefits-cell {% if g.months == 9 %}is-nine-months{% endif %} {% if g.is_best_value %}is-highlighted{% endif %}">
+                    <ul class="bb-benefits-list">
+                      {% for benefit in g.benefits %}
+                        <li>
+                          <svg class="bb-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                          <span class="bb-benefit-text">{{ benefit }}</span>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </td>
+                {% endfor %}
+              </tr>
+
+              <!-- Action Row -->
+              <tr>
+                <th class="bb-col-feature" scope="row">
+                  <span class="bb-row-title">Choose Duration</span>
+                </th>
+                {% for g in duration_groups %}
+                  <td class="bb-col-plan bb-action-cell {% if g.months == 9 %}is-nine-months{% endif %} {% if g.is_best_value %}is-highlighted{% endif %}">
+                    <button type="button" class="bb-btn-subscribe" data-duration="{{ g.months }}" data-tagline="{{ g.tagline }}">
+                      Subscribe
+                    </button>
+                  </td>
+                {% endfor %}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
 
-    <!-- Service Modes Section -->
-    <section class="bb-modes-section" aria-labelledby="service-modes-heading">
-      <div class="bb-modes-header">
-        <h2 class="bb-modes-title" id="service-modes-heading">Flexible Service Modes</h2>
-        <p class="bb-modes-subtitle">Choose how you'd like your books delivered — in person or directly to your doorstep.</p>
-      </div>
-
-      <div class="bb-modes-grid">
-        <!-- Mode 1: Offline Self-Pickup -->
-        <article class="bb-mode-card">
-          <div class="bb-mode-top">
-            <div class="bb-mode-badge-icon" aria-label="Library pickup">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z" />
-                <circle cx="12" cy="10" r="3" />
-              </svg>
-            </div>
-            <span class="bb-mode-badge bb-badge-offline">Included Free</span>
-          </div>
-          <h3>Offline (Self-Pickup)</h3>
-          <p class="bb-mode-desc">
-            Visit our welcoming library to browse our curated shelves, participate in quiet reading, and pick up your books in person.
-          </p>
-          <div class="bb-mode-meta">
-            <div class="bb-mode-meta-item">
-              <svg class="bb-line-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="m2 7 4.418-4.418A2 2 0 0 1 7.832 2h8.336a2 2 0 0 1 1.414.582L22 7" />
-                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4" />
-                <path d="M2 7h20" />
-              </svg>
-              <div>
-                <strong>Library Address:</strong>
-                <span>{{ pickup_address }}</span>
-              </div>
-            </div>
-            <div class="bb-mode-meta-item">
-              <svg class="bb-line-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="10" />
-                <path d="m9 12 2 2 4-4" />
-              </svg>
-              <div>
-                <strong>Logistics fee:</strong>
-                <span>Free (included in base plan)</span>
-              </div>
-            </div>
-          </div>
-        </article>
-
-        <!-- Mode 2: Online Doorstep Delivery -->
-        <article class="bb-mode-card">
-          <div class="bb-mode-top">
-            <div class="bb-mode-badge-icon" aria-label="Doorstep delivery">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
-                <path d="M15 18H9" />
-                <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14v10" />
-                <circle cx="17" cy="18.5" r="2.5" />
-                <circle cx="7" cy="18.5" r="2.5" />
-              </svg>
-            </div>
-            <span class="bb-mode-badge bb-badge-online">+₹{{ delivery_fee_monthly }}/month</span>
-          </div>
-          <h3>Online (Doorstep Delivery)</h3>
-          <p class="bb-mode-desc">
-            Enjoy fixed weekly book deliveries and returns right to your home. We handle the logistics so reading fits effortlessly into your family routine.
-          </p>
-          <div class="bb-mode-meta">
-            <div class="bb-mode-meta-item">
-              <svg class="bb-line-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0Z" />
-                <circle cx="12" cy="10" r="3" />
-              </svg>
-              <div>
-                <strong>Service Area:</strong>
-                <span>{{ delivery_area }}</span>
-              </div>
-            </div>
-            <div class="bb-mode-meta-item">
-              <svg class="bb-line-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M8 2v4" />
-                <path d="M16 2v4" />
-                <rect width="18" height="18" x="3" y="4" rx="2" />
-                <path d="M3 10h18" />
-              </svg>
-              <div>
-                <strong>Delivery Schedule:</strong>
-                <span>{{ delivery_day }}</span>
-              </div>
-            </div>
-            <div class="bb-mode-meta-item">
-              <svg class="bb-line-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 6v12" />
-                <path d="M16 10H9.5a2.5 2.5 0 0 0 0 5H14a2.5 2.5 0 0 1 0 5H8" />
-              </svg>
-              <div>
-                <strong>Logistics fee:</strong>
-                <span>+₹{{ delivery_fee_monthly }} / month</span>
-              </div>
-            </div>
-          </div>
-        </article>
-      </div>
-    </section>
 
   </div>
 </main>
@@ -248,7 +224,7 @@
     <div class="bb-modal-body">
       <!-- Duration Banner -->
       <div class="bb-selection-banner">
-        <p class="bb-selection-duration" id="modal-duration-display">Selected Duration: 2 Months (Summer Special)</p>
+        <p class="bb-selection-duration" id="modal-duration-display">Selected Duration: 2 Months (Beginner Plan)</p>
         {% if not prefill_user %}
           <div class="bb-auth-hint">
             Already have an account? <a href="/accounts/login/?next={{ request.path }}">Log in to prefill</a> or continue below to register.

@@ -120,8 +120,8 @@ def install_release17(app,db,render,admin,root):
         if c.execute("SELECT COUNT(*) FROM lending_plans WHERE tier!=''").fetchone()[0] == 0:
             benefits_text = "Online Portal Access\nAcademic Worksheets\nThe Book Buddy Times\nBeyond School Activities\nGames\nContribute to Magazine"
             default_plans = [
-                ('Solo Explorer - 2 Months', 2, 60, 'Solo Explorer', 'Summer Special', '', 800.0, 2, 8, benefits_text, '2 Months Summer Special membership for 1 reader (2 books at a time).', 1, 'Membership', 14, 1),
-                ('Family Pack / Elite - 2 Months', 2, 60, 'Family Pack / Elite', 'Summer Special', '', 1400.0, 4, 16, benefits_text, '2 Months Summer Special membership for family (4 books at a time).', 1, 'Membership', 14, 1),
+                ('Solo Explorer - 2 Months', 2, 60, 'Solo Explorer', 'Beginner Plan', '', 800.0, 2, 8, benefits_text, '2 Months Beginner Plan membership for 1 reader (2 books at a time).', 1, 'Membership', 14, 1),
+                ('Family Pack / Elite - 2 Months', 2, 60, 'Family Pack / Elite', 'Beginner Plan', '', 1400.0, 4, 16, benefits_text, '2 Months Beginner Plan membership for family (4 books at a time).', 1, 'Membership', 14, 1),
                 ('Solo Explorer - 3 Months', 3, 90, 'Solo Explorer', 'Regular', '', 1100.0, 2, 12, benefits_text, '3 Months Regular membership for 1 reader (2 books at a time).', 1, 'Membership', 14, 1),
                 ('Family Pack / Elite - 3 Months', 3, 90, 'Family Pack / Elite', 'Regular', '', 2000.0, 4, 24, benefits_text, '3 Months Regular membership for family (4 books at a time).', 1, 'Membership', 14, 1),
                 ('Solo Explorer - 9 Months', 9, 270, 'Solo Explorer', 'Academic Year', 'BEST VALUE', 3000.0, 2, 36, benefits_text, '9 Months Academic Year membership for 1 reader (2 books at a time).', 1, 'Membership', 14, 1),
@@ -643,7 +643,7 @@ def install_release17(app,db,render,admin,root):
             family=next((p for p in group_plans if any(k in (p.get('tier') or '').lower() for k in ['family','elite'])), None)
             if not family:family=next((p for p in group_plans if p.get('book_limit')==4), group_plans[-1] if len(group_plans)>1 else None)
 
-            tagline=next((p['tagline'] for p in group_plans if p.get('tagline')), ('Summer Special' if m==2 else 'Regular' if m==3 else 'Academic Year'))
+            tagline=next((p['tagline'] for p in group_plans if p.get('tagline')), ('Beginner Plan' if m==2 else 'Regular' if m==3 else 'Academic Year'))
             badge=next((p['badge'] for p in group_plans if p.get('badge')), ('BEST VALUE' if m==9 else ''))
             benefits_raw=next((p['benefits'] for p in group_plans if p.get('benefits')), '')
             if not benefits_raw:
