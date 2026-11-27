@@ -28,9 +28,12 @@ DEFAULT_DIRECTIONS_PLACEHOLDER = "E.g., T Nagar, Chennai"
 DEFAULT_DIRECTIONS_BTN = "Go"
 
 DEFAULT_ADDRESS = "1, Thiruvalluvar St, Thiru Nagar Colony, Gandhi Nagar,\nSaligramam, Chennai, Tamil Nadu 600093"
+DEFAULT_LAT = "13.0544"
+DEFAULT_LNG = "80.1983"
 DEFAULT_PHONE = "+91 9080759312"
 DEFAULT_EMAIL = "bookbuddy.edu@gmail.com"
 DEFAULT_WHATSAPP = "+91 9080759312"
+DEFAULT_MAPS_URL = "https://www.google.com/maps/search/?api=1&query=1%2C+Thiruvalluvar+St%2C+Thiru+Nagar+Colony%2C+Gandhi+Nagar%2C+Saligramam%2C+Chennai%2C+Tamil+Nadu+600093"
 
 DEFAULT_TOUR_EYEBROW = "Library Tour"
 DEFAULT_TOUR_HEADING = "A Glimpse Inside Book Buddy"
@@ -68,29 +71,28 @@ def get_visit_us_data(db_conn) -> dict[str, Any]:
     whatsapp = content.get("contact_whatsapp") or phone or DEFAULT_WHATSAPP
     whatsapp_digits = clean_phone_for_whatsapp(whatsapp)
 
-    # Encode address for maps
-    encoded_dest = quote(address.replace("\n", " ").strip())
+    # Normalize and cleanly encode destination for maps
+    clean_address = re.sub(r"\s+", " ", address).strip()
+    encoded_dest = quote(clean_address)
     
-    # Custom URLs if provided, otherwise auto-generate from address
+    lat = content.get("visit_lat", "").strip() or DEFAULT_LAT
+    lng = content.get("visit_lng", "").strip() or DEFAULT_LNG
+
+    # Custom URLs if provided, otherwise auto-generate keyless embed and search URLs
     embed_url = content.get("visit_map_embed_url", "").strip()
     if not embed_url:
-        lat = content.get("visit_lat", "").strip()
-        lng = content.get("visit_lng", "").strip()
         if lat and lng:
-            embed_url = f"https://www.google.com/maps?q={lat},{lng}&output=embed"
+            embed_url = f"https://www.google.com/maps?q={lat},{lng}&z=16&output=embed"
         else:
-            embed_url = f"https://www.google.com/maps?q={encoded_dest}&output=embed"
+            embed_url = f"https://www.google.com/maps?q={encoded_dest}&z=16&output=embed"
+    elif "z=" not in embed_url:
+        embed_url += "&z=16" if "?" in embed_url else "?z=16"
 
     maps_url = content.get("visit_maps_url", "").strip()
     if not maps_url:
-        lat = content.get("visit_lat", "").strip()
-        lng = content.get("visit_lng", "").strip()
-        if lat and lng:
-            maps_url = f"https://www.google.com/maps?q={lat},{lng}"
-        else:
-            maps_url = f"https://www.google.com/maps?q={encoded_dest}"
+        maps_url = f"https://www.google.com/maps/search/?api=1&query={encoded_dest}"
 
-    directions_dest = address.replace("\n", " ").strip()
+    directions_dest = clean_address
 
     return {
         "eyebrow": content.get("visit_eyebrow") or DEFAULT_EYEBROW,
@@ -105,6 +107,7 @@ def get_visit_us_data(db_conn) -> dict[str, Any]:
         "directions_placeholder": content.get("visit_directions_placeholder") or DEFAULT_DIRECTIONS_PLACEHOLDER,
         "directions_btn": content.get("visit_directions_btn") or DEFAULT_DIRECTIONS_BTN,
         "address": address,
+        "clean_address": clean_address,
         "phone": phone,
         "email": email,
         "whatsapp": whatsapp,
@@ -113,8 +116,8 @@ def get_visit_us_data(db_conn) -> dict[str, Any]:
         "maps_url": maps_url,
         "directions_dest": directions_dest,
         "encoded_dest": encoded_dest,
-        "lat": content.get("visit_lat", "").strip(),
-        "lng": content.get("visit_lng", "").strip(),
+        "lat": lat,
+        "lng": lng,
         "tour_eyebrow": content.get("tour_eyebrow") or DEFAULT_TOUR_EYEBROW,
         "tour_heading": content.get("tour_heading") or DEFAULT_TOUR_HEADING,
         "tour_subtitle": content.get("tour_subtitle") or DEFAULT_TOUR_SUBTITLE,
@@ -133,6 +136,8 @@ def install_visit_us(app, get_db, current_admin, render_site):
             "contact_phone": DEFAULT_PHONE,
             "contact_email": DEFAULT_EMAIL,
             "contact_whatsapp": DEFAULT_WHATSAPP,
+            "visit_lat": DEFAULT_LAT,
+            "visit_lng": DEFAULT_LNG,
             "visit_eyebrow": DEFAULT_EYEBROW,
             "visit_heading": DEFAULT_HEADING,
             "visit_subtitle": DEFAULT_SUBTITLE,
@@ -156,6 +161,14 @@ def install_visit_us(app, get_db, current_admin, render_site):
             "UPDATE site_content SET content_value=? WHERE content_key='contact_address' AND (content_value LIKE '%Madurai%' OR content_value LIKE '%MK Complex%' OR content_value = '')",
             (DEFAULT_ADDRESS,)
         )
+        db.execute(
+            "UPDATE site_content SET content_value=? WHERE content_key='visit_lat' AND (content_value = '' OR content_value IS NULL)",
+            (DEFAULT_LAT,)
+        )
+        db.execute(
+            "UPDATE site_content SET content_value=? WHERE content_key='visit_lng' AND (content_value = '' OR content_value IS NULL)",
+            (DEFAULT_LNG,)
+        )
         db.commit()
 
     # 2. Public Route (assign to existing visit_us_page endpoint)
@@ -166,7 +179,7 @@ def install_visit_us(app, get_db, current_admin, render_site):
             "visit_us",
             "library",
             visit=visit_data,
-            page_title=f"{visit_data['heading']} | Book Buddy Library",
+            page_title="Visit Us | Book Buddy Library",
         )
 
     app.view_functions["visit_us_page"] = visit_us_route
