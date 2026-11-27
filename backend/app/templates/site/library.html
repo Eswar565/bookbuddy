@@ -68,59 +68,76 @@
     <!-- Mobile Filter Drawer Toggle Button -->
     <button type="button" class="mobile-filter-toggle-btn" id="filter-drawer-toggle" aria-expanded="false" aria-controls="catalogue-sidebar">
       <svg class="bb-icon" style="width:16px;height:16px;"><use href="#i-sliders"/></svg>
-      <span>Filter &amp; Sort Catalogue</span>
+      <span>Filters</span>
     </button>
 
     <!-- Main Layout: Sidebar Filters + Books Grid -->
     <div class="catalogue-layout">
       <!-- Filter Panel (Sticky on desktop, collapses to bottom-sheet drawer on mobile) -->
       <aside class="catalogue-sidebar" id="catalogue-sidebar" style="position:sticky; top:88px; align-self:flex-start; max-height:calc(100vh - 104px); overflow:visible; z-index:30;">
-        <div class="catalogue-filter-bar" style="display:flex; flex-direction:column; gap:14px; background:var(--surface-card); padding:18px; border-radius:var(--radius-lg); border:1px solid var(--border-color); box-shadow:var(--shadow-sm);">
-          <div class="mobile-drawer-header" style="display:none; justify-content:space-between; align-items:center; margin-bottom:4px;">
-            <strong style="font-size:16px; font-weight:700; color:var(--navy);">Filter &amp; Sort</strong>
-            <button type="button" id="sidebar-drawer-close" aria-label="Close filters" style="background:none; border:none; font-size:24px; color:var(--navy); cursor:pointer; line-height:1; padding:0 4px;">&times;</button>
+        <div class="catalogue-filter-bar" style="display:flex; flex-direction:column; gap:12px; background:var(--surface-card); padding:16px; border-radius:var(--radius-lg); border:1px solid var(--border-color); box-shadow:var(--shadow-sm);">
+          
+          <!-- Heading Row: Filters title, Clear all link (when active), and mobile close btn -->
+          <div class="sidebar-header-row" style="display:flex; align-items:center; justify-content:space-between; padding-bottom:12px; border-bottom:1px solid var(--border-color); width:100%; box-sizing:border-box;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--maroon)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="4" y1="21" x2="4" y2="14"></line>
+                <line x1="4" y1="10" x2="4" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12" y2="3"></line>
+                <line x1="20" y1="21" x2="20" y2="16"></line>
+                <line x1="20" y1="12" x2="20" y2="3"></line>
+                <line x1="1" y1="14" x2="7" y2="14"></line>
+                <line x1="9" y1="8" x2="15" y2="8"></line>
+                <line x1="17" y1="16" x2="23" y2="16"></line>
+              </svg>
+              <h2 style="margin:0; font-size:1rem; font-weight:700; color:var(--maroon); line-height:1.2;">Filters</h2>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; margin-left:auto;">
+              <a href="/library/" id="sidebar-clear-all" class="filter-clear-all js-clear-all"
+                 style="display:{% if query or filters23.new == '1' or (selected_sort and selected_sort != 'newest') or (selected_category and selected_category.lower() != 'all') or selected_lang %}inline{% else %}none{% endif %}; font-size:0.85rem; font-weight:600; color:var(--maroon); text-decoration:none; cursor:pointer;"
+                 aria-label="Clear all filters">Clear all</a>
+              <button type="button" id="sidebar-drawer-close" class="mobile-drawer-close-btn" aria-label="Close filters"
+                      style="display:none; background:none; border:none; font-size:24px; color:var(--navy); cursor:pointer; line-height:1; padding:0 4px;">&times;</button>
+            </div>
           </div>
 
           <!-- 1. Search Box (title or author, Enter submit, debounce 300ms, clear X) -->
           <div class="sidebar-search-wrap" style="position:relative; width:100%;">
-            <label for="sidebar-search-q" style="display:block; font-size:12px; font-weight:700; color:var(--navy); margin-bottom:4px;">Search</label>
             <div style="position:relative; display:flex; align-items:center;">
-              <svg class="bb-icon" style="position:absolute; left:12px; width:15px; height:15px; color:var(--text-muted); pointer-events:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg class="bb-icon" style="position:absolute; left:12px; width:16px; height:16px; color:var(--text-muted); pointer-events:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
               <input id="sidebar-search-q" type="text" name="q" value="{{ query }}" placeholder="Search title or author..."
-                     aria-label="Search title or author"
-                     style="width:100%; height:40px; padding:0 34px 0 34px; font-size:13px; font-weight:500; font-family:var(--font-family); border:1.5px solid var(--border-color); border-radius:8px; background:#fff; color:var(--navy); box-sizing:border-box; outline:none; transition:border-color 0.15s ease;">
+                     aria-label="Search books"
+                     style="width:100%; height:44px; min-height:44px; padding:0 34px 0 36px; font-size:13px; font-weight:500; font-family:var(--font-family); border:1.5px solid var(--border-color); border-radius:8px; background:#fff; color:var(--navy); box-sizing:border-box; outline:none; transition:border-color 0.15s ease;">
               <button type="button" id="sidebar-search-clear" aria-label="Clear search"
-                      style="display:{% if query %}flex{% else %}none{% endif %}; position:absolute; right:8px; width:22px; height:22px; border-radius:50%; border:none; background:#f1f5f9; color:#64748b; font-size:13px; line-height:1; align-items:center; justify-content:center; cursor:pointer; padding:0;">
+                      style="display:{% if query %}flex{% else %}none{% endif %}; position:absolute; right:10px; width:22px; height:22px; border-radius:50%; border:none; background:#f1f5f9; color:#64748b; font-size:13px; line-height:1; align-items:center; justify-content:center; cursor:pointer; padding:0;">
                 &times;
               </button>
             </div>
           </div>
 
           <!-- 2. New Arrivals Toggle Button -->
-          <div>
-            <label style="display:block; font-size:12px; font-weight:700; color:var(--navy); margin-bottom:4px;">Highlights</label>
+          <div style="width:100%;">
             <button type="button" id="sidebar-new-arrivals-btn"
                     class="sidebar-pill-btn {% if filters23.new == '1' %}is-active{% endif %}"
+                    aria-label="New arrivals"
                     aria-pressed="{% if filters23.new == '1' %}true{% else %}false{% endif %}"
-                    style="width:100%; height:40px; display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:13px; font-weight:700; font-family:var(--font-family); border-radius:8px; cursor:pointer; box-sizing:border-box; transition:all 0.15s ease; border:1.5px solid {% if filters23.new == '1' %}var(--maroon){% else %}var(--border-color){% endif %}; background:{% if filters23.new == '1' %}var(--maroon){% else %}#ffffff{% endif %}; color:{% if filters23.new == '1' %}#ffffff{% else %}var(--navy){% endif %};">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-              </svg>
-              <span>New Arrivals</span>
+                    style="width:100%; height:44px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; font-family:var(--font-family); border-radius:8px; cursor:pointer; box-sizing:border-box; transition:all 0.15s ease; border:1.5px solid {% if filters23.new == '1' %}var(--maroon){% else %}var(--border-color){% endif %}; background:{% if filters23.new == '1' %}var(--maroon){% else %}#ffffff{% endif %}; color:{% if filters23.new == '1' %}#ffffff{% else %}var(--navy){% endif %}; text-align:center;">
+              New Arrivals
             </button>
           </div>
 
           <!-- 3. Sort By Dropdown Button -->
           <div class="sidebar-dropdown-wrap" style="position:relative; width:100%;">
-            <label style="display:block; font-size:12px; font-weight:700; color:var(--navy); margin-bottom:4px;">Ordering</label>
             <button type="button" id="sidebar-sort-btn"
                     class="sidebar-dropdown-btn"
+                    aria-label="Sort by"
                     aria-haspopup="true"
                     aria-expanded="false"
-                    style="width:100%; height:40px; display:flex; align-items:center; justify-content:space-between; padding:0 12px; font-size:13px; font-weight:700; font-family:var(--font-family); border-radius:8px; border:1.5px solid var(--border-color); background:#ffffff; color:var(--navy); cursor:pointer; box-sizing:border-box;">
+                    style="width:100%; height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; font-size:13px; font-weight:700; font-family:var(--font-family); border-radius:8px; border:1.5px solid var(--border-color); background:#ffffff; color:var(--navy); cursor:pointer; box-sizing:border-box;">
               <span id="sidebar-sort-label">Sort By: {% if selected_sort == 'az' %}A–Z{% elif selected_sort == 'za' %}Z–A{% else %}Newest{% endif %}</span>
               <svg class="bb-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -144,12 +161,12 @@
 
           <!-- 4. Categories Dropdown Button -->
           <div class="sidebar-dropdown-wrap" style="position:relative; width:100%;">
-            <label style="display:block; font-size:12px; font-weight:700; color:var(--navy); margin-bottom:4px;">Categories</label>
             <button type="button" id="sidebar-cat-btn"
                     class="sidebar-dropdown-btn"
+                    aria-label="Categories"
                     aria-haspopup="true"
                     aria-expanded="false"
-                    style="width:100%; height:40px; display:flex; align-items:center; justify-content:space-between; padding:0 12px; font-size:13px; font-weight:700; font-family:var(--font-family); border-radius:8px; border:1.5px solid var(--border-color); background:#ffffff; color:var(--navy); cursor:pointer; box-sizing:border-box;">
+                    style="width:100%; height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; font-size:13px; font-weight:700; font-family:var(--font-family); border-radius:8px; border:1.5px solid var(--border-color); background:#ffffff; color:var(--navy); cursor:pointer; box-sizing:border-box;">
               <span id="sidebar-cat-label">{% if selected_category and selected_category.lower() != 'all' %}{{ selected_category }}{% if selected_lang %} ({{ selected_lang }}){% endif %}{% else %}Categories{% endif %}</span>
               <svg class="bb-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -453,6 +470,25 @@
 
   var searchDebounceTimer = null;
 
+  function updateSidebarClearVisibility() {
+    var clearAllLink = document.getElementById('sidebar-clear-all');
+    if (!clearAllLink) return;
+    var params = getCurrentParams();
+    var qVal = params.get('q') || (searchInput ? searchInput.value.trim() : '');
+    var newVal = params.get('new') || '';
+    var sortVal = params.get('sort') || '';
+    var catVal = params.get('category') || '';
+    var langVal = params.get('lang') || params.get('language') || '';
+    var hasActive = Boolean(
+      qVal ||
+      newVal === '1' ||
+      (sortVal && sortVal !== 'newest') ||
+      (catVal && catVal.toLowerCase() !== 'all') ||
+      langVal
+    );
+    clearAllLink.style.display = hasActive ? 'inline' : 'none';
+  }
+
   function getCurrentParams() {
     return new URLSearchParams(window.location.search);
   }
@@ -551,6 +587,7 @@
 
         // Trigger cart sync so Add/Added buttons render appropriately
         document.dispatchEvent(new CustomEvent('bb-cart-change'));
+        updateSidebarClearVisibility();
       })
       .catch(function(err) {
         if (mainContainer) mainContainer.style.opacity = '1';
@@ -916,6 +953,8 @@
   });
 
   // Handle browser back/forward buttons
+  updateSidebarClearVisibility();
+
   window.addEventListener('popstate', function() {
     fetchAndUpdate({}, false);
   });

@@ -695,16 +695,6 @@
     render();
     updateWishlistUI();
     syncWishlistFromServer();
-
-    // Mobile filter drawer toggle
-    var toggleBtn = document.getElementById('filter-drawer-toggle');
-    var sidebar = document.getElementById('catalogue-sidebar');
-    if (toggleBtn && sidebar) {
-      toggleBtn.addEventListener('click', function () {
-        var isOpen = sidebar.classList.toggle('is-open');
-        toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-      });
-    }
   });
 
   if (document.readyState !== 'loading') {

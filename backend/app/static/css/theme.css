@@ -605,8 +605,8 @@ body, h1, h2, h3, h4, h5, h6, p, a, button, input, select, textarea, summary {
   background: var(--surface-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 16px 20px;
-  margin-bottom: 24px;
+  padding: 16px;
+  gap: 12px;
   box-shadow: var(--shadow-sm);
 }
 
@@ -1480,7 +1480,7 @@ body.storybook .bb-book-grid {
   overflow: visible !important;
 }
 
-@media (max-width: 899px) {
+@media (max-width: 1023px) {
   .catalogue-layout {
     grid-template-columns: 1fr !important;
     gap: 18px !important;
@@ -1498,7 +1498,7 @@ body.storybook .bb-book-grid {
     box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.25) !important;
     max-height: 85vh !important;
     overflow-y: auto !important;
-    padding: 24px 20px !important;
+    padding: 16px !important;
     border: none !important;
   }
   .catalogue-sidebar.is-open {
@@ -1507,12 +1507,22 @@ body.storybook .bb-book-grid {
   .mobile-filter-toggle-btn {
     display: inline-flex !important;
   }
-  .mobile-drawer-header {
-    display: flex !important;
+  .mobile-drawer-close-btn {
+    display: inline-block !important;
   }
 }
 
 /* Simplified Filter Sidebar Dropdowns & Controls */
+#sidebar-search-q,
+#sidebar-new-arrivals-btn,
+#sidebar-sort-btn,
+#sidebar-cat-btn,
+#mobile-search-q {
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  box-sizing: border-box !important;
+}
 .sidebar-dropdown-btn:hover {
   border-color: var(--navy) !important;
 }

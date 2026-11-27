@@ -10,7 +10,6 @@ import {
   X,
   Heart,
   Sliders,
-  Sparkles,
   Plus,
   Trash2,
 } from 'lucide-react';
@@ -253,6 +252,22 @@ export const LibraryPage: React.FC = () => {
     });
     next.set('page', '1');
     setSearchParams(next);
+  };
+
+  const hasActiveSidebarFilters = Boolean(
+    q || isNew || (sort && sort !== 'newest') || (category && category.toLowerCase() !== 'all') || language
+  );
+
+  const handleClearSidebarFilters = () => {
+    setSearchInput('');
+    updateMultipleParams({
+      q: '',
+      new: '',
+      sort: '',
+      category: '',
+      lang: '',
+      language: '',
+    });
   };
 
   const handleClearAll = () => {
@@ -515,7 +530,7 @@ export const LibraryPage: React.FC = () => {
             }}
           >
             <Sliders size={18} />
-            <span>Filter &amp; Sort Catalogue</span>
+            <span>Filters</span>
           </button>
         </div>
 
@@ -532,19 +547,54 @@ export const LibraryPage: React.FC = () => {
               zIndex: 30,
               backgroundColor: '#ffffff',
               borderRadius: '12px',
-              padding: '18px',
+              padding: '16px',
               border: '1px solid var(--border-color, #e2e8f0)',
               boxShadow: '0 2px 12px rgba(10, 36, 114, 0.04)',
               display: 'flex',
               flexDirection: 'column',
-              gap: '14px',
+              gap: '12px',
             }}
           >
+            {/* Top Heading Row: Filters title + Clear all link */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingBottom: '12px',
+                borderBottom: '1px solid var(--border-color, #e2e8f0)',
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Sliders size={18} color="var(--maroon, #7b1230)" />
+                <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--maroon, #7b1230)', lineHeight: 1.2 }}>
+                  Filters
+                </h2>
+              </div>
+              {hasActiveSidebarFilters && (
+                <button
+                  type="button"
+                  onClick={handleClearSidebarFilters}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    color: 'var(--maroon, #7b1230)',
+                    cursor: 'pointer',
+                  }}
+                  aria-label="Clear all filters"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+
             {/* 1. Search Box */}
             <div style={{ position: 'relative', width: '100%' }}>
-              <label htmlFor="react-sidebar-q" style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--navy, #061446)', marginBottom: '4px' }}>
-                Search
-              </label>
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <input
                   id="react-sidebar-q"
@@ -558,10 +608,10 @@ export const LibraryPage: React.FC = () => {
                     }
                   }}
                   placeholder="Search title or author..."
-                  aria-label="Search title or author"
+                  aria-label="Search books"
                   style={{
                     width: '100%',
-                    height: '40px',
+                    height: '44px',
                     padding: '0 32px 0 12px',
                     fontSize: '13px',
                     fontFamily: 'inherit',
@@ -603,21 +653,18 @@ export const LibraryPage: React.FC = () => {
             </div>
 
             {/* 2. New Arrivals Toggle Button */}
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--navy, #061446)', marginBottom: '4px' }}>
-                Highlights
-              </label>
+            <div style={{ width: '100%' }}>
               <button
                 type="button"
+                aria-label="New arrivals"
                 aria-pressed={isNew}
                 onClick={() => updateParam('new', isNew ? '' : '1')}
                 style={{
                   width: '100%',
-                  height: '40px',
-                  display: 'inline-flex',
+                  height: '44px',
+                  display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px',
                   fontSize: '13px',
                   fontWeight: 700,
                   fontFamily: 'inherit',
@@ -628,28 +675,26 @@ export const LibraryPage: React.FC = () => {
                   cursor: 'pointer',
                   boxSizing: 'border-box',
                   transition: 'all 0.15s ease',
+                  textAlign: 'center',
                 }}
               >
-                <Sparkles size={15} />
-                <span>New Arrivals</span>
+                New Arrivals
               </button>
             </div>
 
             {/* 3. Sort By Dropdown */}
             <div className="sidebar-sort-container" style={{ position: 'relative', width: '100%' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--navy, #061446)', marginBottom: '4px' }}>
-                Ordering
-              </label>
               <button
                 ref={sortBtnRef}
                 type="button"
                 id="sidebar-sort-btn"
+                aria-label="Sort by"
                 aria-haspopup="true"
                 aria-expanded={isSortOpen}
                 onClick={toggleSort}
                 style={{
                   width: '100%',
-                  height: '40px',
+                  height: '44px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
@@ -710,19 +755,17 @@ export const LibraryPage: React.FC = () => {
 
             {/* 4. Categories Dropdown */}
             <div className="sidebar-cat-container" style={{ position: 'relative', width: '100%' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--navy, #061446)', marginBottom: '4px' }}>
-                Categories
-              </label>
               <button
                 ref={catBtnRef}
                 type="button"
                 id="sidebar-cat-btn"
+                aria-label="Categories"
                 aria-haspopup="true"
                 aria-expanded={isCatOpen}
                 onClick={toggleCat}
                 style={{
                   width: '100%',
-                  height: '40px',
+                  height: '44px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
@@ -1081,45 +1124,80 @@ export const LibraryPage: React.FC = () => {
                 backgroundColor: '#ffffff',
                 borderTopLeftRadius: '20px',
                 borderTopRightRadius: '20px',
-                padding: '24px 20px',
+                padding: '16px',
                 boxShadow: '0 -10px 40px rgba(0,0,0,0.2)',
                 zIndex: 9999,
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--navy, #061446)' }}>
-                  Filters &amp; Sort
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => setIsMobileFilterOpen(false)}
-                  style={{ background: 'none', border: 'none', padding: '4px', cursor: 'pointer' }}
-                >
-                  <X size={20} />
-                </button>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  paddingBottom: '12px',
+                  borderBottom: '1px solid var(--border-color, #e2e8f0)',
+                  marginBottom: '12px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Sliders size={18} color="var(--maroon, #7b1230)" />
+                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--maroon, #7b1230)' }}>
+                    Filters
+                  </h3>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto' }}>
+                  {hasActiveSidebarFilters && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleClearSidebarFilters();
+                        setIsMobileFilterOpen(false);
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        fontSize: '0.85rem',
+                        fontWeight: 600,
+                        color: 'var(--maroon, #7b1230)',
+                        cursor: 'pointer',
+                      }}
+                      aria-label="Clear all filters"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileFilterOpen(false)}
+                    style={{ background: 'none', border: 'none', padding: '4px', cursor: 'pointer', color: 'var(--navy, #061446)' }}
+                    aria-label="Close filters"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
               </div>
 
               {/* Mobile controls list */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {/* 1. Search */}
                 <div>
-                  <label htmlFor="mobile-search-q" style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '4px' }}>
-                    Search
-                  </label>
                   <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                     <input
                       id="mobile-search-q"
                       type="text"
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
-                      placeholder="Title or author..."
+                      placeholder="Search title or author..."
+                      aria-label="Search books"
                       style={{
                         width: '100%',
-                        padding: '10px 32px 10px 12px',
+                        height: '44px',
+                        padding: '0 32px 0 12px',
                         borderRadius: '8px',
-                        border: '1px solid var(--border-color)',
-                        fontSize: '0.9rem',
+                        border: '1.5px solid var(--border-color)',
+                        fontSize: '13px',
                         boxSizing: 'border-box',
                       }}
                     />
@@ -1130,6 +1208,7 @@ export const LibraryPage: React.FC = () => {
                           setSearchInput('');
                           updateParam('q', '');
                         }}
+                        aria-label="Clear search"
                         style={{
                           position: 'absolute',
                           right: '8px',
@@ -1152,43 +1231,38 @@ export const LibraryPage: React.FC = () => {
 
                 {/* 2. Highlights (New Arrivals) */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '4px' }}>
-                    Highlights
-                  </label>
                   <button
                     type="button"
+                    aria-label="New arrivals"
                     aria-pressed={isNew}
                     onClick={() => updateParam('new', isNew ? '' : '1')}
                     style={{
                       width: '100%',
-                      padding: '10px',
-                      display: 'inline-flex',
+                      height: '44px',
+                      display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '8px',
                       borderRadius: '8px',
                       border: `1.5px solid ${isNew ? 'var(--maroon, #7b1230)' : 'var(--border-color, #e2e8f0)'}`,
                       backgroundColor: isNew ? 'var(--maroon, #7b1230)' : '#ffffff',
                       color: isNew ? '#ffffff' : 'var(--navy, #061446)',
                       fontWeight: 700,
-                      fontSize: '0.9rem',
+                      fontSize: '13px',
                       cursor: 'pointer',
+                      textAlign: 'center',
                     }}
                   >
-                    <Sparkles size={16} />
-                    <span>New Arrivals</span>
+                    New Arrivals
                   </button>
                 </div>
 
                 {/* 3. Ordering (Sort By) */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '4px' }}>
-                    Ordering
-                  </label>
                   <select
                     value={sort}
                     onChange={(e) => updateParam('sort', e.target.value)}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.9rem', backgroundColor: '#ffffff' }}
+                    aria-label="Sort by"
+                    style={{ width: '100%', height: '44px', padding: '0 10px', borderRadius: '8px', border: '1.5px solid var(--border-color)', fontSize: '13px', backgroundColor: '#ffffff' }}
                   >
                     <option value="newest">Sort By: Newest</option>
                     <option value="az">Sort By: A–Z</option>
@@ -1198,9 +1272,6 @@ export const LibraryPage: React.FC = () => {
 
                 {/* 4. Categories */}
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '4px' }}>
-                    Categories
-                  </label>
                   <select
                     value={language ? `lang:${language}` : (category || 'all')}
                     onChange={(e) => {
@@ -1214,7 +1285,8 @@ export const LibraryPage: React.FC = () => {
                         updateMultipleParams({ category: val, language: '', lang: '' });
                       }
                     }}
-                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.9rem', backgroundColor: '#ffffff' }}
+                    aria-label="Categories"
+                    style={{ width: '100%', height: '44px', padding: '0 10px', borderRadius: '8px', border: '1.5px solid var(--border-color)', fontSize: '13px', backgroundColor: '#ffffff' }}
                   >
                     <option value="all">All Categories</option>
                     {['Baby', 'Toddler', 'Junior', 'Middle Grade', 'Young Adults', 'Adults', 'Fiction', 'Non Fiction'].map((cat) => (
@@ -1550,7 +1622,7 @@ export const LibraryPage: React.FC = () => {
       </div>
 
       <style>{`
-        @media (max-width: 899px) {
+        @media (max-width: 1023px) {
           .catalogue-desktop-grid {
             grid-template-columns: 1fr !important;
           }
