@@ -66,7 +66,6 @@ export const MembershipPage: React.FC = () => {
         title="Membership &amp; Lending Plans | BookBuddy"
         description="Choose a flexible reading plan that fits your family. Enjoy curated children books, unlimited swaps, and doorstep delivery across Chennai."
       />
-      <h1 className="sr-only">Membership Plans</h1>
 
       <div style={{ maxWidth: '1100px', width: '92%', margin: '0 auto', padding: '24px 0 48px' }}>
         {/* Current Subscription Status Banner */}
@@ -112,6 +111,20 @@ export const MembershipPage: React.FC = () => {
             </Link>
           </div>
         )}
+
+        <h1
+          style={{
+            margin: '0 0 16px 0',
+            fontFamily: "var(--font-family, 'Inter', sans-serif)",
+            fontSize: 'clamp(1.5rem, 2.5vw, 2rem)',
+            fontWeight: 700,
+            lineHeight: 1.2,
+            color: 'var(--color-primary, #740f28)',
+            textAlign: 'left',
+          }}
+        >
+          Membership Plans
+        </h1>
 
         {/* 1. Plans Section (Top) */}
         <section aria-label="Membership plans">

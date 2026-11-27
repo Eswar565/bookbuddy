@@ -29,6 +29,16 @@
   box-sizing: border-box;
 }
 
+.bb-membership-title {
+  margin: 0 0 16px 0;
+  font-family: var(--font-family, 'Inter', sans-serif);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-primary, #740f28);
+  text-align: left;
+}
+
 /* Remove injected folio table tools */
 .folio-table-tools,
 .bb-table-wrapper .folio-table-tools,
@@ -38,13 +48,13 @@
 
 /* Comparison Table Section */
 .bb-table-wrapper {
-  max-width: 1080px;
+  max-width: 100%;
   margin-inline: auto;
   width: 100%;
   border: 1px solid var(--border, #e5e7eb);
   border-radius: var(--radius-md, 12px);
   background: var(--surface-card, #ffffff);
-  margin-bottom: 48px;
+  margin-bottom: 32px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   box-shadow: 0 4px 20px rgba(6, 20, 70, 0.05);
