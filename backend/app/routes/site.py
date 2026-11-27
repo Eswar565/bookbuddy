@@ -698,6 +698,12 @@ def site_context(section: str = "home") -> dict[str, Any]:
         # Lending plan context — safe defaults for all pages; paged_books() overwrites for /library/
         "member_active_sub": _member_active_sub,
         "member_active_cnt": _member_active_cnt,
+        "delivery_settings": {
+            "membership_delivery_fee_monthly": "350",
+            "membership_delivery_area": "Gandhi Nagar, Saligramam and surrounding areas (within 5 km)",
+            "membership_pickup_address": "Gandhi Nagar, Saligramam, Chennai",
+            "membership_delivery_day": "Fixed pick-up & drop on designated weekday (e.g. Saturday)"
+        },
     }
 
 

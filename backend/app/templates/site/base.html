@@ -51,6 +51,7 @@
   <link rel="stylesheet" href="/static/css/theme.css?v=2">
   {{ custom_theme_style|safe }}
   {% if custom_btn_tx and site_theme == 'custom' %}<style>:root{--btn-tx:{{ custom_btn_tx }};}</style>{% endif %}
+  <script src="{{ url_for('static', filename='js/favourites-store.js') }}?v=1.0"></script>
   {% block extra_css %}{% endblock %}
 </head>
 

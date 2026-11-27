@@ -17,11 +17,13 @@ import {
 import { SEO } from '../components/common/SEO';
 import { BookCard, Book } from '../components/books/BookCard';
 import { useCart } from '../context/CartContext';
+import { useToast } from '../context/ToastContext';
 import { apiGet, apiPost, apiDelete } from '../api/client';
 
 export const LibraryPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { count, openCheckout, addItem } = useCart();
+  const { showToast } = useToast();
 
   // Search and filter state from URL params
   const q = searchParams.get('q') || '';
@@ -177,17 +179,31 @@ export const LibraryPage: React.FC = () => {
     setWishlist(next);
     try {
       localStorage.setItem('bb_wishlist', JSON.stringify(next));
+      localStorage.setItem('bb_favourites', JSON.stringify(next));
     } catch {}
 
+    showToast(isAdding ? 'Added to favourites' : 'Removed from favourites', 'success');
+
     try {
-      if (isAdding) {
-        await apiPost('/api/v1/library/favourites', { book_id: bookId });
-      } else {
-        await apiDelete(`/api/v1/library/favourites/${bookId}`);
+      if (favsData && !favsData.is_guest) {
+        if (isAdding) {
+          const res = await apiPost('/api/v1/library/favourites', { book_id: bookId });
+          if (!res.ok) throw new Error(res.error?.message || 'Failed to add favourite');
+        } else {
+          const res = await apiDelete(`/api/v1/library/favourites/${bookId}`);
+          if (!res.ok) throw new Error(res.error?.message || 'Failed to remove favourite');
+        }
       }
       refetchFavs();
     } catch {
-      // Local state fallback preserved
+      if (favsData && !favsData.is_guest) {
+        setWishlist(wishlist);
+        try {
+          localStorage.setItem('bb_wishlist', JSON.stringify(wishlist));
+          localStorage.setItem('bb_favourites', JSON.stringify(wishlist));
+        } catch {}
+        showToast('Failed to update favourites. Please try again.', 'error');
+      }
     }
   };
 

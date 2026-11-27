@@ -83,10 +83,8 @@ export const BookCard: React.FC<BookCardProps> = ({
       }}
     >
       {/* Cover Container */}
-      <Link
-        to={`/library/${book.id}`}
+      <div
         style={{
-          display: 'block',
           position: 'relative',
           width: '100%',
           minWidth: 0,
@@ -96,45 +94,56 @@ export const BookCard: React.FC<BookCardProps> = ({
           backgroundColor: '#e1e6f0',
           borderRadius: '8px',
           overflow: 'hidden',
-          textDecoration: 'none',
         }}
       >
-        {coverUrl && !imageError ? (
-          <img
-            src={coverUrl.startsWith('/') ? coverUrl : `/${coverUrl}`}
-            alt={book.title}
-            loading="lazy"
-            onError={() => setImageError(true)}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              display: 'block',
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--navy, #0a2472)',
-              fontWeight: 800,
-              fontSize: '0.85rem',
-              letterSpacing: '0.5px',
-              textTransform: 'uppercase',
-            }}
-          >
-            No Cover
-          </div>
-        )}
+        <Link
+          to={`/library/${book.id}`}
+          style={{
+            display: 'block',
+            width: '100%',
+            height: '100%',
+            textDecoration: 'none',
+          }}
+        >
+          {coverUrl && !imageError ? (
+            <img
+              src={coverUrl.startsWith('/') ? coverUrl : `/${coverUrl}`}
+              alt={book.title}
+              loading="lazy"
+              onError={() => setImageError(true)}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--navy, #0a2472)',
+                fontWeight: 800,
+                fontSize: '0.85rem',
+                letterSpacing: '0.5px',
+                textTransform: 'uppercase',
+              }}
+            >
+              No Cover
+            </div>
+          )}
+        </Link>
 
-        {/* Wishlist Heart Button */}
+        {/* Wishlist Heart Button - outside <a> link */}
         <button
           onClick={handleHeartClick}
           type="button"
+          data-fav-toggle
+          data-book-id={book.id}
           aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           aria-pressed={isWishlisted}
           style={{
@@ -182,7 +191,7 @@ export const BookCard: React.FC<BookCardProps> = ({
             New
           </span>
         )}
-      </Link>
+      </div>
 
       {/* Meta: Title & Author */}
       <div style={{ marginTop: '8px', marginBottom: '8px', flex: '0 0 auto', minWidth: 0, width: '100%', boxSizing: 'border-box' }}>

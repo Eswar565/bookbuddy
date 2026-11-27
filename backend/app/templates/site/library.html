@@ -497,6 +497,10 @@
           mainContainer.style.opacity = '1';
         }
 
+        if (window.BookBuddyFavs) {
+          window.BookBuddyFavs.render();
+        }
+
         // Sync Readers pills in top bar
         var currentAud = params.get('audience') || '';
         document.querySelectorAll('.catalogue-quick .btn-export').forEach(function(pill) {

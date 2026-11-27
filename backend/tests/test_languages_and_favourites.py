@@ -130,6 +130,13 @@ def test_api_favourites_guest_and_member_flow():
         add_res = client.post("/api/v1/library/favourites", json={"book_id": 1})
         assert add_res.status_code == 200
         assert add_res.get_json()["ok"] is True
+        assert add_res.get_json()["data"]["is_favourite"] is True
+
+        # Duplicate add is idempotent
+        dup_res = client.post("/api/v1/library/favourites", json={"book_id": 1})
+        assert dup_res.status_code == 200
+        assert dup_res.get_json()["ok"] is True
+        assert dup_res.get_json()["data"]["is_favourite"] is True
 
         # Check favourites list
         list_res = client.get("/api/v1/library/favourites")
@@ -139,12 +146,58 @@ def test_api_favourites_guest_and_member_flow():
         assert 1 in list_body["book_ids"]
         fav_ids = [b["id"] for b in list_body["favourites"]]
         assert 1 in fav_ids
+        assert len([x for x in list_body["book_ids"] if x == 1]) == 1  # No duplicate entries
 
         # Delete book 1 from favourites
         del_res = client.delete("/api/v1/library/favourites/1")
         assert del_res.status_code == 200
+        assert del_res.get_json()["ok"] is True
+        assert del_res.get_json()["data"]["is_favourite"] is False
+
+        # Idempotent delete
+        del_res2 = client.delete("/api/v1/library/favourites/1")
+        assert del_res2.status_code == 200
 
         # Check favourites list again
         list_res2 = client.get("/api/v1/library/favourites")
         list_body2 = list_res2.get_json()["data"]
         assert 1 not in list_body2["book_ids"]
+
+
+def test_api_favourites_unauthorised_and_csrf():
+    """Verify 401 for unauthorised mutations and proper CSRF handling."""
+    with app.test_client() as client:
+        # 1. Unauthorised POST -> 401
+        res = client.post("/api/v1/library/favourites", json={"book_id": 1})
+        assert res.status_code == 401
+        assert res.get_json()["error"]["code"] == "AUTH_REQUIRED"
+
+        # 2. Unauthorised DELETE -> 401
+        res_del = client.delete("/api/v1/library/favourites/1")
+        assert res_del.status_code == 401
+        assert res_del.get_json()["error"]["code"] == "AUTH_REQUIRED"
+
+        # 3. Logged-in session with CSRF protection enabled
+        with client.session_transaction() as sess:
+            sess["user_id"] = 1
+            sess["csrf_token"] = "valid_test_token_123"
+
+        # Turn TESTING temporarily off to test real CSRF verification logic
+        app.config["TESTING"] = False
+        try:
+            # Missing CSRF -> 403
+            res_bad_csrf = client.post("/api/v1/library/favourites", json={"book_id": 1})
+            assert res_bad_csrf.status_code == 403
+            assert res_bad_csrf.get_json()["error"]["code"] == "CSRF_FAILED"
+
+            # Valid X-CSRF-Token header -> 200
+            res_good_csrf = client.post(
+                "/api/v1/library/favourites",
+                json={"book_id": 1},
+                headers={"X-CSRF-Token": "valid_test_token_123"}
+            )
+            assert res_good_csrf.status_code == 200
+            assert res_good_csrf.get_json()["ok"] is True
+        finally:
+            app.config["TESTING"] = True
+
