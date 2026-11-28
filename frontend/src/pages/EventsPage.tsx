@@ -137,10 +137,10 @@ export const EventsPage: React.FC = () => {
         description="Discover weekend reading circles, creative writing contests, author interactions, and workshops held at Book Buddy."
       />
 
-      <div style={{ maxWidth: '1160px', margin: '0 auto', padding: '2.5rem 1.5rem 5rem' }}>
-        {/* Top Header without intro text block */}
-        <header style={{ marginBottom: '1.75rem' }}>
-          <h1 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: '0 0 16px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 20px 60px', boxSizing: 'border-box' }}>
+        {/* Top Header */}
+        <header style={{ marginBottom: '24px' }}>
+          <h1 style={{ fontFamily: 'var(--font-heading, "Fraunces", Georgia, serif)', fontSize: '2.2rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: '0 0 16px' }}>
             Events &amp; Contests
           </h1>
 

@@ -34,3 +34,8 @@ def test_events_switcher_placement_and_design():
         # 6. Button text in event card
         assert "btn-book-event" in html
         assert ("Join contest" in html) or ("Register" in html)
+
+        # 7. No top storybook banner on /events/
+        assert "MARK YOUR CALENDAR" not in html
+        assert "Your community calendar." not in html
+        assert "folio-page-banner" not in html

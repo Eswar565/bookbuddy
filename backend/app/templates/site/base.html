@@ -404,7 +404,7 @@
 
   <div id="main-content" tabindex="-1">
 
-    {% if request.path not in ('/','/about/','/work-with-us/','/gallery/','/library/','/magazine/','/podcasts/','/newspaper/') and not request.path.startswith(('/library/','/members/','/books/','/users/','/magazine','/podcasts','/newspaper')) %}
+    {% if request.path not in ('/','/about/','/work-with-us/','/gallery/','/library/','/magazine/','/podcasts/','/newspaper/','/events/') and not request.path.startswith(('/library/','/members/','/books/','/users/','/magazine','/podcasts','/newspaper','/events')) %}
 
       {% include 'site/_storybook_banner.html' %}
 
