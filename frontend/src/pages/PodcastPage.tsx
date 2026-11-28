@@ -1,18 +1,21 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Radio, Headphones, ExternalLink, Calendar } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Headphones, ExternalLink, Calendar } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { SEO } from '../components/common/SEO';
 import { apiGet } from '../api/client';
 import { Publication } from './NewspaperPage';
 
 export const PodcastPage: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sort = searchParams.get('sort') === 'desc' ? 'desc' : 'asc';
+
   const { data, isLoading } = useQuery({
-    queryKey: ['podcasts-data'],
+    queryKey: ['podcasts-data', sort],
     queryFn: async () => {
-      const res = await apiGet('/api/v1/media?kind=podcast');
+      const res = await apiGet(`/api/v1/media?kind=podcast&sort=${sort}`);
       if (!res.ok) throw new Error(res.error?.message || 'Failed to fetch podcasts');
-      return (res.data?.items || []) as (Publication & { embed_url?: string; audio_url?: string })[];
+      return (res.data?.items || []) as (Publication & { embed_url?: string; audio_url?: string; episode_label?: string; ep_num?: number })[];
     },
   });
 
@@ -37,7 +40,7 @@ export const PodcastPage: React.FC = () => {
           </nav>
 
           {/* Header */}
-          <header style={{ marginBottom: '32px' }}>
+          <header style={{ marginBottom: '24px' }}>
             <span
               style={{
                 display: 'inline-block',
@@ -62,6 +65,42 @@ export const PodcastPage: React.FC = () => {
             </p>
           </header>
 
+          {/* Sort Controls */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '24px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+              <label
+                htmlFor="podcast-sort"
+                style={{
+                  fontFamily: 'var(--font-body, "Nunito", sans-serif)',
+                  fontSize: '0.9rem',
+                  fontWeight: 700,
+                  color: 'var(--color-text, #061446)',
+                  margin: 0,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Sort by:
+              </label>
+              <select
+                id="podcast-sort"
+                className="filter-select"
+                value={sort}
+                onChange={(e) => setSearchParams({ sort: e.target.value })}
+                style={{
+                  width: 'auto',
+                  minWidth: '160px',
+                  height: '40px',
+                  minHeight: '40px',
+                  padding: '0 32px 0 14px',
+                  fontSize: '0.875rem',
+                }}
+              >
+                <option value="asc">Oldest first</option>
+                <option value="desc">Newest first</option>
+              </select>
+            </div>
+          </div>
+
           {isLoading ? (
             <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>
               Loading podcast episodes...
@@ -69,155 +108,178 @@ export const PodcastPage: React.FC = () => {
           ) : items.length === 0 ? (
             <div
               style={{
-                backgroundColor: '#ffffff',
-                border: '1px solid var(--border-color, #e5e7eb)',
+                backgroundColor: 'var(--color-surface, #ffffff)',
+                border: '1px solid var(--color-border, #e5e7eb)',
                 borderRadius: '12px',
-                padding: '48px',
+                padding: '48px 24px',
                 textAlign: 'center',
               }}
             >
-              <h3 style={{ color: 'var(--navy, #061446)', margin: '0 0 8px' }}>No podcast episodes published yet</h3>
-              <p style={{ color: 'var(--text-muted)', margin: 0 }}>
-                Check back soon for new audio adventures from our storytellers!
+              <h3 style={{ fontFamily: 'var(--font-heading, "Fraunces", serif)', color: 'var(--navy, #061446)', margin: '0 0 8px' }}>
+                No podcast episodes found
+              </h3>
+              <p style={{ fontFamily: 'var(--font-body, "Nunito", sans-serif)', color: 'var(--ink-subtle, #6b7280)', margin: 0 }}>
+                We are preparing exciting new audio adventures. Check back soon!
               </p>
             </div>
           ) : (
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
                 gap: '24px',
+                alignItems: 'stretch',
               }}
             >
               {items.map((item, idx) => (
                 <article
                   key={item.id}
                   style={{
-                    backgroundColor: '#ffffff',
-                    border: '1px solid var(--border-color, #e5e7eb)',
+                    backgroundColor: 'var(--color-surface, #ffffff)',
+                    border: '1px solid var(--color-border, #e5e7eb)',
                     borderRadius: '12px',
-                    overflow: 'hidden',
-                    boxShadow: '0 4px 16px rgba(6, 20, 70, 0.05)',
+                    boxShadow: '0 4px 16px rgba(43, 27, 32, 0.05)',
+                    padding: '20px',
                     display: 'flex',
                     flexDirection: 'column',
+                    height: '100%',
+                    boxSizing: 'border-box',
                   }}
                 >
-                  {/* Artwork / Hero Header */}
-                  <div
-                    style={{
-                      width: '100%',
-                      aspectRatio: '16/9',
-                      backgroundColor: 'var(--navy, #061446)',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    {item.cover_path ? (
+                  {/* Cover Art ONLY if present */}
+                  {item.cover_path && (
+                    <div
+                      style={{
+                        width: '100%',
+                        aspectRatio: '16/9',
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        marginBottom: '12px',
+                        flexShrink: 0,
+                      }}
+                    >
                       <img
                         src={item.cover_path}
                         alt={item.title}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                         loading="lazy"
                       />
-                    ) : (
-                      <div
+                    </div>
+                  )}
+
+                  {/* Meta row: pill on left, date on right */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '12px',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: 'var(--font-body, "Nunito", sans-serif)',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        color: '#1e40af',
+                        backgroundColor: '#eff6ff',
+                        padding: '3px 10px',
+                        borderRadius: '12px',
+                        border: '1px solid #bfdbfe',
+                        display: 'inline-block',
+                      }}
+                    >
+                      {(item.episode_label || item.edition || `EPISODE ${item.ep_num || idx + 1}`).toUpperCase()}
+                    </span>
+                    {item.published_on && (
+                      <span
                         style={{
+                          fontFamily: 'var(--font-body, "Nunito", sans-serif)',
+                          fontSize: '0.8rem',
+                          color: 'var(--ink-subtle, #6b7280)',
                           display: 'flex',
-                          flexDirection: 'column',
                           alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#ffffff',
-                          padding: '20px',
-                          textAlign: 'center',
+                          gap: '4px',
                         }}
                       >
-                        <Radio size={40} style={{ color: '#93c5fd', marginBottom: '8px' }} />
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#bfdbfe' }}>
-                          Book Buddy Stories
-                        </span>
-                      </div>
+                        <Calendar size={13} /> {item.published_on}
+                      </span>
                     )}
                   </div>
 
-                  {/* Details */}
-                  <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <span
+                  <h2
+                    style={{
+                      fontFamily: 'var(--font-heading, "Fraunces", Georgia, serif)',
+                      fontSize: '1.25rem',
+                      fontWeight: 700,
+                      color: 'var(--color-text, #061446)',
+                      margin: '0 0 10px 0',
+                      lineHeight: 1.35,
+                    }}
+                  >
+                    {item.title}
+                  </h2>
+
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-body, "Nunito", sans-serif)',
+                      fontSize: '0.875rem',
+                      color: 'var(--ink-subtle, #4b5563)',
+                      lineHeight: 1.5,
+                      margin: '0 0 16px 0',
+                      flexGrow: 1,
+                    }}
+                  >
+                    {item.description || 'A heartwarming audio story and literary adventure for children.'}
+                  </p>
+
+                  {/* Audio Player / Embed pinned to bottom */}
+                  <div style={{ marginTop: 'auto', width: '100%' }}>
+                    {item.embed_url ? (
+                      <div style={{ borderRadius: '8px', overflow: 'hidden', marginBottom: '8px' }}>
+                        <iframe
+                          src={item.embed_url.includes('spotify.com/episode') && !item.embed_url.includes('/embed/') ? item.embed_url.replace('/episode/', '/embed/episode/') : item.embed_url}
+                          title={`${item.title} player`}
+                          width="100%"
+                          height="152"
+                          style={{ borderRadius: '8px', border: 0, display: 'block' }}
+                          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                          loading="lazy"
+                        />
+                      </div>
+                    ) : item.audio_url || item.file_path ? (
+                      <audio
+                        controls
+                        src={item.audio_url || item.file_path}
+                        style={{ width: '100%', height: '36px', marginBottom: '8px' }}
+                      />
+                    ) : (
+                      <a
+                        href="https://open.spotify.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
                         style={{
-                          fontSize: '0.75rem',
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          backgroundColor: 'var(--navy, #061446)',
+                          color: '#ffffff',
+                          padding: '10px 16px',
+                          borderRadius: '8px',
+                          fontFamily: 'var(--font-body, "Nunito", sans-serif)',
                           fontWeight: 700,
-                          textTransform: 'uppercase',
-                          color: '#1e40af',
-                          backgroundColor: '#eff6ff',
-                          padding: '2px 8px',
-                          borderRadius: '12px',
-                          border: '1px solid #bfdbfe',
+                          fontSize: '0.875rem',
+                          textDecoration: 'none',
+                          boxSizing: 'border-box',
                         }}
                       >
-                        {item.edition || `EPISODE ${String(idx + 1).padStart(2, '0')}`}
-                      </span>
-                      {item.published_on && (
-                        <span style={{ fontSize: '0.8rem', color: 'var(--ink-subtle, #6b7280)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <Calendar size={13} /> {item.published_on}
-                        </span>
-                      )}
-                    </div>
-
-                    <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--navy, #061446)', margin: '0 0 8px', lineHeight: 1.35 }}>
-                      {item.title}
-                    </h2>
-
-                    <p style={{ fontSize: '0.85rem', color: 'var(--ink-subtle, #4b5563)', lineHeight: 1.5, margin: '0 0 16px', flexGrow: 1 }}>
-                      {item.description || 'A heartwarming audio story and literary adventure for children.'}
-                    </p>
-
-                    {/* Audio Player / Embed */}
-                    <div style={{ marginTop: 'auto' }}>
-                      {item.embed_url ? (
-                        <div style={{ borderRadius: '8px', overflow: 'hidden', marginBottom: '8px' }}>
-                          <iframe
-                            src={item.embed_url.includes('spotify.com/episode') && !item.embed_url.includes('/embed/') ? item.embed_url.replace('/episode/', '/embed/episode/') : item.embed_url}
-                            title={`${item.title} player`}
-                            width="100%"
-                            height="152"
-                            style={{ borderRadius: '8px', border: 0 }}
-                            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                            loading="lazy"
-                          />
-                        </div>
-                      ) : item.audio_url || item.file_path ? (
-                        <audio
-                          controls
-                          src={item.audio_url || item.file_path}
-                          style={{ width: '100%', height: '36px', marginBottom: '8px' }}
-                        />
-                      ) : (
-                        <a
-                          href="https://open.spotify.com"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            width: '100%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '8px',
-                            backgroundColor: 'var(--navy, #061446)',
-                            color: '#ffffff',
-                            padding: '10px 16px',
-                            borderRadius: '8px',
-                            fontWeight: 700,
-                            fontSize: '0.875rem',
-                            textDecoration: 'none',
-                          }}
-                        >
-                          <Headphones size={16} /> Listen on Spotify <ExternalLink size={14} />
-                        </a>
-                      )}
-                    </div>
+                        <Headphones size={16} /> Listen on Spotify <ExternalLink size={14} />
+                      </a>
+                    )}
                   </div>
                 </article>
               ))}

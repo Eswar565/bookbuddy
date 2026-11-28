@@ -40,7 +40,24 @@ def list_media():
     base_where = " AND ".join(conditions)
 
     if canonical_kind != "all":
-        query = f"SELECT * FROM publications WHERE {base_where} AND kind = ? ORDER BY published_on DESC, id DESC"
+        if canonical_kind == "podcast":
+            sort = args.get("sort", "asc").strip().lower()
+            if sort not in ("asc", "desc"):
+                sort = "asc"
+            order_dir = "DESC" if sort == "desc" else "ASC"
+            query = f"""
+                SELECT *,
+                  CAST(TRIM(REPLACE(REPLACE(REPLACE(REPLACE(LOWER(COALESCE(NULLIF(episode_label, ''), NULLIF(edition, ''), NULLIF(issue_number, ''), '0')), 'episode', ''), 'ep', ''), '#', ''), '.', '')) AS INTEGER) as ep_num
+                FROM publications
+                WHERE {base_where} AND kind = ?
+                ORDER BY
+                  CASE WHEN CAST(TRIM(REPLACE(REPLACE(REPLACE(REPLACE(LOWER(COALESCE(NULLIF(episode_label, ''), NULLIF(edition, ''), NULLIF(issue_number, ''), '0')), 'episode', ''), 'ep', ''), '#', ''), '.', '')) AS INTEGER) > 0 THEN 0 ELSE 1 END ASC,
+                  CAST(TRIM(REPLACE(REPLACE(REPLACE(REPLACE(LOWER(COALESCE(NULLIF(episode_label, ''), NULLIF(edition, ''), NULLIF(issue_number, ''), '0')), 'episode', ''), 'ep', ''), '#', ''), '.', '')) AS INTEGER) {order_dir},
+                  published_on {order_dir},
+                  id {order_dir}
+            """
+        else:
+            query = f"SELECT * FROM publications WHERE {base_where} AND kind = ? ORDER BY published_on DESC, id DESC"
         params.append(canonical_kind)
         rows = db.execute(query, params).fetchall()
         items = [dict(r) for r in rows]
@@ -63,7 +80,17 @@ def list_media():
         params
     ).fetchall()]
     podcasts = [dict(r) for r in db.execute(
-        f"SELECT * FROM publications WHERE {base_where} AND kind = 'podcast' ORDER BY published_on DESC, id DESC",
+        f"""
+        SELECT *,
+          CAST(TRIM(REPLACE(REPLACE(REPLACE(REPLACE(LOWER(COALESCE(NULLIF(episode_label, ''), NULLIF(edition, ''), NULLIF(issue_number, ''), '0')), 'episode', ''), 'ep', ''), '#', ''), '.', '')) AS INTEGER) as ep_num
+        FROM publications
+        WHERE {base_where} AND kind = 'podcast'
+        ORDER BY
+          CASE WHEN CAST(TRIM(REPLACE(REPLACE(REPLACE(REPLACE(LOWER(COALESCE(NULLIF(episode_label, ''), NULLIF(edition, ''), NULLIF(issue_number, ''), '0')), 'episode', ''), 'ep', ''), '#', ''), '.', '')) AS INTEGER) > 0 THEN 0 ELSE 1 END ASC,
+          CAST(TRIM(REPLACE(REPLACE(REPLACE(REPLACE(LOWER(COALESCE(NULLIF(episode_label, ''), NULLIF(edition, ''), NULLIF(issue_number, ''), '0')), 'episode', ''), 'ep', ''), '#', ''), '.', '')) AS INTEGER) ASC,
+          published_on ASC,
+          id ASC
+        """,
         params
     ).fetchall()]
 

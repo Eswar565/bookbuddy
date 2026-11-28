@@ -1512,8 +1512,24 @@ def publications_page() -> Response:
 @app.get("/podcasts/", endpoint="podcasts_page")
 def podcasts_page() -> Response:
     db = get_db()
-    items = [dict(r) for r in db.execute("SELECT * FROM publications WHERE is_active=1 AND kind='podcast' ORDER BY published_on DESC, id DESC").fetchall()]
-    return render_site("podcasts", "community", publications=items)
+    sort = flask_request.args.get("sort", "asc").strip().lower()
+    if sort not in ("asc", "desc"):
+        sort = "asc"
+    order_dir = "DESC" if sort == "desc" else "ASC"
+
+    query = f"""
+        SELECT *,
+          CAST(TRIM(REPLACE(REPLACE(REPLACE(REPLACE(LOWER(COALESCE(NULLIF(episode_label, ''), NULLIF(edition, ''), NULLIF(issue_number, ''), '0')), 'episode', ''), 'ep', ''), '#', ''), '.', '')) AS INTEGER) as ep_num
+        FROM publications
+        WHERE is_active = 1 AND kind = 'podcast'
+        ORDER BY
+          CASE WHEN CAST(TRIM(REPLACE(REPLACE(REPLACE(REPLACE(LOWER(COALESCE(NULLIF(episode_label, ''), NULLIF(edition, ''), NULLIF(issue_number, ''), '0')), 'episode', ''), 'ep', ''), '#', ''), '.', '')) AS INTEGER) > 0 THEN 0 ELSE 1 END ASC,
+          CAST(TRIM(REPLACE(REPLACE(REPLACE(REPLACE(LOWER(COALESCE(NULLIF(episode_label, ''), NULLIF(edition, ''), NULLIF(issue_number, ''), '0')), 'episode', ''), 'ep', ''), '#', ''), '.', '')) AS INTEGER) {order_dir},
+          published_on {order_dir},
+          id {order_dir}
+    """
+    items = [dict(r) for r in db.execute(query).fetchall()]
+    return render_site("podcasts", "community", publications=items, sort=sort)
 
 
 @app.get("/news/", endpoint="news_page")
