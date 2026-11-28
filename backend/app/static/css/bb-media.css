@@ -4,15 +4,17 @@
    ========================================================================== */
 
 .bb-media-page {
-  background: linear-gradient(180deg, #f4f6fc 0%, #ffffff 100%);
+  background: var(--surface-body, #fdfbf7);
   min-height: 80vh;
-  padding: 40px 0 80px;
+  padding: 24px 0 48px;
 }
 
 .bb-media-container {
-  max-width: 1240px;
+  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 24px;
+  box-sizing: border-box;
 }
 
 /* Common Header */

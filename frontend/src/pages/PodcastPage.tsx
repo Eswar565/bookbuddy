@@ -25,8 +25,8 @@ export const PodcastPage: React.FC = () => {
         description="Listen to bedtime audio stories, literature discussions, and reading journeys for children on Book Buddy podcasts."
       />
 
-      <main style={{ padding: '2.5rem 1rem 4rem', backgroundColor: 'var(--tint, #fdfbf7)', minHeight: '80vh' }}>
-        <div style={{ maxWidth: '1140px', margin: '0 auto' }}>
+      <main style={{ padding: '24px 0 48px', backgroundColor: 'var(--tint, #fdfbf7)', minHeight: '80vh' }}>
+        <div style={{ maxWidth: '1200px', width: '100%', margin: '0 auto', padding: '0 24px', boxSizing: 'border-box' }}>
           {/* Breadcrumb */}
           <nav style={{ fontSize: '0.85rem', marginBottom: '16px', color: 'var(--ink-subtle, #6b7280)' }} aria-label="Breadcrumb">
             <Link to="/media" style={{ color: 'var(--navy, #061446)', textDecoration: 'none', fontWeight: 600 }}>

@@ -2,8 +2,6 @@
 {% if sbpath.startswith('/reading-circles/') %}{% set sbdata=('STORIES ARE BETTER TOGETHER','Come read with us!','Join our friendly reading circles and share wonderful stories.','reading-circle.svg') %}
 {% elif sbpath.startswith('/contests/') %}{% set sbdata=('TIME TO SHINE','A space for bright ideas.','Get creative and join our fun reading contests.','contest.svg') %}
 {% elif sbpath.startswith('/events/') %}{% set sbdata=('MARK YOUR CALENDAR','Your community calendar.','Reading circles, contests and unforgettable library days.','reading-circle.svg') %}
-{% elif sbpath.startswith('/podcasts/') %}{% set sbdata=('STORYTIME FOR YOUR EARS','Listen, imagine, smile.','Hear stories, conversations and the voices of our reading community.','podcast.svg') %}
-{% elif sbpath.startswith('/magazine/') %}{% set sbdata=('OUR CREATIVE CORNER','Stories worth sharing.','Flip through a world of imagination and ideas.','magazine.svg') %}
 {% elif sbpath.startswith('/publications/') and request.args.get('kind') == 'news' %}{% set sbdata=('THE LITTLE NEWSROOM','Fresh news, bright minds.','Read news and stories from our community.','newspaper.svg') %}
 {% elif sbpath.startswith('/publications/') %}{% set sbdata=('PAGES FULL OF IDEAS','Made by curious minds.','Browse our newspapers, magazines and creative voices.','magazine.svg') %}
 {% elif sbpath.startswith('/gallery/') %}{% set sbdata=('SMILES & MEMORIES','Our happy moments.','Every picture has a story to tell.','gallery.svg') %}
