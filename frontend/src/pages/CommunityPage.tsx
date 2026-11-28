@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Trophy, Calendar, PenTool, Newspaper, BookCheck, Radio } from 'lucide-react';
+import { Icon } from '../components/ui/Icon';
 import { SEO } from '../components/common/SEO';
 
 export const CommunityPage: React.FC = () => {
@@ -130,7 +130,7 @@ export const CommunityPage: React.FC = () => {
                   marginBottom: '16px',
                 }}
               >
-                <BookOpen size={22} />
+                <Icon name="book-open" size={24} weight="duotone" />
               </div>
               <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--navy, #061446)', margin: '0 0 8px' }}>
                 Reading Circles
@@ -171,7 +171,7 @@ export const CommunityPage: React.FC = () => {
                   marginBottom: '16px',
                 }}
               >
-                <Trophy size={22} />
+                <Icon name="trophy" size={24} weight="duotone" />
               </div>
               <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--navy, #061446)', margin: '0 0 8px' }}>
                 Contests &amp; Challenges
@@ -212,7 +212,7 @@ export const CommunityPage: React.FC = () => {
                   marginBottom: '16px',
                 }}
               >
-                <Calendar size={22} />
+                <Icon name="calendar-blank" size={24} weight="duotone" />
               </div>
               <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--navy, #061446)', margin: '0 0 8px' }}>
                 Events &amp; Workshops
@@ -253,7 +253,7 @@ export const CommunityPage: React.FC = () => {
                   marginBottom: '16px',
                 }}
               >
-                <PenTool size={22} />
+                <Icon name="chats-circle" size={24} weight="duotone" />
               </div>
               <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--navy, #061446)', margin: '0 0 8px' }}>
                 Reader Contributions
@@ -325,7 +325,7 @@ export const CommunityPage: React.FC = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
               <div style={{ background: 'var(--tint, #fdfbf7)', padding: '18px 16px', borderRadius: '10px', border: '1px solid var(--border, #e5e7eb)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--navy, #061446)' }}>
-                  <Newspaper size={18} />
+                  <Icon name="newspaper" size={18} />
                   <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>Newspapers</h3>
                 </div>
                 <p style={{ fontSize: '0.825rem', color: 'var(--ink-subtle, #4b5563)', margin: '0 0 12px', lineHeight: 1.5 }}>
@@ -337,7 +337,7 @@ export const CommunityPage: React.FC = () => {
               </div>
               <div style={{ background: 'var(--tint, #fdfbf7)', padding: '18px 16px', borderRadius: '10px', border: '1px solid var(--border, #e5e7eb)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--navy, #061446)' }}>
-                  <BookCheck size={18} />
+                  <Icon name="book-open-text" size={18} />
                   <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>Magazines</h3>
                 </div>
                 <p style={{ fontSize: '0.825rem', color: 'var(--ink-subtle, #4b5563)', margin: '0 0 12px', lineHeight: 1.5 }}>
@@ -349,7 +349,7 @@ export const CommunityPage: React.FC = () => {
               </div>
               <div style={{ background: 'var(--tint, #fdfbf7)', padding: '18px 16px', borderRadius: '10px', border: '1px solid var(--border, #e5e7eb)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--navy, #061446)' }}>
-                  <Radio size={18} />
+                  <Icon name="microphone-stage" size={18} />
                   <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>Podcasts</h3>
                 </div>
                 <p style={{ fontSize: '0.825rem', color: 'var(--ink-subtle, #4b5563)', margin: '0 0 12px', lineHeight: 1.5 }}>

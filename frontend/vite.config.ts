@@ -33,7 +33,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query', 'react-helmet-async'],
-          icons: ['lucide-react'],
+          icons: ['@phosphor-icons/react'],
         },
       },
     },

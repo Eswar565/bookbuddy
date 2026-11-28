@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Newspaper, BookOpen, Radio, ArrowRight } from 'lucide-react';
+import { Icon } from '../components/ui/Icon';
 import { SEO } from '../components/common/SEO';
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '../api/client';
@@ -89,7 +89,7 @@ export const MediaPage: React.FC = () => {
                   marginBottom: '20px',
                 }}
               >
-                <Newspaper size={28} />
+                <Icon name="newspaper" size={28} weight="duotone" aria-hidden="true" />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                 <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: 0 }}>
@@ -129,7 +129,7 @@ export const MediaPage: React.FC = () => {
                   textDecoration: 'none',
                 }}
               >
-                Read Newspapers <ArrowRight size={16} />
+                Read Newspapers <Icon name="arrow-right" size={16} aria-hidden="true" />
               </Link>
             </article>
 
@@ -159,7 +159,7 @@ export const MediaPage: React.FC = () => {
                   marginBottom: '20px',
                 }}
               >
-                <BookOpen size={28} />
+                <Icon name="book-open" size={28} weight="duotone" aria-hidden="true" />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                 <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: 0 }}>
@@ -199,7 +199,7 @@ export const MediaPage: React.FC = () => {
                   textDecoration: 'none',
                 }}
               >
-                Browse Magazines <ArrowRight size={16} />
+                Browse Magazines <Icon name="arrow-right" size={16} aria-hidden="true" />
               </Link>
             </article>
 
@@ -229,7 +229,7 @@ export const MediaPage: React.FC = () => {
                   marginBottom: '20px',
                 }}
               >
-                <Radio size={28} />
+                <Icon name="microphone-stage" size={28} weight="duotone" aria-hidden="true" />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                 <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: 0 }}>
@@ -269,7 +269,7 @@ export const MediaPage: React.FC = () => {
                   textDecoration: 'none',
                 }}
               >
-                Listen to Podcasts <ArrowRight size={16} />
+                Listen to Podcasts <Icon name="arrow-right" size={16} aria-hidden="true" />
               </Link>
             </article>
           </div>

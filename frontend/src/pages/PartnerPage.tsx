@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle, Handshake, Mail, Phone, MapPin } from 'lucide-react';
+import { Icon } from '../components/ui/Icon';
 import { SEO } from '../components/common/SEO';
 import { useToast } from '../context/ToastContext';
 import { apiPost } from '../api/client';
@@ -101,7 +101,7 @@ export const PartnerPage: React.FC = () => {
 
               {submitted ? (
                 <div style={{ textAlign: 'center', padding: '28px 16px' }}>
-                  <CheckCircle size={44} color="#16a34a" style={{ margin: '0 auto 12px' }} />
+                  <Icon name="check-circle" size={44} weight="fill" color="#16a34a" style={{ margin: '0 auto 12px' }} aria-hidden="true" />
                   <h3 style={{ fontSize: '1.2rem', color: 'var(--navy, #061446)', margin: '0 0 8px' }}>
                     Proposal Submitted!
                   </h3>
@@ -298,7 +298,7 @@ export const PartnerPage: React.FC = () => {
                         color: '#ffffff',
                       }}
                     >
-                      <Send size={15} />
+                      <Icon name="paper-plane-tilt" size={15} aria-hidden="true" />
                       {isSubmitting ? 'Submitting...' : 'Submit Partnership Proposal'}
                     </button>
                   </div>
@@ -318,7 +318,7 @@ export const PartnerPage: React.FC = () => {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <Handshake size={18} color="var(--navy, #061446)" />
+                  <Icon name="handshake" size={18} weight="duotone" color="var(--navy, #061446)" aria-hidden="true" />
                   <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--navy, #061446)', margin: 0 }}>
                     Why Partner with Us?
                   </h3>
@@ -356,7 +356,7 @@ export const PartnerPage: React.FC = () => {
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12.5px', color: 'var(--text-muted, #475569)' }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                    <Phone size={14} color="var(--navy, #061446)" style={{ marginTop: '2px', flexShrink: 0 }} />
+                    <Icon name="phone" size={14} color="var(--navy, #061446)" style={{ marginTop: '2px', flexShrink: 0 }} aria-hidden="true" />
                     <div>
                       <strong style={{ color: 'var(--navy, #061446)' }}>Phone:</strong>
                       <div>
@@ -368,7 +368,7 @@ export const PartnerPage: React.FC = () => {
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                    <Mail size={14} color="var(--navy, #061446)" style={{ marginTop: '2px', flexShrink: 0 }} />
+                    <Icon name="envelope-simple" size={14} color="var(--navy, #061446)" style={{ marginTop: '2px', flexShrink: 0 }} aria-hidden="true" />
                     <div>
                       <strong style={{ color: 'var(--navy, #061446)' }}>Email:</strong>
                       <div>
@@ -380,7 +380,7 @@ export const PartnerPage: React.FC = () => {
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                    <MapPin size={14} color="var(--navy, #061446)" style={{ marginTop: '2px', flexShrink: 0 }} />
+                    <Icon name="map-pin" size={14} color="var(--navy, #061446)" style={{ marginTop: '2px', flexShrink: 0 }} aria-hidden="true" />
                     <div>
                       <strong style={{ color: 'var(--navy, #061446)' }}>Address:</strong>
                       <div>Book Buddy, Saligramam, Chennai, TN, India</div>

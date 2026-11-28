@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Search, BookOpen, Calendar, ShieldCheck, Truck, ArrowRight, Sparkles } from 'lucide-react';
+import { Icon } from '../components/ui/Icon';
 import { SEO } from '../components/common/SEO';
 import { BookCard, Book } from '../components/books/BookCard';
 import { apiGet } from '../api/client';
@@ -75,7 +75,7 @@ export const HomePage: React.FC = () => {
               backdropFilter: 'blur(4px)',
             }}
           >
-            <Sparkles size={14} /> Saligramam, Chennai Lending Library
+            <Icon name="sparkle" size={14} /> Saligramam, Chennai Lending Library
           </span>
 
           <h1
@@ -146,7 +146,7 @@ export const HomePage: React.FC = () => {
                 gap: '6px',
               }}
             >
-              <Search size={16} />
+              <Icon name="magnifying-glass" size={16} />
               <span>Explore</span>
             </button>
           </form>
@@ -196,13 +196,12 @@ export const HomePage: React.FC = () => {
             gap: '18px',
           }}
         >
-          {[
-            { icon: BookOpen, title: 'Thousands of Books', desc: 'Age-appropriate curated picture books, fiction, and non-fiction.' },
-            { icon: Truck, title: 'Doorstep Delivery', desc: 'Regular book drops and collections directly to your doorstep in Chennai.' },
-            { icon: Calendar, title: 'Weekend Circles', desc: 'Storytelling circles, literary contests, and creative sessions.' },
-            { icon: ShieldCheck, title: 'Hassle-Free Swaps', desc: 'Exchange titles as often as your reader finishes them.' },
-          ].map((card, i) => {
-            const Icon = card.icon;
+          {([
+            { icon: 'book-open' as const, title: 'Thousands of Books', desc: 'Age-appropriate curated picture books, fiction, and non-fiction.' },
+            { icon: 'truck' as const, title: 'Doorstep Delivery', desc: 'Regular book drops and collections directly to your doorstep in Chennai.' },
+            { icon: 'calendar-blank' as const, title: 'Weekend Circles', desc: 'Storytelling circles, literary contests, and creative sessions.' },
+            { icon: 'seal-check' as const, title: 'Hassle-Free Swaps', desc: 'Exchange titles as often as your reader finishes them.' },
+          ]).map((card, i) => {
             return (
               <div
                 key={i}
@@ -227,7 +226,7 @@ export const HomePage: React.FC = () => {
                     color: 'var(--navy, #061446)',
                   }}
                 >
-                  <Icon size={22} />
+                  <Icon name={card.icon} size={22} weight="duotone" aria-hidden="true" />
                 </div>
                 <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--navy)', margin: '0 0 6px' }}>{card.title}</h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>{card.desc}</p>
@@ -262,7 +261,7 @@ export const HomePage: React.FC = () => {
               }}
             >
               <span>View Full Catalogue</span>
-              <ArrowRight size={16} />
+              <Icon name="arrow-right" size={16} />
             </Link>
           </div>
 
@@ -306,7 +305,7 @@ export const HomePage: React.FC = () => {
                 }}
               >
                 <span>View All Events</span>
-                <ArrowRight size={16} />
+                <Icon name="arrow-right" size={16} />
               </Link>
             </div>
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, Plus, Check } from 'lucide-react';
+import { Icon } from '../ui/Icon';
 import { useCart } from '../../context/CartContext';
 import { Link } from 'react-router-dom';
 
@@ -166,10 +166,11 @@ export const BookCard: React.FC<BookCardProps> = ({
           onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
           onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1.0)')}
         >
-          <Heart
-            size={16}
-            color={isWishlisted ? 'var(--maroon, #7b1230)' : '#94a3b8'}
-            fill={isWishlisted ? 'var(--maroon, #7b1230)' : 'none'}
+          <Icon
+            name={isWishlisted ? 'heart-fill' : 'heart'}
+            size={18}
+            color={isWishlisted ? 'var(--color-primary, #740f28)' : 'var(--color-text-muted, #94a3b8)'}
+            weight={isWishlisted ? 'fill' : 'regular'}
           />
         </button>
 
@@ -263,12 +264,12 @@ export const BookCard: React.FC<BookCardProps> = ({
             >
               {inCart ? (
                 <>
-                  <Check size={14} strokeWidth={2.5} style={{ flexShrink: 0 }} />
+                  <Icon name="check" size={16} weight="bold" />
                   <span>Added</span>
                 </>
               ) : (
                 <>
-                  <Plus size={14} strokeWidth={2.5} style={{ flexShrink: 0 }} />
+                  <Icon name="plus" size={16} weight="bold" />
                   <span>Add</span>
                 </>
               )}

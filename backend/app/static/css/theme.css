@@ -372,23 +372,23 @@ h5, h6 {
 }
 
 /* Nunito: Body, text, nav, buttons, forms, tables, filter sidebar, dropdown menus, book card text, modal fields, calendar, toasts, footer links, admin panel */
-body :is(p, span, a, li, dd, dt, label):not([class*="fa-"]):not(.bb-icon):not(svg):not(.font-heading):not(.page-title):not(.section-title):not(.bb-modal-title):not(.modal-title):not(.checkout-title):not(.plan-card-name):not(.plan-card-price):not(.plan-name):not(.bb-plan-duration-name):not(.bb-price-val):not(.bb16-price):not(.event-card__title):not(.media-card__title):not(.collab-card__name) {
+body :is(p, span, a, li, dd, dt, label):not(.bb-icon):not(svg):not(.font-heading):not(.page-title):not(.section-title):not(.bb-modal-title):not(.modal-title):not(.checkout-title):not(.plan-card-name):not(.plan-card-price):not(.plan-name):not(.bb-plan-duration-name):not(.bb-price-val):not(.bb16-price):not(.event-card__title):not(.media-card__title):not(.collab-card__name) {
   font-family: var(--font-body);
 }
 
-body :is(button, input, select, textarea, option, summary, .btn, .button):not([class*="fa-"]):not(.bb-icon):not(svg) {
+body :is(button, input, select, textarea, option, summary, .btn, .button):not(.bb-icon):not(svg) {
   font-family: var(--font-body) !important;
   font-weight: 600;
   font-size: 0.95rem;
 }
 
-body :is(nav a, .folio-nav-link, .main-nav a, .s29-nav-main, .sidebar a):not([class*="fa-"]):not(.bb-icon):not(svg) {
+body :is(nav a, .folio-nav-link, .main-nav a, .s29-nav-main, .sidebar a):not(.bb-icon):not(svg) {
   font-family: var(--font-body) !important;
   font-weight: 600;
   font-size: 0.95rem;
 }
 
-body :is(table, th, td):not([class*="fa-"]):not(.bb-icon):not(svg) {
+body :is(table, th, td):not(.bb-icon):not(svg) {
   font-family: var(--font-body) !important;
 }
 
@@ -401,7 +401,7 @@ b, strong {
   color: var(--navy);
 }
 
-em, i:not([class*="fa-"]):not(.bb-icon):not(.fas):not(.far):not(.fab):not([class*="icon"]) {
+em, i:not(.bb-icon):not([class*="icon"]) {
   font-style: italic;
 }
 

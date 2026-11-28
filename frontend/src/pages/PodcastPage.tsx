@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Radio, Headphones, ExternalLink, Calendar } from 'lucide-react';
+import { Icon } from '../components/ui/Icon';
 import { useQuery } from '@tanstack/react-query';
 import { SEO } from '../components/common/SEO';
 import { apiGet } from '../api/client';
@@ -134,7 +134,7 @@ export const PodcastPage: React.FC = () => {
                           textAlign: 'center',
                         }}
                       >
-                        <Radio size={40} style={{ color: '#93c5fd', marginBottom: '8px' }} />
+                        <Icon name="microphone-stage" size={40} weight="duotone" style={{ color: '#93c5fd', marginBottom: '8px' }} aria-hidden="true" />
                         <span style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#bfdbfe' }}>
                           Book Buddy Stories
                         </span>
@@ -161,7 +161,7 @@ export const PodcastPage: React.FC = () => {
                       </span>
                       {item.published_on && (
                         <span style={{ fontSize: '0.8rem', color: 'var(--ink-subtle, #6b7280)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <Calendar size={13} /> {item.published_on}
+                          <Icon name="calendar-blank" size={13} aria-hidden="true" /> {item.published_on}
                         </span>
                       )}
                     </div>
@@ -214,7 +214,7 @@ export const PodcastPage: React.FC = () => {
                             textDecoration: 'none',
                           }}
                         >
-                          <Headphones size={16} /> Listen on Spotify <ExternalLink size={14} />
+                          <Icon name="headphones" size={16} aria-hidden="true" /> Listen on Spotify <Icon name="arrow-square-out" size={14} aria-hidden="true" />
                         </a>
                       )}
                     </div>

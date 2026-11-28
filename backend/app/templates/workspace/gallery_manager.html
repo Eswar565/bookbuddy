@@ -254,10 +254,10 @@
               {{ 'Active' if item.is_active else 'Hidden' }}
             </span>
             {% if not item.file_exists %}
-              <span class="gm-badge gm-badge-missing">⚠️ Missing File</span>
+              <span class="gm-badge gm-badge-missing"><svg class="bb-icon" style="width:13px;height:13px;vertical-align:-1px;margin-right:2px;" aria-hidden="true"><use href="#ph-warning"/></svg>Missing File</span>
             {% endif %}
             {% if item.is_test_data %}
-              <span class="gm-badge gm-badge-test" title="{{ item.test_hint }}">🧪 Test data?</span>
+              <span class="gm-badge gm-badge-test" title="{{ item.test_hint }}">Test data?</span>
             {% endif %}
           </div>
         </div>

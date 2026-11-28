@@ -81,10 +81,7 @@ body.folio :is(h1 em, h2 em) {
   color: var(--gold-dark) !important;
 }
 
-/* Preserve Font Awesome icon fonts */
-i.fa, i.fa-solid, i.fa-regular, i.fa-brands, [class*="fa-"] {
-  font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
-}
+
 
 /* --- Brand Accents --- */
 

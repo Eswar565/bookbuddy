@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, X } from 'lucide-react';
+import { Icon } from '../components/ui/Icon';
 import { SEO } from '../components/common/SEO';
 import { apiGet } from '../api/client';
 import { Link } from 'react-router-dom';
@@ -166,7 +166,7 @@ export const GalleryPage: React.FC = () => {
                       }}
                     >
                       <span>{cat.cta_text || 'Learn More'}</span>
-                      <ArrowRight size={14} />
+                      <Icon name="arrow-right" size={14} aria-hidden="true" />
                     </Link>
                   )}
                 </div>
@@ -206,7 +206,7 @@ export const GalleryPage: React.FC = () => {
                 cursor: 'pointer',
               }}
             >
-              <X size={24} />
+              <Icon name="x" size={24} aria-hidden="true" />
             </button>
             <img
               src={selectedPhoto.startsWith('/') ? selectedPhoto : `/${selectedPhoto}`}
