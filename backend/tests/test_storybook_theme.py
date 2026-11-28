@@ -21,17 +21,16 @@ def test_all_local_storybook_images_are_well_formed():
     for image in png_files:
         assert image.read_bytes()[:8] == b'\x89PNG\r\n\x1a\n', f'{image.name} is not a valid PNG'
 
-def test_shared_folio_assets_and_local_icons():
+def test_shared_folio_assets_and_local_fontawesome():
     for name in ('site/base.html','workspace/base.html'):
         shell=(ROOT/'templates'/name).read_text(encoding='utf8')
-        for asset in ('/static/css/folio.css','/static/js/folio.js'):
+        for asset in ('/static/css/folio.css','/static/js/folio.js','/static/vendor/fontawesome/css/all.min.css'):
             assert asset in shell
             assert (ROOT/asset.lstrip('/')).is_file()
-        assert '_icons.html' in shell
         assert '/static/css/storybook' not in shell
-        assert 'all.min.css' not in shell
     home=(ROOT/'templates/site/home.html').read_text(encoding='utf8')
     assert 'hero-readers.svg' not in home
+    assert 'fa-solid' in home
 
 def test_navigation_still_library_focused():
     shell = (ROOT/'templates/site/base.html').read_text(encoding='utf8')

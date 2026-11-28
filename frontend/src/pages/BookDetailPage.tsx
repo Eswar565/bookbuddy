@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Icon } from '../components/ui/Icon';
+import { ArrowLeft, Plus, Check, ShoppingBag, Heart } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
 import { useCart } from '../context/CartContext';
 import { apiGet } from '../api/client';
@@ -72,7 +72,7 @@ export const BookDetailPage: React.FC = () => {
             textDecoration: 'none',
           }}
         >
-          <Icon name="arrow-left" size={16} /> Return to Catalogue
+          <ArrowLeft size={16} /> Return to Catalogue
         </Link>
       </div>
     );
@@ -101,7 +101,7 @@ export const BookDetailPage: React.FC = () => {
             marginBottom: '2rem',
           }}
         >
-          <Icon name="arrow-left" size={16} /> Back to Catalogue
+          <ArrowLeft size={16} /> Back to Catalogue
         </Link>
 
         <div
@@ -172,12 +172,7 @@ export const BookDetailPage: React.FC = () => {
                 cursor: 'pointer',
               }}
             >
-              <Icon
-                name={isWishlisted ? 'heart-fill' : 'heart'}
-                size={18}
-                color={isWishlisted ? 'var(--color-primary, #740f28)' : '#64748b'}
-                weight={isWishlisted ? 'fill' : 'regular'}
-              />
+              <Heart size={16} color={isWishlisted ? 'var(--maroon)' : '#64748b'} fill={isWishlisted ? 'var(--maroon)' : 'none'} />
               <span>{isWishlisted ? 'Saved to Wishlist' : 'Add to Wishlist'}</span>
             </button>
           </div>
@@ -284,12 +279,12 @@ export const BookDetailPage: React.FC = () => {
               >
                 {inCart ? (
                   <>
-                    <Icon name="check" size={18} />
+                    <Check size={18} />
                     <span>Added to Cart</span>
                   </>
                 ) : (
                   <>
-                    <Icon name="plus" size={18} />
+                    <Plus size={18} />
                     <span>Add to Borrow Cart</span>
                   </>
                 )}
@@ -313,7 +308,7 @@ export const BookDetailPage: React.FC = () => {
                     gap: '6px',
                   }}
                 >
-                  <Icon name="shopping-bag" size={18} />
+                  <ShoppingBag size={18} />
                   <span>View Cart</span>
                 </button>
               )}

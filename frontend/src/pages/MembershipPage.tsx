@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Icon } from '../components/ui/Icon';
+import { Check, ShieldCheck, MapPin, Truck, Calendar, Sparkles } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -85,7 +85,7 @@ export const MembershipPage: React.FC = () => {
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Icon name="seal-check" size={20} color="#16a34a" />
+              <ShieldCheck size={20} color="#16a34a" />
               <div>
                 <strong style={{ color: '#166534', fontSize: '0.9rem' }}>
                   Current Active Plan: {activeSubscription.name.replace(/Summer Special/gi, 'Beginner Plan')}
@@ -201,15 +201,15 @@ export const MembershipPage: React.FC = () => {
                     {/* Feature Checklist */}
                     <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 14px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       <li style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text-main, #1e293b)' }}>
-                        <Icon name="check" size={16} color="var(--color-primary, #740f28)" />
+                        <Check size={15} color="var(--maroon, #740f28)" />
                         <span><strong>{plan.book_limit} books</strong> at a time</span>
                       </li>
                       <li style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text-main, #1e293b)' }}>
-                        <Icon name="check" size={16} color="var(--color-primary, #740f28)" />
+                        <Check size={15} color="var(--maroon, #740f28)" />
                         <span>Unlimited book swaps</span>
                       </li>
                       <li style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text-main, #1e293b)' }}>
-                        <Icon name="check" size={16} color="var(--color-primary, #740f28)" />
+                        <Check size={15} color="var(--maroon, #740f28)" />
                         <span>Doorstep delivery available</span>
                       </li>
                     </ul>
@@ -286,11 +286,11 @@ export const MembershipPage: React.FC = () => {
               </p>
               <div style={{ marginTop: 'auto', paddingTop: '12px', borderTop: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.9rem', lineHeight: 1.45, color: '#374151' }}>
-                  <Icon name="map-pin" size={18} color="var(--color-primary, #740f28)" style={{ marginTop: '2px', flexShrink: 0 }} />
+                  <MapPin size={16} color="var(--maroon, #740f28)" style={{ marginTop: '2px', flexShrink: 0 }} />
                   <span><strong>Address:</strong> Velachery, Chennai - 600042</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.9rem', lineHeight: 1.45, color: '#374151' }}>
-                  <Icon name="check" size={18} color="var(--status-green, #059669)" style={{ marginTop: '2px', flexShrink: 0 }} />
+                  <Check size={16} color="var(--status-green, #059669)" style={{ marginTop: '2px', flexShrink: 0 }} />
                   <span><strong>Logistics fee:</strong> Free (included in plan)</span>
                 </div>
               </div>
@@ -307,15 +307,15 @@ export const MembershipPage: React.FC = () => {
               </p>
               <div style={{ marginTop: 'auto', paddingTop: '12px', borderTop: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.9rem', lineHeight: 1.45, color: '#374151' }}>
-                  <Icon name="truck" size={18} color="var(--color-primary, #740f28)" style={{ marginTop: '2px', flexShrink: 0 }} />
+                  <Truck size={16} color="var(--maroon, #740f28)" style={{ marginTop: '2px', flexShrink: 0 }} />
                   <span><strong>Area:</strong> Greater Chennai City limits</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.9rem', lineHeight: 1.45, color: '#374151' }}>
-                  <Icon name="calendar-check" size={18} color="var(--color-primary, #740f28)" style={{ marginTop: '2px', flexShrink: 0 }} />
+                  <Calendar size={16} color="var(--maroon, #740f28)" style={{ marginTop: '2px', flexShrink: 0 }} />
                   <span><strong>Schedule:</strong> Every Wednesday &amp; Saturday</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '0.9rem', lineHeight: 1.45, color: '#374151' }}>
-                  <Icon name="sparkle" size={18} color="var(--color-primary, #740f28)" style={{ marginTop: '2px', flexShrink: 0 }} />
+                  <Sparkles size={16} color="var(--maroon, #740f28)" style={{ marginTop: '2px', flexShrink: 0 }} />
                   <span><strong>Logistics fee:</strong> +₹150 / month</span>
                 </div>
               </div>

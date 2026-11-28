@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Icon } from '../components/ui/Icon';
+import { Newspaper as NewspaperIcon, Calendar, Eye, Download } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { SEO } from '../components/common/SEO';
 import { apiGet } from '../api/client';
@@ -278,7 +278,7 @@ export const NewspaperPage: React.FC = () => {
                           textAlign: 'center',
                         }}
                       >
-                        <Icon name="newspaper" size={38} weight="duotone" style={{ marginBottom: '8px' }} aria-hidden="true" />
+                        <NewspaperIcon size={38} style={{ marginBottom: '8px' }} />
                         <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           Book Buddy Chronicle
                         </span>
@@ -305,7 +305,7 @@ export const NewspaperPage: React.FC = () => {
                       </span>
                       {item.published_on && (
                         <span style={{ fontSize: '0.8rem', color: 'var(--ink-subtle, #6b7280)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <Icon name="calendar-blank" size={13} aria-hidden="true" /> {item.published_on}
+                          <Calendar size={13} /> {item.published_on}
                         </span>
                       )}
                     </div>
@@ -341,7 +341,7 @@ export const NewspaperPage: React.FC = () => {
                               textDecoration: 'none',
                             }}
                           >
-                            <Icon name="eye" size={15} aria-hidden="true" /> View / Read
+                            <Eye size={15} /> View / Read
                           </a>
                           <a
                             href={item.file_path}
@@ -361,7 +361,7 @@ export const NewspaperPage: React.FC = () => {
                             }}
                             title="Download PDF"
                           >
-                            <Icon name="download-simple" size={15} aria-hidden="true" />
+                            <Download size={15} />
                           </a>
                         </>
                       ) : (

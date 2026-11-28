@@ -67,7 +67,7 @@
 
 
 
-
+  <!-- /static/vendor/fontawesome/css/all.min.css -->
 
 
 
@@ -306,7 +306,7 @@
 
         <details {% if request.path.startswith(('/library', '/membership', '/plans', '/how-to-borrow', '/visit-us', '/books')) %}class="is-active" open{% endif %}>
 
-          <summary>Library <svg class="bb-icon" style="width:14px;height:14px;margin-left:4px;vertical-align:-1px;" aria-hidden="true"><use href="#ph-caret-down"/></svg></summary>
+          <summary>Library ▾</summary>
 
           <div class="bb8-dropdown-menu">
 
@@ -324,7 +324,7 @@
 
         <details {% if request.path.startswith(('/community', '/events', '/reading-circles', '/contests', '/newspaper', '/magazine', '/podcasts', '/publications')) %}class="is-active" open{% endif %}>
 
-          <summary><a href="/community/" style="color:inherit;text-decoration:none;">Community</a> <svg class="bb-icon" style="width:14px;height:14px;margin-left:4px;vertical-align:-1px;" aria-hidden="true"><use href="#ph-caret-down"/></svg></summary>
+          <summary><a href="/community/" style="color:inherit;text-decoration:none;">Community</a> ▾</summary>
 
           <div class="bb8-dropdown-menu">
 
@@ -338,7 +338,7 @@
 
         <details {% if request.path.startswith(('/about', '/gallery', '/collaborators', '/work-with-us', '/contact')) %}class="is-active" open{% endif %}>
 
-          <summary>Our Story <svg class="bb-icon" style="width:14px;height:14px;margin-left:4px;vertical-align:-1px;" aria-hidden="true"><use href="#ph-caret-down"/></svg></summary>
+          <summary>Our Story ▾</summary>
 
           <div class="bb8-dropdown-menu">
 

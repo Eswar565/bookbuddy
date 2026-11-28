@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { Icon } from '../ui/Icon';
+import { BookOpen, User, ShoppingBag, LogOut, Menu, X, ChevronDown } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import styles from './Navbar.module.css';
@@ -26,7 +26,7 @@ export const Navbar: React.FC = () => {
     <header className={styles.navbar}>
       <div className={styles.container}>
         <Link to="/" className={styles.brand} onClick={closeMobile}>
-          <Icon name="book-open" size={28} className={styles.brandIcon} />
+          <BookOpen className={styles.brandIcon} size={28} />
           <span>BookBuddy</span>
         </Link>
 
@@ -57,7 +57,7 @@ export const Navbar: React.FC = () => {
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}
               >
                 Community
-                <Icon name="caret-down" size={14} style={{ opacity: 0.7 }} />
+                <ChevronDown size={14} style={{ opacity: 0.7 }} />
               </NavLink>
               <div className={styles.navDropdownMenu}>
                 <NavLink to="/community/media" className={styles.dropdownItem}>
@@ -96,7 +96,7 @@ export const Navbar: React.FC = () => {
             title="Open borrow request cart"
             style={{ position: 'relative', cursor: 'pointer', background: 'transparent' }}
           >
-            <Icon name="shopping-bag" size={20} />
+            <ShoppingBag size={18} />
             {count > 0 && (
               <span
                 style={{
@@ -138,12 +138,12 @@ export const Navbar: React.FC = () => {
                   display: 'flex',
                 }}
               >
-                <Icon name="sign-out" size={18} />
+                <LogOut size={16} />
               </button>
             </div>
           ) : (
             <Link to="/login" className={styles.btnPrimary}>
-              <Icon name="user-circle" size={18} />
+              <User size={16} />
               <span>Sign In</span>
             </Link>
           )}
@@ -163,7 +163,7 @@ export const Navbar: React.FC = () => {
             }}
             className={styles.mobileHamburger}
           >
-            {mobileOpen ? <Icon name="x" size={24} /> : <Icon name="list" size={24} />}
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>

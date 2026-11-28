@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { Icon } from '../components/ui/Icon';
+import { UserPlus, AlertCircle } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -82,7 +82,7 @@ export const SignupPage: React.FC = () => {
                 gap: '8px',
               }}
             >
-              <Icon name="warning" size={16} aria-hidden="true" />
+              <AlertCircle size={16} />
               <span>{errorMsg}</span>
             </div>
           )}
@@ -180,7 +180,7 @@ export const SignupPage: React.FC = () => {
                 gap: '8px',
               }}
             >
-              <Icon name="user-plus" size={16} aria-hidden="true" />
+              <UserPlus size={16} />
               <span>{isLoading ? 'Creating Account...' : 'Complete Sign Up'}</span>
             </button>
           </form>

@@ -1,7 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Icon } from '../components/ui/Icon';
+import {
+  ShoppingBag,
+  FileSpreadsheet,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  X,
+  Heart,
+  Sliders,
+  Plus,
+  Trash2,
+} from 'lucide-react';
 import { SEO } from '../components/common/SEO';
 import '../components/ui/dropdown.css';
 import { BookCard, Book } from '../components/books/BookCard';
@@ -371,7 +382,7 @@ export const LibraryPage: React.FC = () => {
                 height: '38px',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '8px',
+                gap: '6px',
                 padding: '0 14px',
                 borderRadius: '6px',
                 border: '1px solid var(--border-color, #e2e8f0)',
@@ -382,7 +393,7 @@ export const LibraryPage: React.FC = () => {
                 cursor: 'pointer',
               }}
             >
-              <Icon name="download-simple" size={18} />
+              <FileSpreadsheet size={16} />
               <span>Download as Excel</span>
             </button>
           </div>
@@ -430,12 +441,7 @@ export const LibraryPage: React.FC = () => {
                 cursor: 'pointer',
               }}
             >
-              <Icon
-                name={wishlist.length > 0 ? 'heart-fill' : 'heart'}
-                size={18}
-                color="var(--color-primary, #740f28)"
-                weight={wishlist.length > 0 ? 'fill' : 'regular'}
-              />
+              <Heart size={16} color="var(--maroon, #7b1230)" fill={wishlist.length > 0 ? 'var(--maroon, #7b1230)' : 'none'} />
               <span>Favourites</span>
               {wishlist.length > 0 && (
                 <span
@@ -473,7 +479,7 @@ export const LibraryPage: React.FC = () => {
                 cursor: 'pointer',
               }}
             >
-              <Icon name="shopping-bag" size={18} />
+              <ShoppingBag size={16} />
               <span>Checkout</span>
               {count > 0 && (
                 <span
@@ -514,7 +520,7 @@ export const LibraryPage: React.FC = () => {
               cursor: 'pointer',
             }}
           >
-            <Icon name="funnel" size={18} />
+            <Sliders size={18} />
             <span>Filters</span>
           </button>
         </div>
@@ -553,8 +559,8 @@ export const LibraryPage: React.FC = () => {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Icon name="funnel" size={18} color="var(--color-primary, #740f28)" />
-                <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--color-primary, #740f28)', lineHeight: 1.2 }}>
+                <Sliders size={18} color="var(--maroon, #7b1230)" />
+                <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--maroon, #7b1230)', lineHeight: 1.2 }}>
                   Filters
                 </h2>
               </div>
@@ -631,7 +637,7 @@ export const LibraryPage: React.FC = () => {
                       padding: 0,
                     }}
                   >
-                    <Icon name="x" size={12} />
+                    <X size={12} />
                   </button>
                 )}
               </div>
@@ -682,7 +688,7 @@ export const LibraryPage: React.FC = () => {
                 <span id="sidebar-sort-label">
                   Sort By: {sort === 'az' ? 'A–Z' : sort === 'za' ? 'Z–A' : 'Newest'}
                 </span>
-                <Icon name="caret-down" size={14} className="dropdown-chevron" />
+                <ChevronDown size={14} className="dropdown-chevron" />
               </button>
 
               {isSortOpen && (
@@ -739,7 +745,7 @@ export const LibraryPage: React.FC = () => {
                     ? `${category}${language ? ` (${language})` : ''}`
                     : 'Categories'}
                 </span>
-                <Icon name="caret-down" size={14} className="dropdown-chevron" />
+                <ChevronDown size={14} className="dropdown-chevron" />
               </button>
 
               {isCatOpen && (
@@ -809,7 +815,7 @@ export const LibraryPage: React.FC = () => {
                       <span>Languages</span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         {language && <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--maroon, #7b1230)' }}>{language}</span>}
-                        <Icon name="caret-right" size={14} />
+                        <ChevronRight size={12} />
                       </div>
                     </button>
 
@@ -916,7 +922,7 @@ export const LibraryPage: React.FC = () => {
                       onClick={() => updateParam(chip.key, '')}
                       style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--navy, #061446)', display: 'inline-flex' }}
                     >
-                      <Icon name="x" size={12} />
+                      <X size={12} />
                     </button>
                   </span>
                 ))}
@@ -1020,7 +1026,7 @@ export const LibraryPage: React.FC = () => {
                     fontWeight: 600,
                   }}
                 >
-                  <Icon name="caret-left" size={16} /> Previous
+                  <ChevronLeft size={16} /> Previous
                 </button>
 
                 <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-muted, #64748b)' }}>
@@ -1046,7 +1052,7 @@ export const LibraryPage: React.FC = () => {
                     fontWeight: 600,
                   }}
                 >
-                  Next <Icon name="caret-right" size={16} />
+                  Next <ChevronRight size={16} />
                 </button>
               </div>
             )}
@@ -1094,7 +1100,7 @@ export const LibraryPage: React.FC = () => {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Icon name="funnel" size={18} color="var(--maroon, #7b1230)" aria-hidden="true" />
+                  <Sliders size={18} color="var(--maroon, #7b1230)" />
                   <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--maroon, #7b1230)' }}>
                     Filters
                   </h3>
@@ -1127,7 +1133,7 @@ export const LibraryPage: React.FC = () => {
                     style={{ background: 'none', border: 'none', padding: '4px', cursor: 'pointer', color: 'var(--navy, #061446)' }}
                     aria-label="Close filters"
                   >
-                    <Icon name="x" size={20} />
+                    <X size={20} />
                   </button>
                 </div>
               </div>
@@ -1176,7 +1182,7 @@ export const LibraryPage: React.FC = () => {
                           cursor: 'pointer',
                         }}
                       >
-                        <Icon name="x" size={12} />
+                        <X size={12} />
                       </button>
                     )}
                   </div>
@@ -1339,7 +1345,7 @@ export const LibraryPage: React.FC = () => {
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Icon name="heart-fill" size={20} color="var(--color-primary, #740f28)" />
+                  <Heart size={20} color="var(--maroon, #7b1230)" fill="var(--maroon, #7b1230)" />
                   <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: 'var(--navy, #061446)' }}>
                     My Favourites ({wishlist.length})
                   </h3>
@@ -1349,7 +1355,7 @@ export const LibraryPage: React.FC = () => {
                   onClick={() => setIsFavsOpen(false)}
                   style={{ background: 'none', border: 'none', padding: '4px', cursor: 'pointer', color: '#64748b' }}
                 >
-                  <Icon name="x" size={20} />
+                  <X size={20} />
                 </button>
               </div>
 
@@ -1503,7 +1509,7 @@ export const LibraryPage: React.FC = () => {
                                   cursor: isAvail ? 'pointer' : 'not-allowed',
                                 }}
                               >
-                                <Icon name="plus" size={14} /> Add
+                                <Plus size={12} /> Add
                               </button>
                               <button
                                 type="button"
@@ -1521,7 +1527,7 @@ export const LibraryPage: React.FC = () => {
                                   cursor: 'pointer',
                                 }}
                               >
-                                <Icon name="trash" size={14} /> Remove
+                                <Trash2 size={13} /> Remove
                               </button>
                             </div>
                           </div>
@@ -1531,7 +1537,7 @@ export const LibraryPage: React.FC = () => {
                   </div>
                 ) : (
                   <div style={{ textAlign: 'center', padding: '48px 16px', color: 'var(--text-muted, #64748b)' }}>
-                    <Icon name="heart" size={40} color="#cbd5e1" style={{ marginBottom: '12px' }} />
+                    <Heart size={40} color="#cbd5e1" style={{ marginBottom: '12px' }} />
                     <p style={{ margin: '0 0 8px', fontWeight: 700, color: 'var(--navy, #061446)' }}>
                       No favourites yet. Tap the heart on a book to save it.
                     </p>
@@ -1566,7 +1572,7 @@ export const LibraryPage: React.FC = () => {
                     gap: '8px',
                   }}
                 >
-                  <Icon name="shopping-bag" size={18} /> Open Checkout
+                  <ShoppingBag size={16} /> Open Checkout
                 </button>
               </div>
             </div>

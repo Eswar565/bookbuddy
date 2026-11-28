@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Icon } from '../components/ui/Icon';
+import { BookOpen, Eye, Download, Calendar } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { SEO } from '../components/common/SEO';
 import { apiGet } from '../api/client';
@@ -134,7 +134,7 @@ export const MagazinePage: React.FC = () => {
                             textAlign: 'center',
                           }}
                         >
-                          <Icon name="book-open-text" size={44} weight="duotone" style={{ marginBottom: '8px' }} aria-hidden="true" />
+                          <BookOpen size={44} style={{ marginBottom: '8px' }} />
                           <span style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase' }}>
                             Literary Magazine
                           </span>
@@ -192,7 +192,7 @@ export const MagazinePage: React.FC = () => {
                                 textDecoration: 'none',
                               }}
                             >
-                              <Icon name="eye" size={16} aria-hidden="true" /> Read Issue &rarr;
+                              <Eye size={16} /> Read Issue &rarr;
                             </a>
                             <a
                               href={featuredIssue.file_path}
@@ -211,7 +211,7 @@ export const MagazinePage: React.FC = () => {
                                 textDecoration: 'none',
                               }}
                             >
-                              <Icon name="download-simple" size={16} aria-hidden="true" /> Download PDF
+                              <Download size={16} /> Download PDF
                             </a>
                           </>
                         ) : (
@@ -282,7 +282,7 @@ export const MagazinePage: React.FC = () => {
                                 padding: '16px',
                               }}
                             >
-                              <Icon name="book-open-text" size={36} weight="duotone" style={{ marginBottom: '6px' }} aria-hidden="true" />
+                              <BookOpen size={36} style={{ marginBottom: '6px' }} />
                               <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase' }}>
                                 Magazine Archive
                               </span>
@@ -308,7 +308,7 @@ export const MagazinePage: React.FC = () => {
                             </span>
                             {item.published_on && (
                               <span style={{ fontSize: '0.8rem', color: 'var(--ink-subtle, #6b7280)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <Icon name="calendar-blank" size={13} aria-hidden="true" /> {item.published_on}
+                                <Calendar size={13} /> {item.published_on}
                               </span>
                             )}
                           </div>
@@ -362,7 +362,7 @@ export const MagazinePage: React.FC = () => {
                                   }}
                                   title="Download PDF"
                                 >
-                                  <Icon name="download-simple" size={15} aria-hidden="true" />
+                                  <Download size={15} />
                                 </a>
                               </>
                             ) : (

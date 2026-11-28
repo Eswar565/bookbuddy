@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { Icon } from '../components/ui/Icon';
+import { LogIn, AlertCircle } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -73,7 +73,7 @@ export const LoginPage: React.FC = () => {
                 gap: '8px',
               }}
             >
-              <Icon name="warning" size={16} aria-hidden="true" />
+              <AlertCircle size={16} />
               <span>{errorMsg}</span>
             </div>
           )}
@@ -128,7 +128,7 @@ export const LoginPage: React.FC = () => {
                 gap: '8px',
               }}
             >
-              <Icon name="sign-in" size={16} aria-hidden="true" />
+              <LogIn size={16} />
               <span>{isLoading ? 'Signing In...' : 'Sign In'}</span>
             </button>
           </form>

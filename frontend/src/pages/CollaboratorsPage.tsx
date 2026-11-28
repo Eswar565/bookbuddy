@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Icon } from '../components/ui/Icon';
+import { ExternalLink } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
 import { apiGet } from '../api/client';
 
@@ -123,7 +123,7 @@ export const CollaboratorsPage: React.FC = () => {
                             }}
                           >
                             <span>Visit Partner</span>
-                            <Icon name="arrow-square-out" size={14} />
+                            <ExternalLink size={13} />
                           </a>
                         )}
                       </div>

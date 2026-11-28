@@ -1,5 +1,5 @@
 import React from 'react';
-import { Icon } from '../ui/Icon';
+import { ShoppingBag } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 
 export const FloatingCheckout: React.FC = () => {
@@ -40,7 +40,7 @@ export const FloatingCheckout: React.FC = () => {
         e.currentTarget.style.boxShadow = '0 8px 24px rgba(116, 15, 40, 0.35)';
       }}
     >
-      <Icon name="shopping-bag" size={20} />
+      <ShoppingBag size={20} />
       <span>Checkout</span>
       <span
         style={{

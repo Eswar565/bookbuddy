@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Icon } from '../components/ui/Icon';
+import { Calendar, Clock, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
 import { useToast } from '../context/ToastContext';
 import { apiGet, apiPost } from '../api/client';
@@ -182,7 +182,7 @@ export const EventsPage: React.FC = () => {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                 <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--navy, #061446)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                  <Icon name="calendar-blank" size={16} /> Event Calendar
+                  <Calendar size={16} /> Event Calendar
                 </span>
                 {selectedDate && (
                   <button
@@ -214,7 +214,7 @@ export const EventsPage: React.FC = () => {
                     color: 'var(--navy, #061446)',
                   }}
                 >
-                  <Icon name="caret-left" size={16} />
+                  <ChevronLeft size={16} />
                 </button>
                 <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--navy, #061446)', margin: 0 }}>
                   {monthLabel}
@@ -236,7 +236,7 @@ export const EventsPage: React.FC = () => {
                     color: 'var(--navy, #061446)',
                   }}
                 >
-                  <Icon name="caret-right" size={16} />
+                  <ChevronRight size={16} />
                 </button>
               </div>
 
@@ -407,7 +407,7 @@ export const EventsPage: React.FC = () => {
                   border: '1px dashed var(--border-color, #e2e8f0)',
                 }}
               >
-                <Icon name="calendar-blank" size={36} color="var(--navy, #061446)" style={{ margin: '0 auto 12px', opacity: 0.4 }} />
+                <Calendar size={36} color="var(--navy, #061446)" style={{ margin: '0 auto 12px', opacity: 0.4 }} />
                 <h3 style={{ fontSize: '1.15rem', color: 'var(--navy, #061446)', margin: '0 0 6px' }}>No events found</h3>
                 <p style={{ color: 'var(--text-muted)', margin: '0 0 16px', fontSize: '0.875rem' }}>
                   {selectedDate
@@ -470,7 +470,7 @@ export const EventsPage: React.FC = () => {
                           {badgeLabel}
                         </span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                          <Icon name="calendar-blank" size={14} />
+                          <Calendar size={14} />
                           <span>{evt.event_date}</span>
                         </div>
                       </div>
@@ -482,7 +482,7 @@ export const EventsPage: React.FC = () => {
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                         {evt.event_time && (
                           <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                            <Icon name="clock" size={14} /> {evt.event_time}
+                            <Clock size={14} /> {evt.event_time}
                           </span>
                         )}
                         {evt.location && (
@@ -568,7 +568,7 @@ export const EventsPage: React.FC = () => {
                   color: 'var(--text-muted)',
                 }}
               >
-                <Icon name="x" size={20} />
+                <X size={20} />
               </button>
 
               <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--navy, #061446)', margin: '0 0 8px' }}>

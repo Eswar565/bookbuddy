@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Icon } from '../components/ui/Icon';
+import { Mail, Phone, MapPin, Send, PenTool } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
 import { useToast } from '../context/ToastContext';
 import { apiPost } from '../api/client';
@@ -113,7 +113,7 @@ export const ContactPage: React.FC = () => {
 
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <li style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                  <Icon name="map-pin" size={20} color="var(--color-primary, #740f28)" style={{ flexShrink: 0, marginTop: '3px' }} />
+                  <MapPin size={20} color="var(--maroon, #740f28)" style={{ flexShrink: 0, marginTop: '3px' }} />
                   <div>
                     <strong style={{ fontSize: '0.9rem', color: 'var(--navy)' }}>Library Address</strong>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', lineHeight: 1.5, margin: '4px 0 0' }}>
@@ -124,7 +124,7 @@ export const ContactPage: React.FC = () => {
                 </li>
 
                 <li style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                  <Icon name="phone" size={20} color="var(--color-primary, #740f28)" style={{ flexShrink: 0, marginTop: '3px' }} />
+                  <Phone size={20} color="var(--maroon, #740f28)" style={{ flexShrink: 0, marginTop: '3px' }} />
                   <div>
                     <strong style={{ fontSize: '0.9rem', color: 'var(--navy)' }}>Phone & WhatsApp</strong>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: '4px 0 0' }}>
@@ -134,7 +134,7 @@ export const ContactPage: React.FC = () => {
                 </li>
 
                 <li style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                  <Icon name="envelope-simple" size={20} color="var(--color-primary, #740f28)" style={{ flexShrink: 0, marginTop: '3px' }} />
+                  <Mail size={20} color="var(--maroon, #740f28)" style={{ flexShrink: 0, marginTop: '3px' }} />
                   <div>
                     <strong style={{ fontSize: '0.9rem', color: 'var(--navy)' }}>Email</strong>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: '4px 0 0' }}>
@@ -188,7 +188,7 @@ export const ContactPage: React.FC = () => {
                   gap: '6px',
                 }}
               >
-                <Icon name="paper-plane-tilt" size={16} /> Send an Enquiry
+                <Send size={15} /> Send an Enquiry
               </button>
               <button
                 type="button"
@@ -209,7 +209,7 @@ export const ContactPage: React.FC = () => {
                   gap: '6px',
                 }}
               >
-                <Icon name="chats-circle" size={16} /> Reader Contribution
+                <PenTool size={15} /> Reader Contribution
               </button>
             </div>
 

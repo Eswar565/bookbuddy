@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Icon } from '../ui/Icon';
+import { X, Trash2, MapPin, Truck, AlertCircle, CheckCircle, BookOpen } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
@@ -112,7 +112,7 @@ export const CheckoutModal: React.FC = () => {
               display: 'flex',
             }}
           >
-            <Icon name="x" size={20} />
+            <X size={20} />
           </button>
         </div>
 
@@ -125,7 +125,7 @@ export const CheckoutModal: React.FC = () => {
             </h3>
             {items.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-muted)' }}>
-                <Icon name="book-open" size={32} style={{ margin: '0 auto 8px', opacity: 0.5 }} />
+                <BookOpen size={32} style={{ margin: '0 auto 8px', opacity: 0.5 }} />
                 <p style={{ fontSize: '0.9rem' }}>Your borrow list is empty.</p>
               </div>
             ) : (
@@ -165,7 +165,7 @@ export const CheckoutModal: React.FC = () => {
                       onMouseEnter={(e) => (e.currentTarget.style.color = '#dc2626')}
                       onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-subtle, #64748b)')}
                     >
-                      <Icon name="trash" size={18} />
+                      <Trash2 size={16} />
                     </button>
                   </li>
                 ))}
@@ -187,7 +187,7 @@ export const CheckoutModal: React.FC = () => {
                 alignItems: 'flex-start',
               }}
             >
-              <Icon name="warning" size={20} color="#d97706" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <AlertCircle size={20} color="#d97706" style={{ flexShrink: 0, marginTop: '2px' }} />
               <div>
                 <strong style={{ fontSize: '0.9rem', color: '#92400e' }}>Account Required</strong>
                 <p style={{ fontSize: '0.825rem', color: '#b45309', margin: '4px 0 8px' }}>
@@ -241,7 +241,7 @@ export const CheckoutModal: React.FC = () => {
                 alignItems: 'flex-start',
               }}
             >
-              <Icon name="info" size={20} color="#2563eb" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <AlertCircle size={20} color="#2563eb" style={{ flexShrink: 0, marginTop: '2px' }} />
               <div>
                 <strong style={{ fontSize: '0.9rem', color: '#1e40af' }}>Active Subscription Needed</strong>
                 <p style={{ fontSize: '0.825rem', color: '#1d4ed8', margin: '4px 0 8px' }}>
@@ -280,7 +280,7 @@ export const CheckoutModal: React.FC = () => {
                 color: '#166534',
               }}
             >
-              <Icon name="check-circle" size={18} color="#16a34a" />
+              <CheckCircle size={16} color="#16a34a" />
               <span>
                 Active Plan: <strong>{activeSubscription.name}</strong> ({activeSubscription.book_limit} books at a time)
               </span>
@@ -314,7 +314,7 @@ export const CheckoutModal: React.FC = () => {
                       gap: '6px',
                     }}
                   >
-                    <Icon name="map-pin" size={18} />
+                    <MapPin size={16} />
                     <span>In-Person Pickup</span>
                   </button>
                   <button
@@ -335,7 +335,7 @@ export const CheckoutModal: React.FC = () => {
                       gap: '6px',
                     }}
                   >
-                    <Icon name="truck" size={18} />
+                    <Truck size={16} />
                     <span>Home Delivery</span>
                   </button>
                 </div>
