@@ -23,10 +23,16 @@
 }
 
 .bb-mem-container {
-  max-width: 1100px;
-  width: 92%;
+  max-width: 900px;
+  width: 100%;
   margin-inline: auto;
   box-sizing: border-box;
+}
+
+@media (max-width: 932px) {
+  .bb-mem-container {
+    padding-inline: 16px;
+  }
 }
 
 .bb-membership-title {
@@ -48,7 +54,7 @@
 
 /* Comparison Table Section */
 .bb-table-wrapper {
-  max-width: 100%;
+  max-width: 900px;
   margin-inline: auto;
   width: 100%;
   border: 1px solid var(--border, #e5e7eb);
@@ -85,7 +91,7 @@ body.folio .bb-compare-table td,
 
 /* Label Column (Column 1) */
 .bb-col-feature {
-  width: 28%;
+  width: 26%;
   min-width: 170px;
   padding: 12px 14px !important;
   text-align: left;
@@ -116,28 +122,28 @@ thead .bb-col-feature {
   color: var(--navy, #061446);
   line-height: 1.25;
   white-space: normal !important;
-  overflow-wrap: anywhere !important;
+  overflow-wrap: normal !important;
   word-break: normal !important;
 }
 
-/* Sub-label: 12px, weight 500, line-height 1.35, muted color, wrapped, 3px space above */
+/* Sub-label: 0.9rem, weight 500, line-height 1.35, muted color, wrapped, 3px space above */
 .bb-col-feature small,
 .bb-col-feature .bb-row-sub {
   display: block;
   font-family: inherit;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 500;
   color: var(--ink-subtle, #6b7280);
   line-height: 1.35;
   margin-top: 3px;
   white-space: normal !important;
-  overflow-wrap: anywhere !important;
+  overflow-wrap: normal !important;
   word-break: normal !important;
 }
 
 /* Plan Columns */
 .bb-col-plan {
-  width: calc(72% / 3);
+  width: 24.66%;
   min-width: 125px;
   padding: 12px 14px !important;
   text-align: center;
@@ -149,8 +155,8 @@ thead .bb-col-feature {
 .bb-col-plan.is-nine-months,
 th.is-nine-months,
 td.is-nine-months {
-  background-color: #f8fafc !important;
-  border-right: 2px solid var(--navy, #0b1f6b) !important;
+  background-color: var(--color-highlight, rgba(116, 15, 40, 0.035)) !important;
+  border-right: 1px solid var(--border, #e5e7eb) !important;
 }
 
 /* Column Header Styling */
@@ -190,7 +196,7 @@ td.is-nine-months {
 }
 
 .bb-plan-duration-name {
-  font-size: 1.15rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: var(--navy, #061446);
   margin: 0 0 2px;
@@ -201,7 +207,7 @@ td.is-nine-months {
 }
 
 .bb-plan-tagline {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 500;
   color: var(--ink-subtle, #6b7280);
   margin: 0;
@@ -226,7 +232,7 @@ td.is-nine-months {
 }
 
 .bb-price-sub {
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   color: var(--ink-subtle, #6b7280);
   display: block;
   margin-top: 2px;
@@ -271,7 +277,7 @@ td.is-nine-months {
 
 .bb-benefits-list li {
   font-size: 0.9rem;
-  line-height: 1.4;
+  line-height: 1.7;
   color: var(--ink, #111827);
   display: grid;
   grid-template-columns: 16px 1fr;
@@ -285,7 +291,7 @@ td.is-nine-months {
   height: 16px;
   min-width: 16px;
   min-height: 16px;
-  margin-top: 2px;
+  margin-top: 5px;
   flex-shrink: 0;
   color: var(--status-green, #059669);
 }
@@ -310,10 +316,10 @@ td.is-nine-months {
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 36px;
+  height: 42px;
   background: var(--navy, #0b1f6b);
   color: #ffffff;
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   font-weight: 700;
   border-radius: var(--radius-pill, 9999px);
   border: none;
@@ -330,7 +336,7 @@ td.is-nine-months {
 
 /* Service Modes Section */
 .bb-modes-section {
-  max-width: 1100px;
+  max-width: 900px;
   margin: 32px auto 0;
   width: 100%;
 }
@@ -699,16 +705,16 @@ td.is-nine-months {
     box-shadow: inset -12px 0 14px -10px rgba(6, 20, 70, 0.18), 0 4px 16px rgba(6, 20, 70, 0.05);
   }
   .bb-compare-table {
-    min-width: 780px;
-    width: 780px;
+    min-width: 620px;
+    width: 100%;
   }
   .bb-col-feature {
-    width: 280px;
-    min-width: 280px;
+    width: 26%;
+    min-width: 160px;
   }
   .bb-col-plan {
-    width: calc((780px - 280px) / 3);
-    min-width: 165px;
+    width: 24.66%;
+    min-width: 140px;
   }
   .bb-modes-grid {
     grid-template-columns: 1fr;

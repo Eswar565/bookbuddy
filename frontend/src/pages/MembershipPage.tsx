@@ -67,7 +67,7 @@ export const MembershipPage: React.FC = () => {
         description="Choose a flexible reading plan that fits your family. Enjoy curated children books, unlimited swaps, and doorstep delivery across Chennai."
       />
 
-      <div style={{ maxWidth: '1100px', width: '92%', margin: '0 auto', padding: '24px 0 48px' }}>
+      <div style={{ maxWidth: '900px', width: '92%', margin: '0 auto', padding: '24px 0 48px' }}>
         {/* Current Subscription Status Banner */}
         {user && activeSubscription && (
           <div

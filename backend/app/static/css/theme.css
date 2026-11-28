@@ -265,6 +265,7 @@
   --color-border: #e2e8f0;
   --color-text: #061446;
   --color-primary-soft: rgba(116, 15, 40, 0.08);
+  --color-highlight: rgba(116, 15, 40, 0.035);
   --color-surface: var(--surface-card, #ffffff);
   --color-bg: var(--surface-body, #f8fafc);
   --color-text-muted: var(--text-muted, #64748b);
