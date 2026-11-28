@@ -146,10 +146,14 @@ def get_filtered_books_for_export(db, args) -> list[dict]:
             filters.append('LOWER(' + key + ') = LOWER(?)')
             params.append(chosen[key])
 
-    if chosen['availability'] == 'available':
-        filters.append("(stock > 0)")
-    elif chosen['availability'] == 'waitlist':
-        filters.append("(stock <= 0)")
+    try:
+        from book_availability import get_availability_sql_filter, is_book_available
+    except ImportError:
+        from app.services.book_availability import get_availability_sql_filter, is_book_available
+
+    avail_filter = get_availability_sql_filter(chosen.get('availability'))
+    if avail_filter:
+        filters.append(f"({avail_filter})")
 
     if chosen['new'] == '1':
         filters.append('is_new_arrival=1')
@@ -164,14 +168,14 @@ def get_filtered_books_for_export(db, args) -> list[dict]:
 
     where = f" WHERE {' AND '.join(filters)}" if filters else ""
     rows = db.execute(
-        "SELECT id, title, author, collection, language, age_group, audience, stock, is_new_arrival FROM books" + where + " ORDER BY " + ordering,
+        "SELECT id, title, author, collection, language, age_group, audience, available_copies, stock, is_new_arrival FROM books" + where + " ORDER BY " + ordering,
         params
     ).fetchall()
 
     books = []
     for r in rows:
         b = dict(r)
-        b["availability"] = "Available" if (int(b.get("stock") or 0) > 0) else "Waitlist"
+        b["availability"] = "Available" if is_book_available(b) else "Unavailable"
         b["reader_type"] = (b.get("audience") or b.get("age_group") or "All readers").title()
         b["category"] = b.get("collection") or "General"
         books.append(b)

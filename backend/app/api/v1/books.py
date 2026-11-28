@@ -113,10 +113,14 @@ def list_books():
         conditions.append("author = ?")
         params.append(author)
 
-    if availability == "available":
-        conditions.append("available_copies > 0")
-    elif availability == "waitlist":
-        conditions.append("available_copies = 0")
+    try:
+        from book_availability import get_availability_sql_filter
+    except ImportError:
+        from app.services.book_availability import get_availability_sql_filter
+
+    avail_filter = get_availability_sql_filter(availability)
+    if avail_filter:
+        conditions.append(avail_filter)
 
     if new_only == "1":
         conditions.append("is_new_arrival = 1")
@@ -219,6 +223,11 @@ def list_favourites():
                 ids
             ).fetchall()
             books = [dict(r) for r in rows]
+            fav_avail = request.args.get("availability", "").strip().lower()
+            if fav_avail == "available":
+                books = [b for b in books if (b.get("available_copies") if b.get("available_copies") is not None else b.get("stock") or 0) > 0]
+            elif fav_avail in ("unavailable", "waitlist"):
+                books = [b for b in books if (b.get("available_copies") if b.get("available_copies") is not None else b.get("stock") or 0) <= 0]
             return jsonify({
                 "ok": True,
                 "data": {
@@ -249,6 +258,11 @@ def list_favourites():
     ).fetchall()
 
     books = [dict(r) for r in rows]
+    fav_avail = request.args.get("availability", "").strip().lower()
+    if fav_avail == "available":
+        books = [b for b in books if (b.get("available_copies") if b.get("available_copies") is not None else b.get("stock") or 0) > 0]
+    elif fav_avail in ("unavailable", "waitlist"):
+        books = [b for b in books if (b.get("available_copies") if b.get("available_copies") is not None else b.get("stock") or 0) <= 0]
     book_ids = [b["id"] for b in books]
     return jsonify({
         "ok": True,

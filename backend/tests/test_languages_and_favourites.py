@@ -64,8 +64,8 @@ def test_multilingual_book_filtering():
         book_id = book["id"]
         
         cursor.execute("UPDATE books SET language = 'English, Tamil' WHERE id = ?", (book_id,))
-        db.commit()
         sync_book_languages(db, book_id, "English, Tamil")
+        db.commit()
 
     with app.test_client() as client:
         # Search by English

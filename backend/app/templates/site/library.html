@@ -95,7 +95,7 @@
             </div>
             <div style="display:flex; align-items:center; gap:12px; margin-left:auto;">
               <a href="/library/" id="sidebar-clear-all" class="filter-clear-all js-clear-all"
-                 style="display:{% if query or filters23.new == '1' or (selected_sort and selected_sort != 'newest') or (selected_category and selected_category.lower() != 'all') or selected_lang %}inline{% else %}none{% endif %}; font-size:0.85rem; font-weight:600; color:var(--maroon); text-decoration:none; cursor:pointer;"
+                 style="display:{% if query or filters23.new == '1' or (selected_sort and selected_sort != 'newest') or (selected_category and selected_category.lower() != 'all') or selected_lang or selected_availability %}inline{% else %}none{% endif %}; font-size:0.85rem; font-weight:600; color:var(--maroon); text-decoration:none; cursor:pointer;"
                  aria-label="Clear all filters">Clear all</a>
               <button type="button" id="sidebar-drawer-close" class="mobile-drawer-close-btn" aria-label="Close filters"
                       style="display:none; background:none; border:none; font-size:24px; color:var(--navy); cursor:pointer; line-height:1; padding:0 4px;">&times;</button>
@@ -238,6 +238,48 @@
             </div>
           </div>
 
+          <!-- 5. Availability Dropdown Button -->
+          <div class="sidebar-dropdown-wrap" style="position:relative; width:100%;">
+            <button type="button" id="sidebar-avail-btn"
+                    class="sidebar-dropdown-btn dropdown-trigger"
+                    aria-label="Availability"
+                    aria-haspopup="true"
+                    aria-expanded="false">
+              <span id="sidebar-avail-label">{% if selected_availability == 'available' %}Availability: Available{% elif selected_availability in ['unavailable', 'waitlist'] %}Availability: Unavailable{% else %}Availability{% endif %}</span>
+              <svg class="bb-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+
+            <!-- Availability Dropdown Menu (role="menu") -->
+            <div id="sidebar-avail-menu" class="dropdown-menu sidebar-menu" role="menu" style="display:none;">
+              <button type="button" role="menuitem" class="dropdown-item js-avail-opt {% if not selected_availability or selected_availability == 'all' %}is-selected{% endif %}"
+                      data-value="all"
+                      aria-checked="{% if not selected_availability or selected_availability == 'all' %}true{% else %}false{% endif %}">
+                <span>All Books</span>
+                <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+              <button type="button" role="menuitem" class="dropdown-item js-avail-opt {% if selected_availability == 'available' %}is-selected{% endif %}"
+                      data-value="available"
+                      aria-checked="{% if selected_availability == 'available' %}true{% else %}false{% endif %}">
+                <span>Available</span>
+                <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+              <button type="button" role="menuitem" class="dropdown-item js-avail-opt {% if selected_availability in ['unavailable', 'waitlist'] %}is-selected{% endif %}"
+                      data-value="unavailable"
+                      aria-checked="{% if selected_availability in ['unavailable', 'waitlist'] %}true{% else %}false{% endif %}">
+                <span>Unavailable</span>
+                <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+
         </div>
       </aside>
 
@@ -267,14 +309,22 @@
         {% else %}
           <div class="bb-catalogue-empty" style="background:var(--surface-card); padding:48px 24px; text-align:center; border-radius:var(--radius-lg); border:1px dashed var(--border-color);">
             <h2 style="font-size:20px; font-weight:700; color:var(--navy); margin:0 0 8px;">
-              {% if selected_category and selected_category.lower() != 'all' %}
+              {% if selected_availability in ['unavailable', 'waitlist'] %}
+                No unavailable books right now
+              {% elif selected_availability == 'available' %}
+                No available books right now
+              {% elif selected_category and selected_category.lower() != 'all' %}
                 No books found in this category
               {% else %}
                 No matching titles
               {% endif %}
             </h2>
             <p style="color:var(--text-muted); margin:0 0 20px;">
-              {% if selected_category and selected_category.lower() != 'all' %}
+              {% if selected_availability in ['unavailable', 'waitlist'] %}
+                All of our books currently have copies available for borrowing.
+              {% elif selected_availability == 'available' %}
+                All books are currently checked out.
+              {% elif selected_category and selected_category.lower() != 'all' %}
                 Try choosing another category or clearing your active filters to explore our shelves.
               {% else %}
                 Try adjusting your filters or search keywords to discover other wonderful titles.
@@ -459,6 +509,9 @@
   var catBtn = document.getElementById('sidebar-cat-btn');
   var catMenu = document.getElementById('sidebar-cat-menu');
   var catLabel = document.getElementById('sidebar-cat-label');
+  var availBtn = document.getElementById('sidebar-avail-btn');
+  var availMenu = document.getElementById('sidebar-avail-menu');
+  var availLabel = document.getElementById('sidebar-avail-label');
   var langTrigger = document.getElementById('sidebar-languages-trigger');
   var langSubmenu = document.getElementById('sidebar-languages-submenu');
   var topLangSelect = document.getElementById('top-filter-lang');
@@ -477,12 +530,14 @@
     var sortVal = params.get('sort') || '';
     var catVal = params.get('category') || '';
     var langVal = params.get('lang') || params.get('language') || '';
+    var availVal = params.get('availability') || '';
     var hasActive = Boolean(
       qVal ||
       newVal === '1' ||
       (sortVal && sortVal !== 'newest') ||
       (catVal && catVal.toLowerCase() !== 'all') ||
-      langVal
+      langVal ||
+      availVal
     );
     clearAllLink.style.display = hasActive ? 'inline' : 'none';
   }
@@ -574,13 +629,35 @@
           if (!matched) topLangSelect.selectedIndex = 0;
         }
 
+        // Sync Availability Dropdown
+        var currentAvail = (params.get('availability') || '').toLowerCase();
+        if (availLabel) {
+          if (currentAvail === 'available') {
+            availLabel.innerText = 'Availability: Available';
+          } else if (currentAvail === 'unavailable' || currentAvail === 'waitlist') {
+            availLabel.innerText = 'Availability: Unavailable';
+          } else {
+            availLabel.innerText = 'Availability';
+          }
+        }
+        if (availMenu) {
+          availMenu.querySelectorAll('.js-avail-opt').forEach(function(item) {
+            var val = item.getAttribute('data-value');
+            var isSel = (val === 'all' && !currentAvail) ||
+                        (val === 'available' && currentAvail === 'available') ||
+                        (val === 'unavailable' && (currentAvail === 'unavailable' || currentAvail === 'waitlist'));
+            item.classList.toggle('is-selected', isSel);
+            item.setAttribute('aria-checked', isSel ? 'true' : 'false');
+          });
+        }
+
         // Sync Excel download link
-        var excelBtn = document.querySelector('.catalogue-quick .btn-excel[href*="/library/export/"]');
+        var excelBtn = document.querySelector('.catalogue-quick a[href*="/library/export/"]');
         if (excelBtn) {
           var exportParams = new URLSearchParams(params);
           exportParams.delete('page');
-          exportParams.set('format', 'xlsx');
-          excelBtn.setAttribute('href', '/library/export/?' + exportParams.toString());
+          var exportQs = exportParams.toString();
+          excelBtn.setAttribute('href', '/library/export/xlsx/' + (exportQs ? '?' + exportQs : ''));
         }
 
         // Trigger cart sync so Add/Added buttons render appropriately
@@ -673,6 +750,7 @@
 
   function openSortMenu() {
     closeCatMenu();
+    closeAvailMenu();
     if (sortMenu) {
       sortMenu.style.display = 'block';
       positionMenu(sortBtn, sortMenu);
@@ -722,6 +800,7 @@
 
   function openCatMenu() {
     closeSortMenu();
+    closeAvailMenu();
     if (catMenu) {
       catMenu.style.display = 'block';
       positionMenu(catBtn, catMenu);
@@ -791,6 +870,61 @@
     });
   }
 
+  // 5. Availability Dropdown
+  function closeAvailMenu() {
+    if (availMenu) {
+      availMenu.style.display = 'none';
+      availMenu.classList.remove('dropdown-menu--up');
+    }
+    if (availBtn) availBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  function openAvailMenu() {
+    closeSortMenu();
+    closeCatMenu();
+    if (availMenu) {
+      availMenu.style.display = 'block';
+      positionMenu(availBtn, availMenu);
+    }
+    if (availBtn) availBtn.setAttribute('aria-expanded', 'true');
+  }
+
+  if (availBtn) {
+    availBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var isOpen = availMenu && availMenu.style.display === 'block';
+      if (isOpen) closeAvailMenu();
+      else openAvailMenu();
+    });
+  }
+
+  if (availMenu) {
+    availMenu.addEventListener('click', function(e) {
+      var opt = e.target.closest('.js-avail-opt');
+      if (!opt) return;
+      var availVal = opt.getAttribute('data-value') || '';
+
+      if (availLabel) {
+        if (availVal === 'available') {
+          availLabel.innerText = 'Availability: Available';
+        } else if (availVal === 'unavailable') {
+          availLabel.innerText = 'Availability: Unavailable';
+        } else {
+          availLabel.innerText = 'Availability';
+        }
+      }
+
+      availMenu.querySelectorAll('.js-avail-opt').forEach(function(item) {
+        var isThis = item === opt;
+        item.classList.toggle('is-selected', isThis);
+        item.setAttribute('aria-checked', isThis ? 'true' : 'false');
+      });
+
+      closeAvailMenu();
+      fetchAndUpdate({ availability: (availVal === 'all' ? '' : availVal), page: 1 });
+    });
+  }
+
   // Keyboard navigation for dropdowns (Esc to close, Up/Down arrows to navigate)
   function handleDropdownKeydown(e, menu, btn, closeFn) {
     if (!menu || menu.style.display !== 'block') return;
@@ -817,6 +951,8 @@
       handleDropdownKeydown(e, sortMenu, sortBtn, closeSortMenu);
     } else if (catMenu && catMenu.style.display === 'block') {
       handleDropdownKeydown(e, catMenu, catBtn, closeCatMenu);
+    } else if (availMenu && availMenu.style.display === 'block') {
+      handleDropdownKeydown(e, availMenu, availBtn, closeAvailMenu);
     }
   });
 
@@ -854,12 +990,16 @@
     if (catMenu && !catMenu.contains(e.target) && !catBtn.contains(e.target)) {
       closeCatMenu();
     }
+    if (availMenu && !availMenu.contains(e.target) && !availBtn.contains(e.target)) {
+      closeAvailMenu();
+    }
   });
 
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
       closeSortMenu();
       closeCatMenu();
+      closeAvailMenu();
     }
   });
 
@@ -911,6 +1051,15 @@
         updates['language'] = '';
         if (topLangSelect) topLangSelect.selectedIndex = 0;
         if (catLabel) catLabel.innerText = 'Categories';
+      } else if (key === 'availability') {
+        if (availLabel) availLabel.innerText = 'Availability';
+        if (availMenu) {
+          availMenu.querySelectorAll('.js-avail-opt').forEach(function(item) {
+            var isAll = item.getAttribute('data-value') === 'all';
+            item.classList.toggle('is-selected', isAll);
+            item.setAttribute('aria-checked', isAll ? 'true' : 'false');
+          });
+        }
       }
       fetchAndUpdate(updates);
       return;
@@ -930,8 +1079,16 @@
       }
       if (sortLabel) sortLabel.innerText = 'Sort By: Newest';
       if (catLabel) catLabel.innerText = 'Categories';
+      if (availLabel) availLabel.innerText = 'Availability';
+      if (availMenu) {
+        availMenu.querySelectorAll('.js-avail-opt').forEach(function(item) {
+          var isAll = item.getAttribute('data-value') === 'all';
+          item.classList.toggle('is-selected', isAll);
+          item.setAttribute('aria-checked', isAll ? 'true' : 'false');
+        });
+      }
       if (topLangSelect) topLangSelect.selectedIndex = 0;
-      fetchAndUpdate({ q: '', new: '', sort: '', category: '', lang: '', language: '', audience: '', page: 1 });
+      fetchAndUpdate({ q: '', new: '', sort: '', category: '', lang: '', language: '', audience: '', availability: '', page: 1 });
       return;
     }
 

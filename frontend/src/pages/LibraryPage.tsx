@@ -30,6 +30,7 @@ export const LibraryPage: React.FC = () => {
   const audience = searchParams.get('audience') || '';
   const language = searchParams.get('language') || searchParams.get('lang') || '';
   const category = searchParams.get('category') || '';
+  const availability = searchParams.get('availability') || '';
   const isNew = searchParams.get('new') === '1';
   const sort = searchParams.get('sort') || 'newest';
   const page = parseInt(searchParams.get('page') || '1', 10);
@@ -39,15 +40,19 @@ export const LibraryPage: React.FC = () => {
   const [isFavsOpen, setIsFavsOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isCatOpen, setIsCatOpen] = useState(false);
+  const [isAvailOpen, setIsAvailOpen] = useState(false);
   const [isLangSubmenuOpen, setIsLangSubmenuOpen] = useState(false);
   const [isSortUp, setIsSortUp] = useState(false);
   const [isCatUp, setIsCatUp] = useState(false);
+  const [isAvailUp, setIsAvailUp] = useState(false);
   const sortBtnRef = useRef<HTMLButtonElement>(null);
   const catBtnRef = useRef<HTMLButtonElement>(null);
+  const availBtnRef = useRef<HTMLButtonElement>(null);
 
   const toggleSort = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsCatOpen(false);
+    setIsAvailOpen(false);
     if (!isSortOpen && sortBtnRef.current) {
       const rect = sortBtnRef.current.getBoundingClientRect();
       const spaceBelow = window.innerHeight - rect.bottom;
@@ -60,6 +65,7 @@ export const LibraryPage: React.FC = () => {
   const toggleCat = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsSortOpen(false);
+    setIsAvailOpen(false);
     if (!isCatOpen && catBtnRef.current) {
       const rect = catBtnRef.current.getBoundingClientRect();
       const spaceBelow = window.innerHeight - rect.bottom;
@@ -67,6 +73,19 @@ export const LibraryPage: React.FC = () => {
       setIsCatUp(spaceBelow < 328 && spaceAbove > spaceBelow);
     }
     setIsCatOpen((prev) => !prev);
+  };
+
+  const toggleAvail = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsSortOpen(false);
+    setIsCatOpen(false);
+    if (!isAvailOpen && availBtnRef.current) {
+      const rect = availBtnRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      setIsAvailUp(spaceBelow < 150 && spaceAbove > spaceBelow);
+    }
+    setIsAvailOpen((prev) => !prev);
   };
 
   // Debounce search input sync
@@ -94,12 +113,16 @@ export const LibraryPage: React.FC = () => {
         setIsCatOpen(false);
         setIsLangSubmenuOpen(false);
       }
+      if (!target.closest('.sidebar-avail-container')) {
+        setIsAvailOpen(false);
+      }
     };
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setIsSortOpen(false);
         setIsCatOpen(false);
         setIsLangSubmenuOpen(false);
+        setIsAvailOpen(false);
       } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         const activeMenu = document.querySelector('.dropdown-menu[role="menu"]');
         if (activeMenu) {
@@ -256,7 +279,7 @@ export const LibraryPage: React.FC = () => {
   };
 
   const hasActiveSidebarFilters = Boolean(
-    q || isNew || (sort && sort !== 'newest') || (category && category.toLowerCase() !== 'all') || language
+    q || isNew || (sort && sort !== 'newest') || (category && category.toLowerCase() !== 'all') || language || availability
   );
 
   const handleClearSidebarFilters = () => {
@@ -268,6 +291,7 @@ export const LibraryPage: React.FC = () => {
       category: '',
       lang: '',
       language: '',
+      availability: '',
     });
   };
 
@@ -290,6 +314,7 @@ export const LibraryPage: React.FC = () => {
   if (category && category.toLowerCase() !== 'all') activeChips.push({ key: 'category', label: `Category: ${category}` });
   if (language) activeChips.push({ key: 'language', label: `Language: ${language}` });
   if (sort && sort !== 'newest') activeChips.push({ key: 'sort', label: `Sort: ${sort === 'az' ? 'A–Z' : 'Z–A'}` });
+  if (availability) activeChips.push({ key: 'availability', label: availability === 'available' ? 'Available' : 'Unavailable' });
 
 
   // Favourites list for the drawer
@@ -881,6 +906,65 @@ export const LibraryPage: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {/* 5. Availability Dropdown */}
+            <div className="sidebar-avail-container" style={{ position: 'relative', width: '100%' }}>
+              <button
+                ref={availBtnRef}
+                type="button"
+                id="sidebar-avail-btn"
+                className="sidebar-dropdown-btn dropdown-trigger"
+                aria-label="Availability"
+                aria-haspopup="true"
+                aria-expanded={isAvailOpen}
+                onClick={toggleAvail}
+              >
+                <span id="sidebar-avail-label">
+                  {availability === 'available'
+                    ? 'Availability: Available'
+                    : availability === 'unavailable'
+                    ? 'Availability: Unavailable'
+                    : 'Availability'}
+                </span>
+                <ChevronDown size={14} className="dropdown-chevron" />
+              </button>
+
+              {isAvailOpen && (
+                <div
+                  id="sidebar-avail-menu"
+                  role="menu"
+                  className={`dropdown-menu sidebar-menu ${isAvailUp ? 'dropdown-menu--up' : ''}`}
+                >
+                  {[
+                    { val: 'all', label: 'All Books' },
+                    { val: 'available', label: 'Available' },
+                    { val: 'unavailable', label: 'Unavailable' },
+                  ].map((item) => {
+                    const isSelected = (!availability && item.val === 'all') || availability === item.val;
+                    return (
+                      <button
+                        key={item.val}
+                        type="button"
+                        role="menuitem"
+                        aria-checked={isSelected}
+                        className={`dropdown-item js-avail-opt ${isSelected ? 'is-selected' : ''}`}
+                        onClick={() => {
+                          updateParam('availability', item.val === 'all' ? '' : item.val);
+                          setIsAvailOpen(false);
+                        }}
+                      >
+                        <span>{item.label}</span>
+                        {isSelected && (
+                          <svg className="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </aside>
 
           {/* Right Main Column: Active Chips + Grid + Pagination */}
@@ -978,10 +1062,18 @@ export const LibraryPage: React.FC = () => {
                 }}
               >
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--navy, #061446)', margin: '0 0 8px' }}>
-                  {category && category.toLowerCase() !== 'all' ? 'No books found in this category' : 'No matching books found'}
+                  {availability === 'unavailable'
+                    ? 'No unavailable books right now'
+                    : availability === 'available'
+                    ? 'No available books right now'
+                    : category && category.toLowerCase() !== 'all'
+                    ? 'No books found in this category'
+                    : 'No matching books found'}
                 </h2>
                 <p style={{ color: 'var(--text-muted, #64748b)', margin: '0 0 16px', fontSize: '0.9rem' }}>
-                  {category && category.toLowerCase() !== 'all'
+                  {availability === 'unavailable'
+                    ? 'All of our books currently have copies available for borrowing.'
+                    : category && category.toLowerCase() !== 'all'
                     ? 'Try choosing another category or clearing your active filters to explore our shelves.'
                     : 'Try adjusting your filters or search keywords to find titles.'}
                 </p>
@@ -1260,6 +1352,23 @@ export const LibraryPage: React.FC = () => {
                         </option>
                       ))}
                     </optgroup>
+                  </select>
+                </div>
+
+                {/* 5. Availability */}
+                <div>
+                  <select
+                    value={availability || 'all'}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      updateParam('availability', val === 'all' ? '' : val);
+                    }}
+                    aria-label="Availability"
+                    style={{ width: '100%', height: '44px', padding: '0 10px', borderRadius: '8px', border: '1.5px solid var(--border-color)', fontSize: '13px', backgroundColor: '#ffffff' }}
+                  >
+                    <option value="all">All Books</option>
+                    <option value="available">Available</option>
+                    <option value="unavailable">Unavailable</option>
                   </select>
                 </div>
 

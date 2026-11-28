@@ -485,6 +485,7 @@ def init_db() -> None:
         """
     )
     connection.execute("CREATE INDEX IF NOT EXISTS idx_member_favourites_user ON member_favourites(user_id);")
+    connection.execute("CREATE INDEX IF NOT EXISTS idx_books_available_copies ON books(available_copies);")
 
     # Migrate and populate book_languages join table
     from languages import ensure_book_languages_table
@@ -949,10 +950,13 @@ def paged_books(*, collection_filter: bool = True) -> dict[str, Any]:
         if chosen[key]:
             filters.append('LOWER(' + key + ') = LOWER(?)')
             params.append(chosen[key])
-    if chosen['availability'] == 'available':
-        filters.append("(SELECT COUNT(*) FROM copies17 c WHERE c.book_id=books.id AND c.status='Available') > (SELECT COUNT(*) FROM lending_loans l WHERE l.book_id=books.id AND l.status='Requested')")
-    elif chosen['availability'] == 'waitlist':
-        filters.append("(SELECT COUNT(*) FROM copies17 c WHERE c.book_id=books.id AND c.status='Available') <= (SELECT COUNT(*) FROM lending_loans l WHERE l.book_id=books.id AND l.status='Requested')")
+    try:
+        from book_availability import get_availability_sql_filter
+    except ImportError:
+        from app.services.book_availability import get_availability_sql_filter
+    avail_filter = get_availability_sql_filter(chosen.get('availability'))
+    if avail_filter:
+        filters.append(avail_filter)
     if chosen['new'] == '1':
         filters.append('is_new_arrival=1')
 
@@ -1015,6 +1019,9 @@ def paged_books(*, collection_filter: bool = True) -> dict[str, Any]:
         active_chips.append({"key": "audience", "label": f'Readers: {chosen["audience"].title()}', "remove_url": catalogue_url(audience="")})
     if collection:
         active_chips.append({"key": "collection", "label": f'Collection: {collection}', "remove_url": catalogue_url(collection="")})
+    if chosen.get("availability") in ("available", "unavailable", "waitlist"):
+        avail_label = "Available" if chosen.get("availability") == "available" else "Unavailable"
+        active_chips.append({"key": "availability", "label": avail_label, "remove_url": catalogue_url(availability="")})
 
     def export_url(format="xlsx"):
         args = dict(flask_request.args)
@@ -1064,6 +1071,7 @@ def paged_books(*, collection_filter: bool = True) -> dict[str, Any]:
         "selected_category": category,
         "selected_sort": sort,
         "selected_lang": lang,
+        "selected_availability": chosen.get("availability", ""),
         "catalogue_count": count,
         "catalogue_page": page,
         "catalogue_pages": pages,
