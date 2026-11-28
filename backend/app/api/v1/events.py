@@ -28,24 +28,37 @@ def list_events():
         query += " AND event_date >= ?"
         params.append(today)
 
+    cat_clause = ""
     if event_type in ("contest", "contests"):
-        query += " AND LOWER(category) IN ('contest', 'contests')"
+        cat_clause = " AND LOWER(category) IN ('contest', 'contests')"
     elif event_type in ("reading-circle", "reading_circle", "reading-circles"):
-        query += " AND LOWER(category) IN ('reading-circle', 'reading_circle', 'reading-circles')"
+        cat_clause = " AND LOWER(category) IN ('reading-circle', 'reading_circle', 'reading-circles')"
     elif event_type in ("upcoming", "event", "events", "workshop"):
-        query += " AND (LOWER(category) IN ('upcoming', 'event', 'events', 'workshop') OR category IS NULL OR category = '')"
+        cat_clause = " AND (LOWER(category) IN ('upcoming', 'event', 'events', 'workshop') OR category IS NULL OR category = '')"
 
+    query += cat_clause
     query += " ORDER BY event_date " + ("DESC" if view == "past" else "ASC") + ", event_time ASC"
     rows = db.execute(query, params).fetchall()
     events = [dict(r) for r in rows]
     for ev in events:
         ev["seats_left"] = max(0, int(ev.get("capacity") or 0) - int(ev.get("booked_seats") or 0))
 
+    current_count = db.execute(
+        "SELECT COUNT(*) FROM events WHERE (is_active=1 OR is_active IS NULL) AND event_date >= ?" + cat_clause,
+        (today,)
+    ).fetchone()[0]
+    past_count = db.execute(
+        "SELECT COUNT(*) FROM events WHERE (is_active=1 OR is_active IS NULL) AND event_date < ?" + cat_clause,
+        (today,)
+    ).fetchone()[0]
+
     return jsonify({
         "ok": True,
         "data": {
             "events": events,
-            "count": len(events)
+            "count": len(events),
+            "current_count": current_count,
+            "past_count": past_count
         }
     })
 

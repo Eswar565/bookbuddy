@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Calendar, Clock, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
@@ -32,7 +33,15 @@ const getCategoryLabel = (category?: string) => {
 
 export const EventsPage: React.FC = () => {
   const { showToast } = useToast();
-  const [view, setView] = useState<'current' | 'past'>('current');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const view = (searchParams.get('view') === 'past' ? 'past' : 'current') as 'current' | 'past';
+  const setView = (newView: 'current' | 'past') => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('view', newView);
+      return next;
+    });
+  };
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [calendarDate, setCalendarDate] = useState<Date>(new Date());
@@ -54,7 +63,7 @@ export const EventsPage: React.FC = () => {
       if (selectedDate) params.set('date', selectedDate);
       const res = await apiGet(`/api/v1/events?${params.toString()}`);
       if (!res.ok) throw new Error(res.error?.message || 'Failed to load events');
-      return res.data?.events as EventItem[];
+      return res.data as { events: EventItem[]; count: number; current_count?: number; past_count?: number };
     },
   });
 
@@ -86,7 +95,9 @@ export const EventsPage: React.FC = () => {
     }
   };
 
-  const events = data || [];
+  const events = data?.events || [];
+  const currentCount = data?.current_count ?? (view === 'current' ? events.length : 0);
+  const pastCount = data?.past_count ?? (view === 'past' ? events.length : 0);
 
   // Calendar calculations
   const year = calendarDate.getFullYear();
@@ -168,8 +179,8 @@ export const EventsPage: React.FC = () => {
 
         {/* Layout container */}
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 320px) minmax(0, 1fr)', gap: '28px', alignItems: 'start' }}>
-          {/* Left Column: Calendar & View switch */}
-          <aside style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Left Column: Calendar */}
+          <aside style={{ display: 'flex', flexDirection: 'column', gap: 0, alignSelf: 'start' }}>
             {/* Calendar widget */}
             <div
               style={{
@@ -330,69 +341,76 @@ export const EventsPage: React.FC = () => {
               )}
             </div>
 
-            {/* View Switcher: Current vs Past */}
-            <nav aria-label="Event timeframes" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <button
-                onClick={() => setView('current')}
-                type="button"
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '12px 16px',
-                  borderRadius: '10px',
-                  border: view === 'current' ? '1.5px solid var(--navy, #061446)' : '1px solid var(--border-color, #e2e8f0)',
-                  backgroundColor: view === 'current' ? 'var(--navy, #061446)' : '#ffffff',
-                  color: view === 'current' ? '#ffffff' : 'var(--text-main, #1e293b)',
-                  fontWeight: 700,
-                  fontSize: '0.9rem',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                }}
-              >
-                <span>Current &amp; Upcoming</span>
-              </button>
-              <button
-                onClick={() => setView('past')}
-                type="button"
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '12px 16px',
-                  borderRadius: '10px',
-                  border: view === 'past' ? '1.5px solid var(--navy, #061446)' : '1px solid var(--border-color, #e2e8f0)',
-                  backgroundColor: view === 'past' ? 'var(--navy, #061446)' : '#ffffff',
-                  color: view === 'past' ? '#ffffff' : 'var(--text-main, #1e293b)',
-                  fontWeight: 700,
-                  fontSize: '0.9rem',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                }}
-              >
-                <span>Past Events</span>
-              </button>
-            </nav>
           </aside>
 
           {/* Right Column: Events Content Area */}
-          <section>
-            <div style={{ marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--navy, #061446)', margin: 0 }}>
-                {view === 'past' ? 'Past Events & Contests' : 'Upcoming Events & Contests'}
-              </h2>
-              {selectedDate && (
-                <p style={{ fontSize: '0.85rem', color: 'var(--maroon, #740f28)', fontWeight: 600, margin: '6px 0 0' }}>
-                  Filtered for date: {selectedDate} —{' '}
-                  <button
-                    onClick={() => setSelectedDate(null)}
-                    type="button"
-                    style={{ background: 'none', border: 'none', color: 'var(--navy, #061446)', textDecoration: 'underline', cursor: 'pointer', padding: 0 }}
-                  >
-                    Show all days
-                  </button>
-                </p>
-              )}
+          <section id="events-tabpanel" role="tabpanel">
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '16px',
+                flexWrap: 'wrap',
+                marginBottom: '20px',
+              }}
+            >
+              <div>
+                <h2 style={{ fontFamily: 'var(--font-heading, "Fraunces", Georgia, serif)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--navy, #061446)', margin: 0 }}>
+                  {view === 'past' ? 'Past Events & Contests' : 'Upcoming Events & Contests'}
+                </h2>
+                {selectedDate && (
+                  <p style={{ fontFamily: 'var(--font-body, "Nunito", sans-serif)', fontSize: '0.85rem', color: 'var(--maroon, #740f28)', fontWeight: 600, margin: '6px 0 0' }}>
+                    Filtered for date: {selectedDate} —{' '}
+                    <button
+                      onClick={() => setSelectedDate(null)}
+                      type="button"
+                      style={{ background: 'none', border: 'none', color: 'var(--navy, #061446)', textDecoration: 'underline', cursor: 'pointer', padding: 0 }}
+                    >
+                      Show all days
+                    </button>
+                  </p>
+                )}
+              </div>
+
+              {/* Compact Segmented Control (Pill Toggle) */}
+              <div
+                className="events-view-switcher"
+                role="tablist"
+                aria-label="Event timeframes"
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    setView(view === 'current' ? 'past' : 'current');
+                  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    setView(view === 'current' ? 'past' : 'current');
+                  }
+                }}
+              >
+                <button
+                  onClick={() => setView('current')}
+                  type="button"
+                  role="tab"
+                  className={`events-view-tab ${view !== 'past' ? 'is-active' : ''}`}
+                  aria-selected={view !== 'past'}
+                  tabIndex={view !== 'past' ? 0 : -1}
+                >
+                  <span>Current &amp; Upcoming</span>
+                  <span className="count-badge">{currentCount}</span>
+                </button>
+                <button
+                  onClick={() => setView('past')}
+                  type="button"
+                  role="tab"
+                  className={`events-view-tab ${view === 'past' ? 'is-active' : ''}`}
+                  aria-selected={view === 'past'}
+                  tabIndex={view === 'past' ? 0 : -1}
+                >
+                  <span>Past Events</span>
+                  <span className="count-badge">{pastCount}</span>
+                </button>
+              </div>
             </div>
 
             {isLoading ? (
@@ -503,18 +521,9 @@ export const EventsPage: React.FC = () => {
                           <button
                             onClick={() => setRegisterEvent(evt)}
                             type="button"
-                            style={{
-                              backgroundColor: 'var(--navy, #061446)',
-                              color: '#ffffff',
-                              border: 'none',
-                              borderRadius: '8px',
-                              padding: '8px 18px',
-                              fontWeight: 600,
-                              fontSize: '0.875rem',
-                              cursor: 'pointer',
-                            }}
+                            className="btn-book-event"
                           >
-                            View &amp; Register &rarr;
+                            {getCategoryLabel(evt.category) === 'Contest' ? 'Join contest \u2192' : 'Register \u2192'}
                           </button>
                         ) : (
                           <span style={{ fontSize: '0.8rem', color: 'var(--text-subtle)', fontStyle: 'italic' }}>

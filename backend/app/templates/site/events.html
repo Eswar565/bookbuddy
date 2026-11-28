@@ -89,35 +89,45 @@
             {% endif %}
           </div>
         </div>
-
-        <!-- Vertical Menu: Current Events & Past Events -->
-        <nav class="events-nav-menu" aria-label="Event timeframes">
-          <a href="/events/?view=current{% if event_type %}&amp;type={{ event_type }}{% endif %}{% if chosen_date %}&amp;date={{ chosen_date }}{% endif %}{% if home_calendar.month %}&amp;month={{ home_calendar.month }}{% endif %}"
-             class="events-nav-item {% if view != 'past' %}is-active{% endif %}">
-            <span>Current &amp; Upcoming</span>
-            <span class="count-badge">{{ current_count }}</span>
-          </a>
-          <a href="/events/?view=past{% if event_type %}&amp;type={{ event_type }}{% endif %}{% if chosen_date %}&amp;date={{ chosen_date }}{% endif %}{% if home_calendar.month %}&amp;month={{ home_calendar.month }}{% endif %}"
-             class="events-nav-item {% if view == 'past' %}is-active{% endif %}">
-            <span>Past Events</span>
-            <span class="count-badge">{{ past_count }}</span>
-          </a>
-        </nav>
       </aside>
 
       <!-- RIGHT COLUMN: Events Content Area -->
-      <section class="events-content-area">
-        <!-- Content Header -->
-        <div class="events-content-header" style="margin-bottom:20px;">
-          <div>
-            <h2 style="font-size:1.35rem; font-weight:700; color:var(--navy); margin:0;">
+      <section class="events-content-area" id="events-tabpanel" role="tabpanel">
+        <!-- Content Header with Flex Row and Segmented Control Switcher -->
+        <div class="events-content-header">
+          <div class="events-heading-group">
+            <h2 class="events-section-title">
               {% if view == 'past' %}Past Events &amp; Contests{% else %}Upcoming Events &amp; Contests{% endif %}
             </h2>
             {% if chosen_date %}
-            <p style="font-size:13px; color:var(--maroon); font-weight:600; margin:6px 0 0;">
-              Filtered for date: {{ chosen_date }} — <a href="/events/?view={{ view }}{% if event_type %}&amp;type={{ event_type }}{% endif %}{% if home_calendar.month %}&amp;month={{ home_calendar.month }}{% endif %}" style="color:var(--navy); text-decoration:underline;">Show all days</a>
+            <p class="events-date-filter-note">
+              Filtered for date: {{ chosen_date }} — <a href="/events/?view={{ view }}{% if event_type %}&amp;type={{ event_type }}{% endif %}{% if home_calendar.month %}&amp;month={{ home_calendar.month }}{% endif %}">Show all days</a>
             </p>
             {% endif %}
+          </div>
+
+          <!-- Compact Segmented Control (Pill Toggle) -->
+          <div class="events-view-switcher" role="tablist" aria-label="Event timeframes">
+            <a href="/events/?view=current{% if event_type %}&amp;type={{ event_type }}{% endif %}{% if chosen_date %}&amp;date={{ chosen_date }}{% endif %}{% if home_calendar.month %}&amp;month={{ home_calendar.month }}{% endif %}"
+               class="events-view-tab {% if view != 'past' %}is-active{% endif %}"
+               role="tab"
+               aria-selected="{% if view != 'past' %}true{% else %}false{% endif %}"
+               tabindex="{% if view != 'past' %}0{% else %}-1{% endif %}"
+               id="tab-current"
+               aria-controls="events-tabpanel">
+              <span>Current &amp; Upcoming</span>
+              <span class="count-badge">{{ current_count }}</span>
+            </a>
+            <a href="/events/?view=past{% if event_type %}&amp;type={{ event_type }}{% endif %}{% if chosen_date %}&amp;date={{ chosen_date }}{% endif %}{% if home_calendar.month %}&amp;month={{ home_calendar.month }}{% endif %}"
+               class="events-view-tab {% if view == 'past' %}is-active{% endif %}"
+               role="tab"
+               aria-selected="{% if view == 'past' %}true{% else %}false{% endif %}"
+               tabindex="{% if view == 'past' %}0{% else %}-1{% endif %}"
+               id="tab-past"
+               aria-controls="events-tabpanel">
+              <span>Past Events</span>
+              <span class="count-badge">{{ past_count }}</span>
+            </a>
           </div>
         </div>
 
@@ -182,7 +192,7 @@
                       {% if event.fee %}₹{{ event.fee|int }} / seat{% else %}Free Admission{% endif %}
                     </span>
                     <a href="/events/{{ event.id }}/" class="btn-book-event">
-                      View &amp; Register &rarr;
+                      {% if event.category in ('contest', 'contests') %}Join contest &rarr;{% else %}Register &rarr;{% endif %}
                     </a>
                   {% endif %}
                 </div>
@@ -211,4 +221,27 @@
     </div>
   </div>
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var switcher = document.querySelector('.events-view-switcher[role="tablist"]');
+  if (!switcher) return;
+  var tabs = Array.from(switcher.querySelectorAll('[role="tab"]'));
+  switcher.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      var idx = tabs.indexOf(document.activeElement);
+      var next = tabs[(idx + 1) % tabs.length];
+      next.focus();
+      next.click();
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      var idx = tabs.indexOf(document.activeElement);
+      var prev = tabs[(idx - 1 + tabs.length) % tabs.length];
+      prev.focus();
+      prev.click();
+    }
+  });
+});
+</script>
 {% endblock %}
