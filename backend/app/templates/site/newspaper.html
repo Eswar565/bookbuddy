@@ -3,170 +3,195 @@
 {% block title %}The Chronicle Archive · Book Buddy Newspaper{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/static/css/bb-media.css?v=2">
+<link rel="stylesheet" href="/static/css/bb-media.css?v=3">
 {% endblock %}
 
 {% block body %}
-<main class="bb-media-page" style="padding: 2.5rem 1rem 4rem; background-color: var(--tint, #fdfbf7);">
-  <div class="bb-media-container" style="max-width: 1140px; margin: 0 auto;">
+<main class="bb-media-page">
+  <div class="bb-media-container">
     <!-- Breadcrumb -->
-    <nav style="font-size: 0.85rem; margin-bottom: 16px; color: var(--ink-subtle, #6b7280);" aria-label="Breadcrumb">
-      <a href="/media/" style="color: var(--navy, #061446); text-decoration: none; font-weight: 600;">Media Hub</a>
-      <span style="margin: 0 6px;">/</span>
+    <nav class="bb-media-breadcrumb" aria-label="Breadcrumb">
+      <a href="/media/">Media Hub</a>
+      <span class="bb-breadcrumb-sep">/</span>
       <span>Newspapers</span>
     </nav>
 
-    <!-- Header with Pill, Heading and Subtitle -->
-    <header class="bb-media-header" style="margin-bottom: 28px;">
+    <!-- Header with Pill, Heading and Subtitle (Full Width) -->
+    <header class="bb-media-header">
       <div class="bb-media-header-left">
-        <span class="bb-media-pill" style="display:inline-block; font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:var(--maroon, #740f28); background:rgba(116, 15, 40, 0.08); padding:4px 14px; border-radius:20px; margin-bottom:8px;">
+        <span class="bb-media-pill">
           Press &amp; Media
         </span>
-        <h1 class="bb-media-title" style="font-size: 2.2rem; font-weight: 800; color: var(--navy, #061446); margin: 0 0 6px;">
-          The <span class="bb-accent" style="color: var(--maroon, #740f28);">Chronicle</span> Archive
+        <h1 class="bb-media-title">
+          The <span class="bb-accent">Chronicle</span> Archive
         </h1>
       </div>
-      <p class="bb-media-subtitle" style="color: var(--ink-subtle, #4b5563); font-size: 1rem; margin: 0;">
+      <p class="bb-media-subtitle">
         Exploring stories, journalism, and student voices from our reading community.
       </p>
     </header>
 
-    <!-- Filter Bar (Year / Month) -->
-    <div style="background: #ffffff; border: 1px solid var(--border, #e5e7eb); border-radius: 12px; padding: 16px 20px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; box-shadow: 0 2px 8px rgba(6, 20, 70, 0.04);">
-      <form method="get" action="/newspaper/" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-        <label style="font-size: 0.875rem; font-weight: 700; color: var(--navy, #061446);">Filter Editions:</label>
-        
-        <select name="year" style="padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border, #e5e7eb); font-size: 0.875rem; color: var(--ink, #111827); background: #ffffff;">
-          <option value="">All Years</option>
-          {% for y in available_years %}
-            <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
-          {% endfor %}
-        </select>
+    <!-- Two-Column Grid: Sticky Sidebar + Editions Grid -->
+    <div class="bb-media-layout">
+      <!-- Left Column: Sticky Filter Sidebar -->
+      <aside class="filter-sidebar" aria-label="Filter archive editions">
+        <form method="get" action="/newspaper/" class="filter-sidebar-form" id="newspaper-filter-form">
+          <h2 class="filter-sidebar-title">Filter editions</h2>
 
-        <select name="month" style="padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border, #e5e7eb); font-size: 0.875rem; color: var(--ink, #111827); background: #ffffff;">
-          <option value="">All Months</option>
-          <option value="1" {% if selected_month == '1' %}selected{% endif %}>January</option>
-          <option value="2" {% if selected_month == '2' %}selected{% endif %}>February</option>
-          <option value="3" {% if selected_month == '3' %}selected{% endif %}>March</option>
-          <option value="4" {% if selected_month == '4' %}selected{% endif %}>April</option>
-          <option value="5" {% if selected_month == '5' %}selected{% endif %}>May</option>
-          <option value="6" {% if selected_month == '6' %}selected{% endif %}>June</option>
-          <option value="7" {% if selected_month == '7' %}selected{% endif %}>July</option>
-          <option value="8" {% if selected_month == '8' %}selected{% endif %}>August</option>
-          <option value="9" {% if selected_month == '9' %}selected{% endif %}>September</option>
-          <option value="10" {% if selected_month == '10' %}selected{% endif %}>October</option>
-          <option value="11" {% if selected_month == '11' %}selected{% endif %}>November</option>
-          <option value="12" {% if selected_month == '12' %}selected{% endif %}>December</option>
-        </select>
+          <!-- Year select -->
+          <div class="filter-field">
+            <label for="filter-year" class="sr-only">Year</label>
+            <select name="year" id="filter-year" class="filter-select">
+              <option value="">All years</option>
+              {% for y in available_years %}
+                <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
+              {% endfor %}
+            </select>
+          </div>
 
-        <button type="submit" style="padding: 8px 16px; border-radius: 8px; border: none; background: var(--navy, #061446); color: #ffffff; font-weight: 700; font-size: 0.875rem; cursor: pointer;">
-          Apply Filter
-        </button>
+          <!-- Month select -->
+          <div class="filter-field">
+            <label for="filter-month" class="sr-only">Month</label>
+            <select name="month" id="filter-month" class="filter-select">
+              <option value="">All months</option>
+              <option value="1" {% if selected_month == '1' %}selected{% endif %}>January</option>
+              <option value="2" {% if selected_month == '2' %}selected{% endif %}>February</option>
+              <option value="3" {% if selected_month == '3' %}selected{% endif %}>March</option>
+              <option value="4" {% if selected_month == '4' %}selected{% endif %}>April</option>
+              <option value="5" {% if selected_month == '5' %}selected{% endif %}>May</option>
+              <option value="6" {% if selected_month == '6' %}selected{% endif %}>June</option>
+              <option value="7" {% if selected_month == '7' %}selected{% endif %}>July</option>
+              <option value="8" {% if selected_month == '8' %}selected{% endif %}>August</option>
+              <option value="9" {% if selected_month == '9' %}selected{% endif %}>September</option>
+              <option value="10" {% if selected_month == '10' %}selected{% endif %}>October</option>
+              <option value="11" {% if selected_month == '11' %}selected{% endif %}>November</option>
+              <option value="12" {% if selected_month == '12' %}selected{% endif %}>December</option>
+            </select>
+          </div>
 
-        {% if selected_year or selected_month %}
-          <a href="/newspaper/" style="font-size: 0.85rem; color: var(--maroon, #740f28); text-decoration: none; font-weight: 600;">
-            Clear Filter
-          </a>
-        {% endif %}
-      </form>
+          <!-- Results count & Clear filters link -->
+          <div class="filter-results-wrap">
+            <div class="filter-results-count" id="filter-results-count">
+              Showing <strong>{{ publications|length }}</strong> of <strong>{{ total_count }}</strong> editions
+            </div>
+            <a href="/newspaper/" class="filter-clear-link" id="filter-clear-btn" {% if not selected_year and not selected_month %}style="display: none;"{% endif %}>
+              Clear filters
+            </a>
+          </div>
 
-      <span style="font-size: 0.875rem; color: var(--ink-subtle, #6b7280);">
-        Showing <strong>{{ publications|length }}</strong> of <strong>{{ total_count }}</strong> editions
-      </span>
-    </div>
+          <!-- Visually hidden submit for no-JS fallback -->
+          <button type="submit" class="sr-only">Apply Filter</button>
+        </form>
+      </aside>
 
-    <!-- Newspaper Issues Grid -->
-    {% if publications %}
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; margin-bottom: 36px;" role="feed" aria-label="Newspaper issues archive">
-      {% for item in publications %}
-      <article style="background: #ffffff; border: 1px solid var(--border, #e5e7eb); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(6, 20, 70, 0.05); display: flex; flex-direction: column;" id="issue-{{ item.id }}">
-        <!-- Cover preview image -->
-        <div style="width: 100%; aspect-ratio: 16/10; background: var(--tint, #fdfbf7); position: relative; overflow: hidden; border-bottom: 1px solid var(--border, #e5e7eb);">
-          {% if item.cover_path %}
-            <img src="{{ item.cover_path if item.cover_path.startswith(('http', '/')) else '/' ~ item.cover_path }}" alt="{{ item.title }} cover" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy">
+      <!-- Right Column: Editions Content -->
+      <div class="bb-media-content">
+        <div class="bb-editions-container" id="editions-container">
+          {% if publications %}
+            <div class="bb-editions-grid" id="editions-grid" role="feed" aria-label="Newspaper issues archive">
+              {% for item in publications %}
+              <article class="bb-newspaper-card-item" id="issue-{{ item.id }}">
+                <!-- Cover preview image in 3:4 frame -->
+                <div class="bb-newspaper-cover-frame">
+                  {% if item.cover_path %}
+                    <img src="{{ item.cover_path if item.cover_path.startswith(('http', '/')) else '/' ~ item.cover_path }}" 
+                         alt="{{ item.title }} cover" 
+                         class="bb-newspaper-cover-img" 
+                         loading="lazy">
+                  {% else %}
+                    <div class="bb-newspaper-cover-placeholder">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-bottom: 8px;">
+                        <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+                        <path d="M18 14h-8"/>
+                        <path d="M15 18h-5"/>
+                        <path d="M10 6h8v4h-8V6Z"/>
+                      </svg>
+                      <span class="bb-newspaper-placeholder-title">Book Buddy Chronicle</span>
+                    </div>
+                  {% endif %}
+                </div>
+
+                <!-- Issue Details -->
+                <div class="bb-newspaper-card-body">
+                  <div class="bb-newspaper-card-meta-top">
+                    <span class="bb-newspaper-vol-pill">
+                      {{ item.volume or 'VOLUME 01' }} · {{ item.issue_number or item.edition or 'ISSUE 01' }}
+                    </span>
+                    {% if item.published_on %}
+                      <span class="bb-newspaper-date">
+                        {{ item.published_on }}
+                      </span>
+                    {% endif %}
+                  </div>
+
+                  <h2 class="bb-newspaper-card-title">
+                    {{ item.title }}
+                  </h2>
+
+                  <p class="bb-newspaper-card-desc">
+                    {{ item.description or 'A fresh edition of the Book Buddy community newspaper.' }}
+                  </p>
+
+                  <!-- Action Buttons -->
+                  <div class="bb-newspaper-card-actions">
+                    {% if item.file_path %}
+                      <a href="/publications/{{ item.id }}/view/" target="_blank" rel="noopener noreferrer" class="bb-btn-read">
+                        View / Read
+                      </a>
+                      <a href="/publications/{{ item.id }}/download/" class="bb-btn-download" title="Download PDF">
+                        Download
+                      </a>
+                    {% else %}
+                      <a href="/newspaper/" class="bb-btn-read bb-btn-read-full">
+                        View / Read
+                      </a>
+                    {% endif %}
+                  </div>
+                </div>
+              </article>
+              {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if total_pages > 1 %}
+            <nav class="bb-media-pagination" id="editions-pagination" aria-label="Newspaper pagination">
+              {% if current_page > 1 %}
+                <a href="?page={{ current_page - 1 }}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}" class="bb-page-btn bb-page-nav">
+                  &larr; Previous
+                </a>
+              {% endif %}
+
+              {% for p in range(1, total_pages + 1) %}
+                <a href="?page={{ p }}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}" class="bb-page-btn {% if p == current_page %}is-active{% endif %}">
+                  {{ p }}
+                </a>
+              {% endfor %}
+
+              {% if current_page < total_pages %}
+                <a href="?page={{ current_page + 1 }}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}" class="bb-page-btn bb-page-nav">
+                  Next &rarr;
+                </a>
+              {% endif %}
+            </nav>
+            {% endif %}
+
           {% else %}
-            <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(6, 20, 70, 0.04); color: var(--navy, #061446); padding: 20px; text-align: center;">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-bottom: 8px;">
-                <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
-                <path d="M18 14h-8"/>
-                <path d="M15 18h-5"/>
-                <path d="M10 6h8v4h-8V6Z"/>
-              </svg>
-              <span style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--navy, #061446);">Book Buddy Chronicle</span>
+            <!-- Empty state when no issues match -->
+            <div class="bb-media-empty-card" id="editions-empty">
+              <h3 class="bb-media-empty-title">No newspaper issues found</h3>
+              <p class="bb-media-empty-desc">Try adjusting your filter or check back soon for new editions!</p>
+              {% if selected_year or selected_month %}
+                <button type="button" class="bb-btn-reset-filter" id="empty-clear-btn">
+                  Reset filters
+                </button>
+              {% endif %}
             </div>
           {% endif %}
         </div>
-
-        <!-- Issue Details -->
-        <div style="padding: 20px; display: flex; flex-direction: column; flex-grow: 1;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--maroon, #740f28); background: rgba(116, 15, 40, 0.08); padding: 2px 8px; border-radius: 12px;">
-              {{ item.volume or 'VOLUME 01' }} · {{ item.issue_number or item.edition or 'ISSUE 01' }}
-            </span>
-            {% if item.published_on %}
-              <span style="font-size: 0.8rem; color: var(--ink-subtle, #6b7280);">
-                {{ item.published_on }}
-              </span>
-            {% endif %}
-          </div>
-
-          <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--navy, #061446); margin: 0 0 8px; line-height: 1.35;">
-            {{ item.title }}
-          </h2>
-
-          <p style="font-size: 0.85rem; color: var(--ink-subtle, #4b5563); line-height: 1.5; margin: 0 0 20px; flex-grow: 1;">
-            {{ item.description or 'A fresh edition of the Book Buddy community newspaper.' }}
-          </p>
-
-          <!-- Action Buttons -->
-          <div style="display: flex; gap: 8px; margin-top: auto;">
-            {% if item.file_path %}
-              <a href="/publications/{{ item.id }}/view/" target="_blank" rel="noopener noreferrer" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--maroon, #740f28); color: #ffffff; padding: 9px 14px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
-                View / Read
-              </a>
-              <a href="/publications/{{ item.id }}/download/" style="display: inline-flex; align-items: center; justify-content: center; background: #ffffff; border: 1px solid var(--border, #e5e7eb); color: var(--navy, #061446); padding: 9px 12px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none;" title="Download PDF">
-                Download
-              </a>
-            {% else %}
-              <a href="/newspaper/" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; background: var(--navy, #061446); color: #ffffff; padding: 9px 14px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-decoration: none;">
-                View / Read
-              </a>
-            {% endif %}
-          </div>
-        </div>
-      </article>
-      {% endfor %}
+      </div>
     </div>
-
-    <!-- Pagination -->
-    {% if total_pages > 1 %}
-    <nav style="display: flex; justify-content: center; align-items: center; gap: 8px; margin: 32px 0;" aria-label="Newspaper pagination">
-      {% if current_page > 1 %}
-        <a href="?page={{ current_page - 1 }}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}" style="padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border, #e5e7eb); background: #ffffff; color: var(--navy, #061446); text-decoration: none; font-weight: 700; font-size: 0.85rem;">
-          &larr; Previous
-        </a>
-      {% endif %}
-
-      {% for p in range(1, total_pages + 1) %}
-        <a href="?page={{ p }}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}" style="padding: 8px 12px; border-radius: 8px; border: 1px solid {% if p == current_page %}var(--maroon, #740f28){% else %}var(--border, #e5e7eb){% endif %}; background: {% if p == current_page %}var(--maroon, #740f28){% else %}#ffffff{% endif %}; color: {% if p == current_page %}#ffffff{% else %}var(--ink, #111827){% endif %}; text-decoration: none; font-weight: 700; font-size: 0.85rem;">
-          {{ p }}
-        </a>
-      {% endfor %}
-
-      {% if current_page < total_pages %}
-        <a href="?page={{ current_page + 1 }}{% if selected_year %}&year={{ selected_year }}{% endif %}{% if selected_month %}&month={{ selected_month }}{% endif %}" style="padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border, #e5e7eb); background: #ffffff; color: var(--navy, #061446); text-decoration: none; font-weight: 700; font-size: 0.85rem;">
-          Next &rarr;
-        </a>
-      {% endif %}
-    </nav>
-    {% endif %}
-
-    {% else %}
-    <div style="background:#fff; border:1px solid rgba(6,20,70,0.08); border-radius:14px; padding:48px; text-align:center;">
-      <h3 style="font-family:var(--font-main); color:#061446; margin:0 0 8px;">No newspaper issues found</h3>
-      <p style="color:#64748b; margin:0;">Try adjusting your filter or check back soon for new editions!</p>
-    </div>
-    {% endif %}
   </div>
 </main>
+
+<script src="/static/js/bb-media.js?v=3" defer></script>
 {% endblock %}

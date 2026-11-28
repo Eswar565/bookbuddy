@@ -145,3 +145,122 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 });
+
+
+// ==========================================================================
+// Filter Editions live update with URL sync (Shared Component)
+// ==========================================================================
+(function initEditionFilters() {
+  function setup() {
+    const form = document.querySelector('.filter-sidebar-form');
+    if (!form) return;
+
+    const yearSelect = form.querySelector('select[name="year"]');
+    const monthSelect = form.querySelector('select[name="month"]');
+    const clearLink = document.querySelector('#filter-clear-btn');
+    const container = document.querySelector('#editions-container');
+    const countDisplay = document.querySelector('#filter-results-count');
+
+    function updateFilters(pushToHistory) {
+      if (typeof pushToHistory === 'undefined') pushToHistory = true;
+
+      const year = yearSelect ? yearSelect.value.trim() : '';
+      const month = monthSelect ? monthSelect.value.trim() : '';
+
+      const params = new URLSearchParams();
+      if (year) params.set('year', year);
+      if (month) params.set('month', month);
+
+      const queryString = params.toString();
+      const targetUrl = window.location.pathname + (queryString ? '?' + queryString : '');
+
+      if (pushToHistory) {
+        window.history.pushState({ year: year, month: month }, '', targetUrl);
+      }
+
+      if (clearLink) {
+        clearLink.style.display = (year || month) ? 'inline-block' : 'none';
+      }
+
+      if (container) {
+        container.style.opacity = '0.5';
+        container.style.pointerEvents = 'none';
+      }
+
+      fetch(targetUrl, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+        .then(function (res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.text();
+        })
+        .then(function (html) {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+
+          const newContainer = doc.querySelector('#editions-container');
+          if (newContainer && container) {
+            container.innerHTML = newContainer.innerHTML;
+          }
+
+          const newCount = doc.querySelector('#filter-results-count');
+          if (newCount && countDisplay) {
+            countDisplay.innerHTML = newCount.innerHTML;
+          }
+        })
+        .catch(function (err) {
+          console.error('Filter live update failed, falling back to submit:', err);
+          form.submit();
+        })
+        .finally(function () {
+          if (container) {
+            container.style.opacity = '1';
+            container.style.pointerEvents = '';
+          }
+        });
+    }
+
+    if (yearSelect) {
+      yearSelect.addEventListener('change', function () {
+        updateFilters(true);
+      });
+    }
+
+    if (monthSelect) {
+      monthSelect.addEventListener('change', function () {
+        updateFilters(true);
+      });
+    }
+
+    if (clearLink) {
+      clearLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (yearSelect) yearSelect.value = '';
+        if (monthSelect) monthSelect.value = '';
+        updateFilters(true);
+      });
+    }
+
+    document.addEventListener('click', function (e) {
+      if (e.target && e.target.id === 'empty-clear-btn') {
+        e.preventDefault();
+        if (yearSelect) yearSelect.value = '';
+        if (monthSelect) monthSelect.value = '';
+        updateFilters(true);
+      }
+    });
+
+    window.addEventListener('popstate', function () {
+      const params = new URLSearchParams(window.location.search);
+      if (yearSelect) yearSelect.value = params.get('year') || '';
+      if (monthSelect) monthSelect.value = params.get('month') || '';
+      updateFilters(false);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+})();
