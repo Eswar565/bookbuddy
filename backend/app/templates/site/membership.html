@@ -233,7 +233,7 @@
         <div class="bb-form-section">
           <div class="bb-field-group">
             <label for="tier-select">Select your tier <span class="req">*</span></label>
-            <select name="plan_id" id="tier-select" required>
+            <select name="plan_id" id="tier-select" class="js-custom-select" required>
               <!-- Populated dynamically via JS -->
             </select>
           </div>
@@ -256,7 +256,7 @@
 
           <div class="bb-field-group">
             <label for="student_grade">Student Grade <span class="req">*</span></label>
-            <select name="student_grade" id="student_grade" required>
+            <select name="student_grade" id="student_grade" class="js-custom-select" required>
               <option value="" disabled selected>-- Select Grade --</option>
               <option value="Pre-KG / LKG / UKG">Pre-KG / LKG / UKG</option>
               <option value="Class 1 to 3">Class 1 to 3</option>
@@ -291,7 +291,7 @@
           
           <div class="bb-field-group">
             <label for="service_mode">Service Mode <span class="req">*</span></label>
-            <select name="service_mode" id="service_mode" required>
+            <select name="service_mode" id="service_mode" class="js-custom-select" required>
               <option value="offline" selected>Offline (Self-Pickup): Free</option>
               <option value="online">Online (Doorstep Delivery): +₹{{ delivery_fee_monthly }}/month</option>
             </select>

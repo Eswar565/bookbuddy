@@ -265,6 +265,10 @@
   --color-border: #e2e8f0;
   --color-text: #061446;
   --color-primary-soft: rgba(116, 15, 40, 0.08);
+  --color-surface: var(--surface-card, #ffffff);
+  --color-bg: var(--surface-body, #f8fafc);
+  --color-text-muted: var(--text-muted, #64748b);
+  --color-danger: #dc2626;
 
   --gold: #d97706;
   --gold-tint: #fef3c7;
@@ -288,7 +292,7 @@
   /* Radii */
   --radius-xs: 4px;
   --radius-sm: 6px;
-  --radius-md: 10px;
+  --radius-md: 12px;
   --radius-lg: 14px;
   --radius-xl: 20px;
   --radius-pill: 9999px;
@@ -466,10 +470,10 @@ small, .small, .text-small, .text-sm, .text-muted, .caption,
    ========================================================================== */
 .bb8-dropdown.is-active > summary,
 .bb8-dropdown summary.is-active {
-  color: var(--navy) !important;
-  background-color: var(--navy-tint) !important;
-  font-weight: 400 !important;
-  border-bottom: 2px solid var(--navy) !important;
+  color: var(--color-primary, #740f28) !important;
+  background-color: transparent !important;
+  font-weight: 700 !important;
+  border-bottom: none !important;
 }
 
 .bb8-dropdown-menu a.is-active,
@@ -2586,112 +2590,276 @@ body .btn-cart-add {            /* the Add / Added button */
 }
 
 /* ==========================================================================
-   Shared Catalogue Sidebar Dropdown Menus (Sort By & Categories)
+   Book Buddy - Unified Dropdown & Select System
+   Single shared style for custom menus & native selects across the entire site
    ========================================================================== */
-.dropdown-menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  width: 100%;
-  padding: 4px;
-  margin-top: 4px;
-  background: #fff;
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(10,36,114,.12);
-  max-height: min(320px, calc(100vh - 160px));   /* never taller than the viewport */
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  z-index: 50;
-  box-sizing: border-box;
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
+
+@keyframes dd-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-.dropdown-menu::-webkit-scrollbar {
-  width: 6px;
+/* 1. Custom Trigger Button */
+body :is(.dropdown-trigger, .sidebar-dropdown-btn, .bb-select-trigger, .form-select-trigger),
+#sidebar-sort-btn,
+#sidebar-cat-btn,
+.dropdown-trigger,
+.sidebar-dropdown-btn,
+.bb-select-trigger,
+.form-select-trigger {
+  height: 44px !important;
+  min-height: 44px !important;
+  background: var(--color-surface, #ffffff) !important;
+  border: 1px solid var(--color-border, #e2e8f0) !important;
+  border-radius: 10px !important;
+  padding: 0 14px !important;
+  color: var(--color-text, #061446) !important;
+  font: 500 0.95rem var(--font-body, "Nunito", sans-serif) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  cursor: pointer !important;
+  outline: none !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+  user-select: none !important;
 }
-.dropdown-menu::-webkit-scrollbar-track {
-  background: transparent;
+
+.dropdown-trigger:hover,
+.sidebar-dropdown-btn:hover,
+.bb-select-trigger:hover,
+.form-select-trigger:hover {
+  border-color: var(--color-primary, #740f28) !important;
 }
-.dropdown-menu::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 999px;
+
+.dropdown-trigger:focus-visible,
+.dropdown-trigger[aria-expanded="true"],
+.sidebar-dropdown-btn:focus-visible,
+.sidebar-dropdown-btn[aria-expanded="true"],
+.bb-select-trigger:focus-visible,
+.bb-select-trigger[aria-expanded="true"],
+.form-select-trigger:focus-visible,
+.form-select-trigger[aria-expanded="true"] {
+  outline: 2px solid var(--color-primary, #740f28) !important;
+  outline-offset: 2px !important;
+  border-color: var(--color-primary, #740f28) !important;
+  box-shadow: 0 0 0 3px var(--color-primary-soft, rgba(116, 15, 40, 0.08)) !important;
+}
+
+.dropdown-trigger .bb-chevron,
+.dropdown-trigger svg.chevron,
+.sidebar-dropdown-btn .bb-chevron,
+.sidebar-dropdown-btn svg,
+.bb-select-trigger .bb-chevron,
+.bb-select-trigger svg.chevron {
+  width: 16px !important;
+  height: 16px !important;
+  color: var(--color-text-muted, #64748b) !important;
+  stroke: var(--color-text-muted, #64748b) !important;
+  transition: transform 0.2s ease !important;
+  flex-shrink: 0 !important;
+}
+
+.dropdown-trigger[aria-expanded="true"] .bb-chevron,
+.dropdown-trigger[aria-expanded="true"] svg.chevron,
+.sidebar-dropdown-btn[aria-expanded="true"] .bb-chevron,
+.sidebar-dropdown-btn[aria-expanded="true"] svg,
+.bb-select-trigger[aria-expanded="true"] .bb-chevron,
+.bb-select-trigger[aria-expanded="true"] svg.chevron,
+details[open] > summary .bb-icon,
+details[open] > summary .bb-chevron {
+  transform: rotate(180deg) !important;
+}
+
+/* 2. Custom Dropdown Menu Panel */
+.dropdown-menu,
+.bb8-dropdown-menu,
+.bb-select-menu,
+.navDropdownMenu {
+  position: absolute !important;
+  top: calc(100% + 6px) !important;
+  left: 0 !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-height: min(320px, calc(100vh - 160px)) !important;
+  background: var(--color-surface, #ffffff) !important;
+  border: 1px solid var(--color-border, #e2e8f0) !important;
+  border-radius: var(--radius-md, 12px) !important;
+  box-shadow: 0 8px 24px rgba(43, 27, 32, 0.12) !important;
+  padding: 6px !important;
+  margin-top: 0 !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  z-index: 50 !important;
+  animation: dd-in 0.12s ease-out !important;
+  box-sizing: border-box !important;
+  list-style: none !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: #cbd5e1 transparent !important;
 }
 
 .dropdown-menu.dropdown-menu--up,
-.dropdown-menu--up {
-  top: auto;
-  bottom: calc(100% + 4px);
-  margin-top: 0;
-  margin-bottom: 4px;
+.dropdown-menu--up,
+.bb-select-menu--up {
+  top: auto !important;
+  bottom: calc(100% + 6px) !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
+.dropdown-menu::-webkit-scrollbar,
+.bb8-dropdown-menu::-webkit-scrollbar,
+.bb-select-menu::-webkit-scrollbar {
+  width: 6px !important;
+}
+.dropdown-menu::-webkit-scrollbar-thumb,
+.bb8-dropdown-menu::-webkit-scrollbar-thumb,
+.bb-select-menu::-webkit-scrollbar-thumb {
+  background: #cbd5e1 !important;
+  border-radius: 999px !important;
+}
+
+/* 3. Dropdown Items */
 .dropdown-item,
-body.folio button.dropdown-item,
-.catalogue-sidebar button.dropdown-item {
+.bb8-dropdown-menu a,
+.bb-select-item,
+.navDropdownMenu a {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-  min-height: 36px !important;
-  max-height: 36px !important;
-  height: 36px !important;
+  gap: 8px !important;
+  min-height: 38px !important;
   padding: 8px 12px !important;
   margin: 0 !important;
-  line-height: 1.2 !important;
-  font-size: 0.9rem !important;
-  font-weight: 400 !important;
-  color: var(--color-text) !important;
+  border-radius: 8px !important;
+  font: 500 0.95rem var(--font-body, "Nunito", sans-serif) !important;
+  color: var(--color-text, #061446) !important;
   background: transparent !important;
   border: none !important;
-  border-radius: 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
   cursor: pointer !important;
+  text-decoration: none !important;
   text-align: left !important;
-  font-family: inherit !important;
+  line-height: 1.25 !important;
   transition: background 0.15s ease, color 0.15s ease !important;
-}
-
-.dropdown-item + .dropdown-item,
-body.folio button.dropdown-item + button.dropdown-item,
-.catalogue-sidebar button.dropdown-item + button.dropdown-item {
-  margin-top: 0 !important;
-  border-top: 0 !important;
 }
 
 .dropdown-item:hover,
 .dropdown-item:focus-visible,
-body.folio button.dropdown-item:hover,
-body.folio button.dropdown-item:focus-visible {
-  background: var(--color-primary-soft) !important;
-  color: var(--color-primary) !important;
+.bb8-dropdown-menu a:hover,
+.bb8-dropdown-menu a:focus-visible,
+.bb-select-item:hover,
+.bb-select-item:focus-visible,
+.navDropdownMenu a:hover,
+.navDropdownMenu a:focus-visible {
+  background: var(--color-primary-soft, rgba(116, 15, 40, 0.08)) !important;
+  color: var(--color-primary, #740f28) !important;
   outline: none !important;
 }
 
+.dropdown-item[aria-selected="true"],
 .dropdown-item[aria-checked="true"],
 .dropdown-item.is-selected,
-body.folio button.dropdown-item[aria-checked="true"],
-body.folio button.dropdown-item.is-selected {
-  font-weight: 400 !important;
-  color: var(--color-primary) !important;
+.bb8-dropdown-menu a.is-active,
+.bb8-dropdown-menu a[aria-current="page"],
+.bb-select-item[aria-selected="true"],
+.bb-select-item.is-selected {
+  background: var(--color-primary-soft, rgba(116, 15, 40, 0.08)) !important;
+  color: var(--color-primary, #740f28) !important;
+  font-weight: 700 !important;
+}
+
+.dropdown-item .check,
+.bb-select-item .check {
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0 !important;
+  stroke: var(--color-primary, #740f28) !important;
+  display: inline-block !important;
+}
+
+.dropdown-item:not(.is-selected):not([aria-selected="true"]):not([aria-checked="true"]) .check,
+.bb-select-item:not(.is-selected):not([aria-selected="true"]):not([aria-checked="true"]) .check {
+  display: none !important;
+}
+
+/* 4. Header Nav Parent Summary */
+.bb8-dropdown.is-active > summary,
+.bb8-dropdown summary.is-active {
+  color: var(--color-primary, #740f28) !important;
   background: transparent !important;
+  border-bottom: none !important;
+  font-weight: 700 !important;
 }
 
-.dropdown-item .check {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}   /* inline SVG check on the right */
-
-.dropdown-item:not(.is-selected):not([aria-checked="true"]) .check {
-  display: none;
+/* 5. Native Select Elements */
+select,
+.form-select,
+.bb8-form-select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  height: 44px !important;
+  width: 100% !important;
+  padding: 0 40px 0 14px !important;
+  background: var(--color-surface, #ffffff) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 14px center / 16px !important;
+  border: 1px solid var(--color-border, #e2e8f0) !important;
+  border-radius: 10px !important;
+  font: 500 0.95rem var(--font-body, "Nunito", sans-serif) !important;
+  color: var(--color-text, #061446) !important;
+  box-sizing: border-box !important;
+  cursor: pointer !important;
+  outline: none !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
 }
 
+select:hover,
+.form-select:hover,
+.bb8-form-select:hover {
+  border-color: var(--color-primary, #740f28) !important;
+}
 
-/* ==========================================================================
-   End-of-file Typography Enforcement
-   ========================================================================== */
+select:focus-visible,
+select:focus,
+.form-select:focus-visible,
+.form-select:focus,
+.bb8-form-select:focus-visible,
+.bb8-form-select:focus {
+  outline: none !important;
+  border-color: var(--color-primary, #740f28) !important;
+  box-shadow: 0 0 0 3px var(--color-primary-soft, rgba(116, 15, 40, 0.08)) !important;
+}
+
+select:disabled,
+.form-select:disabled,
+.bb8-form-select:disabled {
+  background-color: var(--color-bg, #f8fafc) !important;
+  color: var(--color-text-muted, #64748b) !important;
+  cursor: not-allowed !important;
+}
+
+select.is-invalid,
+.form-select.is-invalid {
+  border-color: var(--color-danger, #dc2626) !important;
+}
+
+option,
+optgroup {
+  font-family: var(--font-body, "Nunito", sans-serif) !important;
+  color: var(--color-text, #061446) !important;
+  background: var(--color-surface, #ffffff) !important;
+  padding: 8px 12px !important;
+}
+
+/* End-of-file Typography & Component Safeguards */
 article.bb-book-card h2,
 article.bb-book-card h2.bb-book-title,
 .bb-book-card .bb-book-title,
@@ -2716,9 +2884,4 @@ article.bb-book-card h2.bb-book-title,
 .btn-filter-checkout {
   font-family: var(--font-body) !important;
   font-size: 0.88rem !important;
-}
-.dropdown-item,
-button.dropdown-item {
-  font-family: var(--font-body) !important;
-  font-size: 0.9rem !important;
 }

@@ -35,7 +35,7 @@
         <!-- Language Dropdown (replaces pill buttons) -->
         <div style="display:flex; align-items:center; gap:6px;">
           <label for="top-filter-lang" style="color:var(--navy); font-size:14px; font-weight:700;">Language:</label>
-          <select id="top-filter-lang" name="language" onchange="if(this.value){window.location.href=this.value;}" style="height:38px; padding:0 12px; font-size:14px; font-weight:600; color:var(--navy); border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; cursor:pointer;">
+          <select id="top-filter-lang" name="language" class="js-custom-select" onchange="if(this.value){window.location.href=this.value;}">
             <option value="{{ catalogue_url(language='', page=1) }}" {% if not filters23.language %}selected{% endif %}>All Languages</option>
             {% for lang in filter_options['language'] %}
             <option value="{{ catalogue_url(language=lang, page=1) }}" {% if filters23.language|lower == lang|lower %}selected{% endif %}>{{ lang }}</option>
@@ -133,13 +133,12 @@
           <!-- 3. Sort By Dropdown Button -->
           <div class="sidebar-dropdown-wrap" style="position:relative; width:100%;">
             <button type="button" id="sidebar-sort-btn"
-                    class="sidebar-dropdown-btn"
+                    class="sidebar-dropdown-btn dropdown-trigger"
                     aria-label="Sort by"
                     aria-haspopup="true"
-                    aria-expanded="false"
-                    style="width:100%; height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; font-size:14px; font-weight:700; font-family:var(--font-family); border-radius:8px; border:1.5px solid var(--border-color); background:#ffffff; color:var(--navy); cursor:pointer; box-sizing:border-box;">
+                    aria-expanded="false">
               <span id="sidebar-sort-label">Sort By: {% if selected_sort == 'az' %}A–Z{% elif selected_sort == 'za' %}Z–A{% else %}Newest{% endif %}</span>
-              <svg class="bb-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <svg class="bb-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </button>
@@ -162,13 +161,12 @@
           <!-- 4. Categories Dropdown Button -->
           <div class="sidebar-dropdown-wrap" style="position:relative; width:100%;">
             <button type="button" id="sidebar-cat-btn"
-                    class="sidebar-dropdown-btn"
+                    class="sidebar-dropdown-btn dropdown-trigger"
                     aria-label="Categories"
                     aria-haspopup="true"
-                    aria-expanded="false"
-                    style="width:100%; height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; font-size:14px; font-weight:700; font-family:var(--font-family); border-radius:8px; border:1.5px solid var(--border-color); background:#ffffff; color:var(--navy); cursor:pointer; box-sizing:border-box;">
+                    aria-expanded="false">
               <span id="sidebar-cat-label">{% if selected_category and selected_category.lower() != 'all' %}{{ selected_category }}{% if selected_lang %} ({{ selected_lang }}){% endif %}{% else %}Categories{% endif %}</span>
-              <svg class="bb-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <svg class="bb-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </button>
@@ -398,7 +396,7 @@
 
           <div class="bb-form-group">
             <label for="req-delivery-mode" class="bb-form-label">Delivery Mode</label>
-            <select id="req-delivery-mode" name="delivery_mode" class="bb-form-select">
+            <select id="req-delivery-mode" name="delivery_mode" class="bb-form-select js-custom-select">
               <option value="offline" selected>Offline (Self-Pickup at {{ delivery_settings.membership_pickup_address }})</option>
               <option value="online">Online (Doorstep Delivery +₹{{ delivery_settings.membership_delivery_fee_monthly }}/mo)</option>
             </select>

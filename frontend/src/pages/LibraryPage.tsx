@@ -14,6 +14,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
+import '../components/ui/dropdown.css';
 import { BookCard, Book } from '../components/books/BookCard';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
@@ -406,20 +407,10 @@ export const LibraryPage: React.FC = () => {
               </label>
               <select
                 id="top-filter-lang"
+                className="form-select"
                 value={language}
                 onChange={(e) => updateParam('language', e.target.value)}
-                style={{
-                  height: '38px',
-                  padding: '0 12px',
-                  borderRadius: '6px',
-                  border: '1px solid var(--border-color, #e2e8f0)',
-                  backgroundColor: '#ffffff',
-                  color: 'var(--navy, #061446)',
-                  fontSize: '0.85rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  outline: 'none',
-                }}
+                style={{ width: 'auto', minWidth: '160px' }}
               >
                 <option value="">All Languages</option>
                 {(filterOptions.languages || filterOptions.language || []).map((lang: string) => (
@@ -688,32 +679,16 @@ export const LibraryPage: React.FC = () => {
                 ref={sortBtnRef}
                 type="button"
                 id="sidebar-sort-btn"
+                className="sidebar-dropdown-btn dropdown-trigger"
                 aria-label="Sort by"
                 aria-haspopup="true"
                 aria-expanded={isSortOpen}
                 onClick={toggleSort}
-                style={{
-                  width: '100%',
-                  height: '44px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '0 12px',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  fontFamily: 'inherit',
-                  borderRadius: '8px',
-                  border: '1.5px solid var(--border-color, #e2e8f0)',
-                  backgroundColor: '#ffffff',
-                  color: 'var(--navy, #061446)',
-                  cursor: 'pointer',
-                  boxSizing: 'border-box',
-                }}
               >
                 <span id="sidebar-sort-label">
                   Sort By: {sort === 'az' ? 'A–Z' : sort === 'za' ? 'Z–A' : 'Newest'}
                 </span>
-                <ChevronDown size={14} />
+                <ChevronDown size={14} className="dropdown-chevron" />
               </button>
 
               {isSortOpen && (
@@ -759,34 +734,18 @@ export const LibraryPage: React.FC = () => {
                 ref={catBtnRef}
                 type="button"
                 id="sidebar-cat-btn"
+                className="sidebar-dropdown-btn dropdown-trigger"
                 aria-label="Categories"
                 aria-haspopup="true"
                 aria-expanded={isCatOpen}
                 onClick={toggleCat}
-                style={{
-                  width: '100%',
-                  height: '44px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '0 12px',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  fontFamily: 'inherit',
-                  borderRadius: '8px',
-                  border: '1.5px solid var(--border-color, #e2e8f0)',
-                  backgroundColor: '#ffffff',
-                  color: 'var(--navy, #061446)',
-                  cursor: 'pointer',
-                  boxSizing: 'border-box',
-                }}
               >
                 <span id="sidebar-cat-label">
                   {category && category.toLowerCase() !== 'all'
                     ? `${category}${language ? ` (${language})` : ''}`
                     : 'Categories'}
                 </span>
-                <ChevronDown size={14} />
+                <ChevronDown size={14} className="dropdown-chevron" />
               </button>
 
               {isCatOpen && (

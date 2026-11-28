@@ -162,13 +162,13 @@
 
           <div class="bb8-dropdown-menu">
 
-            <a href="/library/" {% if request.path == '/library/' %}aria-current="page" class="is-active"{% endif %}>Book Catalogue</a>
+            <a class="dropdown-item {% if request.path == '/library/' %}is-active{% endif %}" href="/library/" {% if request.path == '/library/' %}aria-current="page"{% endif %}>Book Catalogue</a>
 
-            <a href="/membership/" {% if request.path == '/membership/' or request.path.startswith('/plans') %}aria-current="page" class="is-active"{% endif %}>Membership Plans</a>
+            <a class="dropdown-item {% if request.path == '/membership/' or request.path.startswith('/plans') %}is-active{% endif %}" href="/membership/" {% if request.path == '/membership/' or request.path.startswith('/plans') %}aria-current="page"{% endif %}>Membership Plans</a>
 
-            <a href="/how-to-borrow/" {% if request.path == '/how-to-borrow/' %}aria-current="page" class="is-active"{% endif %}>How to Borrow</a>
+            <a class="dropdown-item {% if request.path == '/how-to-borrow/' %}is-active{% endif %}" href="/how-to-borrow/" {% if request.path == '/how-to-borrow/' %}aria-current="page"{% endif %}>How to Borrow</a>
 
-            <a href="/visit-us/" {% if request.path == '/visit-us/' %}aria-current="page" class="is-active"{% endif %}>Visit Us</a>
+            <a class="dropdown-item {% if request.path == '/visit-us/' %}is-active{% endif %}" href="/visit-us/" {% if request.path == '/visit-us/' %}aria-current="page"{% endif %}>Visit Us</a>
 
           </div>
 
@@ -184,9 +184,9 @@
 
           <div class="bb8-dropdown-menu">
 
-            <a href="/community/media/" {% if request.path.startswith(('/community/media', '/publications', '/newspaper', '/magazine', '/podcasts')) %}aria-current="page" class="is-active"{% endif %}>Media</a>
+            <a class="dropdown-item {% if request.path.startswith(('/community/media', '/publications', '/newspaper', '/magazine', '/podcasts')) %}is-active{% endif %}" href="/community/media/" {% if request.path.startswith(('/community/media', '/publications', '/newspaper', '/magazine', '/podcasts')) %}aria-current="page"{% endif %}>Media</a>
 
-            <a href="/events/" {% if request.path.startswith(('/events', '/reading-circles', '/contests')) %}aria-current="page" class="is-active"{% endif %}>Events &amp; Contests</a>
+            <a class="dropdown-item {% if request.path.startswith(('/events', '/reading-circles', '/contests')) %}is-active{% endif %}" href="/events/" {% if request.path.startswith(('/events', '/reading-circles', '/contests')) %}aria-current="page"{% endif %}>Events &amp; Contests</a>
 
           </div>
 
@@ -310,13 +310,13 @@
 
           <div class="bb8-dropdown-menu">
 
-            <a href="/library/" {% if request.path == '/library/' %}aria-current="page" class="is-active"{% endif %}>Book Catalogue</a>
+            <a class="dropdown-item {% if request.path == '/library/' %}is-active{% endif %}" href="/library/" {% if request.path == '/library/' %}aria-current="page"{% endif %}>Book Catalogue</a>
 
-            <a href="/membership/" {% if request.path == '/membership/' or request.path.startswith('/plans') %}aria-current="page" class="is-active"{% endif %}>Membership Plans</a>
+            <a class="dropdown-item {% if request.path == '/membership/' or request.path.startswith('/plans') %}is-active{% endif %}" href="/membership/" {% if request.path == '/membership/' or request.path.startswith('/plans') %}aria-current="page"{% endif %}>Membership Plans</a>
 
-            <a href="/how-to-borrow/" {% if request.path == '/how-to-borrow/' %}aria-current="page" class="is-active"{% endif %}>How to Borrow</a>
+            <a class="dropdown-item {% if request.path == '/how-to-borrow/' %}is-active{% endif %}" href="/how-to-borrow/" {% if request.path == '/how-to-borrow/' %}aria-current="page"{% endif %}>How to Borrow</a>
 
-            <a href="/visit-us/" {% if request.path == '/visit-us/' %}aria-current="page" class="is-active"{% endif %}>Visit Us</a>
+            <a class="dropdown-item {% if request.path == '/visit-us/' %}is-active{% endif %}" href="/visit-us/" {% if request.path == '/visit-us/' %}aria-current="page"{% endif %}>Visit Us</a>
 
           </div>
 
@@ -328,9 +328,9 @@
 
           <div class="bb8-dropdown-menu">
 
-            <a href="/community/media/" {% if request.path.startswith(('/community/media', '/publications', '/newspaper', '/magazine', '/podcasts')) %}aria-current="page" class="is-active"{% endif %}>Media</a>
+            <a class="dropdown-item {% if request.path.startswith(('/community/media', '/publications', '/newspaper', '/magazine', '/podcasts')) %}is-active{% endif %}" href="/community/media/" {% if request.path.startswith(('/community/media', '/publications', '/newspaper', '/magazine', '/podcasts')) %}aria-current="page"{% endif %}>Media</a>
 
-            <a href="/events/" {% if request.path.startswith(('/events', '/reading-circles', '/contests')) %}aria-current="page" class="is-active"{% endif %}>Events &amp; Contests</a>
+            <a class="dropdown-item {% if request.path.startswith(('/events', '/reading-circles', '/contests')) %}is-active{% endif %}" href="/events/" {% if request.path.startswith(('/events', '/reading-circles', '/contests')) %}aria-current="page"{% endif %}>Events &amp; Contests</a>
 
           </div>
 
@@ -763,6 +763,8 @@
   <script src="/static/js/folio.js?v=6" defer></script>
 
   <script src="/static/js/home-calendar.js?v=5" defer></script>
+
+  <script src="/static/js/bb-dropdown.js?v=1" defer></script>
 
 </body>
 
