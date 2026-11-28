@@ -15,18 +15,18 @@
     <!-- Quick Readers & Language Row with Export Buttons (Exact Order: Readers | Download as Excel | Language (dropdown) | Favourites | Checkout) -->
     <nav class="catalogue-quick" aria-label="Quick filters and export" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:14px; background:var(--surface-card); padding:12px 18px; border-radius:var(--radius-lg); border:1px solid var(--border-color); margin-bottom:20px; box-shadow:var(--shadow-sm);">
       <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-        <strong style="color:var(--navy); font-size:13px; font-weight:700;">Readers:</strong>
+        <strong style="color:var(--navy); font-size:14px; font-weight:700;">Readers:</strong>
         {% for value, label in [('', 'All'), ('adult', 'Adults'), ('kids', 'Kids')] %}
         <a href="{{ catalogue_url(audience=value, page=1) }}"
            class="btn-export {% if filters23.audience == value %}btn-excel{% endif %}"
-           style="height:38px; display:inline-flex; align-items:center; padding:0 14px; font-size:13px; {% if filters23.audience == value %}background:var(--navy); color:#fff; border-color:var(--navy); font-weight:700;{% endif %}"
+           style="height:38px; display:inline-flex; align-items:center; padding:0 14px; font-size:14px; {% if filters23.audience == value %}background:var(--navy); color:#fff; border-color:var(--navy); font-weight:700;{% endif %}"
            {% if filters23.audience == value %}aria-current="page"{% endif %}>
           {{ label }}
         </a>
         {% endfor %}
 
         <!-- Download as Excel placed right after Kids -->
-        <a href="{{ export_url(format='xlsx') }}" class="btn-export btn-excel" title="Download currently filtered list as Excel spreadsheet" style="height:38px; display:inline-flex; align-items:center; gap:6px; padding:0 14px; font-size:13px;">
+        <a href="{{ export_url(format='xlsx') }}" class="btn-export btn-excel" title="Download currently filtered list as Excel spreadsheet" style="height:38px; display:inline-flex; align-items:center; gap:6px; padding:0 14px; font-size:14px;">
           <svg class="bb-icon" style="width:14px;height:14px;" aria-hidden="true"><use href="#i-download"/></svg> Download as Excel
         </a>
       </div>
@@ -34,8 +34,8 @@
       <div class="catalogue-right-actions" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
         <!-- Language Dropdown (replaces pill buttons) -->
         <div style="display:flex; align-items:center; gap:6px;">
-          <label for="top-filter-lang" style="color:var(--navy); font-size:13px; font-weight:700;">Language:</label>
-          <select id="top-filter-lang" name="language" onchange="if(this.value){window.location.href=this.value;}" style="height:38px; padding:0 12px; font-size:13px; font-weight:600; color:var(--navy); border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; cursor:pointer;">
+          <label for="top-filter-lang" style="color:var(--navy); font-size:14px; font-weight:700;">Language:</label>
+          <select id="top-filter-lang" name="language" onchange="if(this.value){window.location.href=this.value;}" style="height:38px; padding:0 12px; font-size:14px; font-weight:600; color:var(--navy); border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; cursor:pointer;">
             <option value="{{ catalogue_url(language='', page=1) }}" {% if not filters23.language %}selected{% endif %}>All Languages</option>
             {% for lang in filter_options['language'] %}
             <option value="{{ catalogue_url(language=lang, page=1) }}" {% if filters23.language|lower == lang|lower %}selected{% endif %}>{{ lang }}</option>
@@ -44,23 +44,23 @@
         </div>
 
         <!-- Favourites Button with Count Badge -->
-        <a href="/library/favourites/" id="bb-filter-favs-btn" class="btn-export btn-favs js-favs-trigger" title="View your saved favourite books" style="height:38px; display:inline-flex; align-items:center; gap:8px; padding:0 14px; font-size:13px; font-weight:600; color:var(--navy); background:#fff; border:1px solid var(--border-color); border-radius:var(--radius-sm); text-decoration:none; cursor:pointer;">
+        <a href="/library/favourites/" id="bb-filter-favs-btn" class="btn-export btn-favs js-favs-trigger" title="View your saved favourite books" style="height:38px; display:inline-flex; align-items:center; gap:8px; padding:0 14px; font-size:14px; font-weight:600; color:var(--navy); background:#fff; border:1px solid var(--border-color); border-radius:var(--radius-sm); text-decoration:none; cursor:pointer;">
           <svg class="bb-icon" width="16" height="16" viewBox="0 0 24 24" fill="var(--maroon)" stroke="var(--maroon)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
           </svg>
           <span>Favourites</span>
-          <span class="bb-fav-badge js-fav-badge" id="bb-filter-fav-badge" style="display:none; background:var(--maroon); color:#fff; font-size:11px; font-weight:700; padding:2px 7px; border-radius:999px;">0</span>
+          <span class="bb-fav-badge js-fav-badge" id="bb-filter-fav-badge" style="display:none; background:var(--maroon); color:#fff; font-size:14px; font-weight:700; padding:2px 7px; border-radius:999px;">0</span>
         </a>
 
         <!-- Checkout Button -->
-        <button type="button" id="bb-filter-checkout-btn" class="btn-filter-checkout js-checkout-trigger" aria-label="Open borrow cart checkout" aria-haspopup="dialog" style="height:38px; display:inline-flex; align-items:center; gap:8px; padding:0 16px; font-size:13px; font-weight:700; border-radius:var(--radius-sm); background:var(--navy); color:#fff; border:none; cursor:pointer;">
+        <button type="button" id="bb-filter-checkout-btn" class="btn-filter-checkout js-checkout-trigger" aria-label="Open borrow cart checkout" aria-haspopup="dialog" style="height:38px; display:inline-flex; align-items:center; gap:8px; padding:0 16px; font-size:14px; font-weight:700; border-radius:var(--radius-sm); background:var(--navy); color:#fff; border:none; cursor:pointer;">
           <svg class="bb-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
             <line x1="3" y1="6" x2="21" y2="6"></line>
             <path d="M16 10a4 4 0 0 1-8 0"></path>
           </svg>
           <span>Checkout</span>
-          <span class="bb-cart-badge js-cart-badge" id="bb-filter-cart-badge" style="display:none; background:#ff4757; color:#fff; font-size:11px; font-weight:700; padding:2px 7px; border-radius:999px;">0</span>
+          <span class="bb-cart-badge js-cart-badge" id="bb-filter-cart-badge" style="display:none; background:#ff4757; color:#fff; font-size:14px; font-weight:700; padding:2px 7px; border-radius:999px;">0</span>
         </button>
       </div>
     </nav>
@@ -111,9 +111,9 @@
               </svg>
               <input id="sidebar-search-q" type="text" name="q" value="{{ query }}" placeholder="Search title or author..."
                      aria-label="Search books"
-                     style="width:100%; height:44px; min-height:44px; padding:0 34px 0 36px; font-size:13px; font-weight:500; font-family:var(--font-family); border:1.5px solid var(--border-color); border-radius:8px; background:#fff; color:var(--navy); box-sizing:border-box; outline:none; transition:border-color 0.15s ease;">
+                     style="width:100%; height:44px; min-height:44px; padding:0 34px 0 36px; font-size:14px; font-weight:500; font-family:var(--font-family); border:1.5px solid var(--border-color); border-radius:8px; background:#fff; color:var(--navy); box-sizing:border-box; outline:none; transition:border-color 0.15s ease;">
               <button type="button" id="sidebar-search-clear" aria-label="Clear search"
-                      style="display:{% if query %}flex{% else %}none{% endif %}; position:absolute; right:10px; width:22px; height:22px; border-radius:50%; border:none; background:#f1f5f9; color:#64748b; font-size:13px; line-height:1; align-items:center; justify-content:center; cursor:pointer; padding:0;">
+                      style="display:{% if query %}flex{% else %}none{% endif %}; position:absolute; right:10px; width:22px; height:22px; border-radius:50%; border:none; background:#f1f5f9; color:#64748b; font-size:14px; line-height:1; align-items:center; justify-content:center; cursor:pointer; padding:0;">
                 &times;
               </button>
             </div>
@@ -125,7 +125,7 @@
                     class="sidebar-pill-btn {% if filters23.new == '1' %}is-active{% endif %}"
                     aria-label="New arrivals"
                     aria-pressed="{% if filters23.new == '1' %}true{% else %}false{% endif %}"
-                    style="width:100%; height:44px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; font-family:var(--font-family); border-radius:8px; cursor:pointer; box-sizing:border-box; transition:all 0.15s ease; border:1.5px solid {% if filters23.new == '1' %}var(--maroon){% else %}var(--border-color){% endif %}; background:{% if filters23.new == '1' %}var(--maroon){% else %}#ffffff{% endif %}; color:{% if filters23.new == '1' %}#ffffff{% else %}var(--navy){% endif %}; text-align:center;">
+                    style="width:100%; height:44px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family:var(--font-family); border-radius:8px; cursor:pointer; box-sizing:border-box; transition:all 0.15s ease; border:1.5px solid {% if filters23.new == '1' %}var(--maroon){% else %}var(--border-color){% endif %}; background:{% if filters23.new == '1' %}var(--maroon){% else %}#ffffff{% endif %}; color:{% if filters23.new == '1' %}#ffffff{% else %}var(--navy){% endif %}; text-align:center;">
               New Arrivals
             </button>
           </div>
@@ -137,7 +137,7 @@
                     aria-label="Sort by"
                     aria-haspopup="true"
                     aria-expanded="false"
-                    style="width:100%; height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; font-size:13px; font-weight:700; font-family:var(--font-family); border-radius:8px; border:1.5px solid var(--border-color); background:#ffffff; color:var(--navy); cursor:pointer; box-sizing:border-box;">
+                    style="width:100%; height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; font-size:14px; font-weight:700; font-family:var(--font-family); border-radius:8px; border:1.5px solid var(--border-color); background:#ffffff; color:var(--navy); cursor:pointer; box-sizing:border-box;">
               <span id="sidebar-sort-label">Sort By: {% if selected_sort == 'az' %}A–Z{% elif selected_sort == 'za' %}Z–A{% else %}Newest{% endif %}</span>
               <svg class="bb-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -166,7 +166,7 @@
                     aria-label="Categories"
                     aria-haspopup="true"
                     aria-expanded="false"
-                    style="width:100%; height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; font-size:13px; font-weight:700; font-family:var(--font-family); border-radius:8px; border:1.5px solid var(--border-color); background:#ffffff; color:var(--navy); cursor:pointer; box-sizing:border-box;">
+                    style="width:100%; height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; font-size:14px; font-weight:700; font-family:var(--font-family); border-radius:8px; border:1.5px solid var(--border-color); background:#ffffff; color:var(--navy); cursor:pointer; box-sizing:border-box;">
               <span id="sidebar-cat-label">{% if selected_category and selected_category.lower() != 'all' %}{{ selected_category }}{% if selected_lang %} ({{ selected_lang }}){% endif %}{% else %}Categories{% endif %}</span>
               <svg class="bb-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -204,7 +204,7 @@
                         aria-checked="{% if selected_category|lower == 'languages' or selected_lang %}true{% else %}false{% endif %}">
                   <span>Languages</span>
                   <div style="display:flex; align-items:center; gap:4px;">
-                    {% if selected_lang %}<span style="font-size:11px; font-weight:700; color:var(--maroon);">{{ selected_lang }}</span>{% endif %}
+                    {% if selected_lang %}<span style="font-size:14px; font-weight:700; color:var(--maroon);">{{ selected_lang }}</span>{% endif %}
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                       <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
@@ -248,14 +248,14 @@
         <!-- Active Filter Chips Bar (No total books count) -->
         {% if active_chips %}
         <div class="filter-active-chips" style="margin-top:0; margin-bottom:20px; border-top:none; background:var(--surface-card); padding:12px 16px; border-radius:var(--radius-md); border:1px solid var(--border-color); display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
-          <span style="font-size:12px; font-weight:700; color:var(--text-muted); margin-right:4px;">Active Filters:</span>
+          <span style="font-size:14px; font-weight:700; color:var(--text-muted); margin-right:4px;">Active Filters:</span>
           {% for chip in active_chips %}
-          <span class="filter-chip" style="display:inline-flex; align-items:center; gap:6px; background:#f1f5f9; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:600; color:var(--navy);">
+          <span class="filter-chip" style="display:inline-flex; align-items:center; gap:6px; background:#f1f5f9; padding:4px 10px; border-radius:999px; font-size:14px; font-weight:600; color:var(--navy);">
             <span>{{ chip.label }}</span>
             <a href="{{ chip.remove_url }}" class="filter-chip-remove js-chip-remove" data-remove-key="{{ chip.key }}" aria-label="Remove {{ chip.label }} filter" style="color:var(--text-muted); text-decoration:none; font-weight:700;">&times;</a>
           </span>
           {% endfor %}
-          <a href="/library/" class="filter-clear-all js-clear-all" style="font-size:12px; font-weight:700; color:var(--maroon); margin-left:auto; text-decoration:none;">Clear All</a>
+          <a href="/library/" class="filter-clear-all js-clear-all" style="font-size:14px; font-weight:700; color:var(--maroon); margin-left:auto; text-decoration:none;">Clear All</a>
         </div>
         {% endif %}
 
@@ -402,7 +402,7 @@
               <option value="offline" selected>Offline (Self-Pickup at {{ delivery_settings.membership_pickup_address }})</option>
               <option value="online">Online (Doorstep Delivery +₹{{ delivery_settings.membership_delivery_fee_monthly }}/mo)</option>
             </select>
-            <small id="delivery-mode-hint" style="display:block; font-size:11px; color:var(--text-muted); margin-top:5px;">
+            <small id="delivery-mode-hint" style="display:block; font-size:14px; color:var(--text-muted); margin-top:5px;">
               Self-pickup at {{ delivery_settings.membership_pickup_address }}
             </small>
           </div>
@@ -410,12 +410,12 @@
           <div class="bb-form-group" id="delivery-address-group" style="display:none;">
             <label for="req-address" class="bb-form-label">Delivery Address <span style="color:#b91c1c;">*</span></label>
             <textarea id="req-address" name="address" rows="3" placeholder="Enter flat/door no, street, area, pincode..." class="bb-form-textarea">{{ user.address or '' }}</textarea>
-            <small id="delivery-online-hint" style="display:block; font-size:11px; color:var(--text-muted); margin-top:5px;">
+            <small id="delivery-online-hint" style="display:block; font-size:14px; color:var(--text-muted); margin-top:5px;">
               Delivery area: {{ delivery_settings.membership_delivery_area }} · Schedule: {{ delivery_settings.membership_delivery_day }}
             </small>
           </div>
 
-          <div id="bb-modal-submit-error" style="display:none; padding:10px 14px; background:#fee2e2; color:#991b1b; border-radius:6px; font-size:13px; margin-bottom:14px;"></div>
+          <div id="bb-modal-submit-error" style="display:none; padding:10px 14px; background:#fee2e2; color:#991b1b; border-radius:6px; font-size:14px; margin-bottom:14px;"></div>
 
           <div class="bb-modal-actions">
             <button type="button" class="btn-modal-cancel" id="bb-modal-cancel-btn">Cancel</button>

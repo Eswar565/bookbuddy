@@ -68,7 +68,7 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
             CREATE TABLE IF NOT EXISTS site_settings (
                 id INTEGER PRIMARY KEY,
                 theme TEXT NOT NULL DEFAULT 'maroon',
-                font TEXT NOT NULL DEFAULT 'love_ya_like_a_sister',
+                font TEXT NOT NULL DEFAULT 'fraunces_nunito',
                 custom_p TEXT NOT NULL DEFAULT '#7a1230',
                 custom_bg TEXT NOT NULL DEFAULT '#f7f8fc',
                 custom_card TEXT NOT NULL DEFAULT '#ffffff',
@@ -78,7 +78,7 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
         cols = [r[1] for r in get_db().execute("PRAGMA table_info(site_settings)").fetchall()]
         for col, default in [
             ('theme', "'maroon'"),
-            ('font', "'love_ya_like_a_sister'"),
+            ('font', "'fraunces_nunito'"),
             ('custom_p', "'#7a1230'"),
             ('custom_bg', "'#f7f8fc'"),
             ('custom_card', "'#ffffff'"),
@@ -89,14 +89,14 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
         if not get_db().execute("SELECT id FROM site_settings WHERE id=1").fetchone():
             get_db().execute(
                 "INSERT INTO site_settings (id, theme, font, custom_p, custom_bg, custom_card, custom_tx) "
-                "VALUES (1, 'maroon', 'love_ya_like_a_sister', '#7a1230', '#f7f8fc', '#ffffff', '#1a1a2e')"
+                "VALUES (1, 'maroon', 'fraunces_nunito', '#7a1230', '#f7f8fc', '#ffffff', '#1a1a2e')"
             )
         get_db().commit()
 
     @app.context_processor
     def appearance_context():
         theme = 'maroon'
-        font = 'love_ya_like_a_sister'
+        font = 'fraunces_nunito'
         custom_p = '#7a1230'
         custom_bg = '#f7f8fc'
         custom_card = '#ffffff'
@@ -105,7 +105,7 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
             row = get_db().execute('SELECT theme, font, custom_p, custom_bg, custom_card, custom_tx FROM site_settings WHERE id=1').fetchone()
             if row:
                 theme = row['theme'] or 'maroon'
-                font = row['font'] or 'love_ya_like_a_sister'
+                font = row['font'] or 'fraunces_nunito'
                 custom_p = row['custom_p'] or '#7a1230'
                 custom_bg = row['custom_bg'] or '#f7f8fc'
                 custom_card = row['custom_card'] or '#ffffff'
@@ -861,7 +861,7 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
         return workspace('password',title='Change password',active='password')
 
     ALLOWED_THEMES = {'maroon', 'navy', 'dark', 'custom'}
-    ALLOWED_FONTS = {'love_ya_like_a_sister', 'playfair', 'inter', 'poppins'}
+    ALLOWED_FONTS = {'fraunces_nunito', 'love_ya_like_a_sister', 'playfair', 'inter', 'poppins'}
     HEX_COLOR_RE = re.compile(r'^#[0-9a-fA-F]{6}$')
 
     DEFAULT_P = '#7a1230'
@@ -876,14 +876,14 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
             action = request.form.get('action', 'save')
             if action == 'reset':
                 theme = 'maroon'
-                font = 'love_ya_like_a_sister'
+                font = 'fraunces_nunito'
                 custom_p = DEFAULT_P
                 custom_bg = DEFAULT_BG
                 custom_card = DEFAULT_CARD
                 custom_tx = DEFAULT_TX
             else:
                 theme = request.form.get('theme', 'maroon').strip().lower()
-                font = request.form.get('font', 'love_ya_like_a_sister').strip().lower()
+                font = request.form.get('font', 'fraunces_nunito').strip().lower()
                 custom_p = request.form.get('custom_p', DEFAULT_P).strip()
                 custom_bg = request.form.get('custom_bg', DEFAULT_BG).strip()
                 custom_card = request.form.get('custom_card', DEFAULT_CARD).strip()
@@ -892,7 +892,7 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
                 if theme not in ALLOWED_THEMES:
                     theme = 'maroon'
                 if font not in ALLOWED_FONTS:
-                    font = 'love_ya_like_a_sister'
+                    font = 'fraunces_nunito'
 
                 for color_name, val in [('Primary', custom_p), ('Background', custom_bg), ('Card', custom_card), ('Text', custom_tx)]:
                     if not HEX_COLOR_RE.match(val):
@@ -914,7 +914,7 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
             return redirect('/admin/appearance/')
 
         theme = 'maroon'
-        font = 'love_ya_like_a_sister'
+        font = 'fraunces_nunito'
         custom_p = DEFAULT_P
         custom_bg = DEFAULT_BG
         custom_card = DEFAULT_CARD
@@ -923,7 +923,7 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
             row = get_db().execute('SELECT theme, font, custom_p, custom_bg, custom_card, custom_tx FROM site_settings WHERE id=1').fetchone()
             if row:
                 theme = row['theme'] or 'maroon'
-                font = row['font'] or 'love_ya_like_a_sister'
+                font = row['font'] or 'fraunces_nunito'
                 custom_p = row['custom_p'] or DEFAULT_P
                 custom_bg = row['custom_bg'] or DEFAULT_BG
                 custom_card = row['custom_card'] or DEFAULT_CARD

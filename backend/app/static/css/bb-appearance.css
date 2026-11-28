@@ -127,11 +127,12 @@ html { font-synthesis: none !important; -webkit-font-synthesis: none !important;
 
 /* --- 2. Fonts on :root via [data-font] --- */
 :root,
+[data-font="fraunces_nunito"],
 [data-font="inter"],
 [data-font="playfair"],
 [data-font="love_ya_like_a_sister"],
 [data-font="poppins"] {
-  --ft: var(--font-main);
+  --ft: var(--font-body);
 }
 
 /* --- 3. Global CSS Refactoring to use Variables --- */
@@ -142,15 +143,24 @@ body {
   color: var(--tx) !important;
 }
 
-h1, h2, h3, h4, h5, h6,
+h1, h2, h3, h4,
+.bb8-footer-col h3 {
+  font-family: var(--font-heading) !important;
+  font-weight: 700 !important;
+}
+
+h5, h6 {
+  font-family: var(--font-heading) !important;
+  font-weight: 600 !important;
+}
+
 .eyebrow,
 .folio-kicker,
 .bb8-brand,
 .bb8-nav-link,
-.bb8-footer-col h3,
 .button, .btn,
 input, select, textarea, button {
-  font-family: var(--ft) !important;
+  font-family: var(--font-body) !important;
 }
 
 h1, h2, h3, h4, h5, h6 {

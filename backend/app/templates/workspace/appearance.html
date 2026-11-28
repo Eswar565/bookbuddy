@@ -278,24 +278,25 @@
       </div>
 
       <div class="font-grid" role="radiogroup" aria-label="Typography">
-        <!-- Love Ya Like A Sister Card (Default) -->
-        <div class="font-card {% if current_font == 'love_ya_like_a_sister' or not current_font %}selected{% endif %}"
-             data-font-val="love_ya_like_a_sister"
+        <!-- Fraunces + Nunito Card (Default) -->
+        <div class="font-card {% if current_font == 'fraunces_nunito' or not current_font %}selected{% endif %}"
+             data-font-val="fraunces_nunito"
              tabindex="0"
              role="radio"
-             aria-checked="{{ 'true' if current_font == 'love_ya_like_a_sister' or not current_font else 'false' }}">
+             aria-checked="{{ 'true' if current_font == 'fraunces_nunito' or not current_font else 'false' }}">
           <div class="card-status-badge">
             <svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>
           </div>
-          <div class="font-specimen" style="font-family: var(--font-main);">
+          <div class="font-specimen" style="font-family: var(--font-heading);">
             <div class="font-big-aa">Aa</div>
             <div class="font-sample-weights">
-              <span style="font-weight: 400;">400 Regular</span>
+              <span style="font-family: var(--font-heading); font-weight: 700;">Fraunces 700</span> · 
+              <span style="font-family: var(--font-body); font-weight: 400;">Nunito 400</span>
             </div>
           </div>
           <div class="card-info">
-            <h3 class="font-name" style="font-family: var(--font-main);">Love Ya Like A Sister <span class="tag-default">Default</span></h3>
-            <p class="font-desc">'Love Ya Like A Sister', cursive · Playful, handwritten display font by Kimberly Geswein.</p>
+            <h3 class="font-name" style="font-family: var(--font-heading);">Fraunces &amp; Nunito <span class="tag-default">Default</span></h3>
+            <p class="font-desc">Fraunces serif headings + Nunito rounded sans-serif body &amp; UI components.</p>
           </div>
         </div>
 
@@ -441,7 +442,8 @@
   };
 
   var fontFamilies = {
-    love_ya_like_a_sister: "var(--font-main)",
+    fraunces_nunito: "var(--font-body)",
+    love_ya_like_a_sister: "var(--font-body)",
     inter: "var(--font-main)",
     playfair: "var(--font-main)",
     poppins: "var(--font-main)"
@@ -666,7 +668,7 @@
       e.preventDefault();
       actionInput.value = 'reset';
       themeInput.value = 'maroon';
-      fontInput.value = 'love_ya_like_a_sister';
+      fontInput.value = 'fraunces_nunito';
       pickerP.value = '#7a1230';
       pickerBg.value = '#f7f8fc';
       pickerCard.value = '#ffffff';

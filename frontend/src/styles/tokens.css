@@ -7,10 +7,20 @@
 @import './theme.css';
 
 :root {
-  /* Font Family - Single unified font across all elements */
-  --font-family: var(--font-main);
-  --font-body: var(--font-main);
-  --font-heading: var(--font-main);
+  /* Font Family - Fraunces (Headings) + Nunito (Body) */
+  --font-heading: "Fraunces", "Noto Serif Tamil", "Noto Serif Devanagari", Georgia, serif;
+  --font-body: "Nunito", "Noto Sans Tamil", "Noto Sans Devanagari", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-main: var(--font-body);
+  --font-family: var(--font-body);
+  --font-name: "Nunito";
+  --headingFont: var(--font-heading);
+  --bodyFont: var(--font-body);
+  --contentFont: var(--font-body);
+  --bb-body-font: var(--font-body);
+  --bb-display-font: var(--font-heading);
+  --bs-font-sans-serif: var(--font-body);
+  --bs-body-font-family: var(--font-body);
+  --ft: var(--font-body);
 
   /* Primary Theme Palette */
   --navy: #061446;

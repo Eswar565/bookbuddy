@@ -1,65 +1,255 @@
 /* ==========================================================================
    Book Buddy - Single Theme File (static/css/theme.css)
-   Single font family: Love Ya Like A Sister + Noto Sans Tamil & Devanagari fallbacks.
-   Consistent theme variables, and responsive components.
+   Typography: Fraunces (Headings) + Nunito (Body & Components)
+   Fallbacks: Noto Serif / Sans Tamil & Devanagari.
    ========================================================================== */
 
-@import url("https://fonts.googleapis.com/css2?family=Love+Ya+Like+A+Sister&family=Noto+Sans+Devanagari:wght@400;600&family=Noto+Sans+Tamil:wght@400;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Nunito:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Devanagari:wght@600;700&family=Noto+Serif+Tamil:wght@600;700&display=swap");
 
 /* --- Self-Hosted Fonts (@font-face) --- */
 @font-face {
-  font-family: 'Love Ya Like A Sister';
+  font-family: 'Fraunces';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/static/fonts/love-ya-like-a-sister-latin.woff2') format('woff2');
+  src: url('/static/fonts/fraunces-400-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/static/fonts/fraunces-400-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 @font-face {
-  font-family: 'Love Ya Like A Sister';
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/static/fonts/fraunces-600-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/static/fonts/fraunces-600-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/static/fonts/fraunces-700-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/static/fonts/fraunces-700-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Nunito';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/static/fonts/love-ya-like-a-sister-latin-ext.woff2') format('woff2');
+  src: url('/static/fonts/nunito-400-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/static/fonts/nunito-400-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/static/fonts/nunito-500-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/static/fonts/nunito-500-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/static/fonts/nunito-600-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/static/fonts/nunito-600-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/static/fonts/nunito-700-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/static/fonts/nunito-700-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/static/fonts/nunito-800-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/static/fonts/nunito-800-latin-ext.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 @font-face {
   font-family: 'Noto Sans Tamil';
   font-style: normal;
-  font-weight: 400 600;
+  font-weight: 400;
   font-display: swap;
   src: url('/static/fonts/noto-sans-tamil-400.woff2') format('woff2');
   unicode-range: U+0964-0965, U+0B82-0BFA, U+200C-200D, U+20B9, U+25CC;
 }
 
 @font-face {
+  font-family: 'Noto Sans Tamil';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/static/fonts/noto-sans-tamil-600.woff2') format('woff2');
+  unicode-range: U+0964-0965, U+0B82-0BFA, U+200C-200D, U+20B9, U+25CC;
+}
+
+@font-face {
+  font-family: 'Noto Sans Tamil';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/static/fonts/noto-sans-tamil-700.woff2') format('woff2');
+  unicode-range: U+0964-0965, U+0B82-0BFA, U+200C-200D, U+20B9, U+25CC;
+}
+
+@font-face {
   font-family: 'Noto Sans Devanagari';
   font-style: normal;
-  font-weight: 400 600;
+  font-weight: 400;
   font-display: swap;
   src: url('/static/fonts/noto-sans-devanagari-400.woff2') format('woff2');
   unicode-range: U+0900-097F, U+1CD0-1CF4, U+1CF7-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B0A;
 }
 
-:root {
-  /* Font Family - Single unified font across all elements */
-  --font-name: "Love Ya Like A Sister";
-  --font-main: "Love Ya Like A Sister", "Noto Sans Tamil", "Noto Sans Devanagari", "Comic Sans MS", cursive;
-  --font-family: var(--font-main);
-  --font-body: var(--font-main);
-  --font-heading: var(--font-main);
-  --bb-body-font: var(--font-main);
-  --bb-display-font: var(--font-main);
-  --headingFont: var(--font-main);
-  --contentFont: var(--font-main);
-  --bodyFont: var(--font-main);
-  --bs-font-sans-serif: var(--font-main);
-  --bs-body-font-family: var(--font-main);
-  --ft: var(--font-main);
+@font-face {
+  font-family: 'Noto Sans Devanagari';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/static/fonts/noto-sans-devanagari-600.woff2') format('woff2');
+  unicode-range: U+0900-097F, U+1CD0-1CF4, U+1CF7-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B0A;
+}
 
-  /* Primary Theme Palette */
+@font-face {
+  font-family: 'Noto Sans Devanagari';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/static/fonts/noto-sans-devanagari-700.woff2') format('woff2');
+  unicode-range: U+0900-097F, U+1CD0-1CF4, U+1CF7-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B0A;
+}
+
+@font-face {
+  font-family: 'Noto Serif Tamil';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/static/fonts/noto-serif-tamil-600.woff2') format('woff2');
+  unicode-range: U+0964-0965, U+0B82-0BFA, U+200C-200D, U+20B9, U+25CC;
+}
+
+@font-face {
+  font-family: 'Noto Serif Tamil';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/static/fonts/noto-serif-tamil-700.woff2') format('woff2');
+  unicode-range: U+0964-0965, U+0B82-0BFA, U+200C-200D, U+20B9, U+25CC;
+}
+
+@font-face {
+  font-family: 'Noto Serif Devanagari';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/static/fonts/noto-serif-devanagari-600.woff2') format('woff2');
+  unicode-range: U+0900-097F, U+1CD0-1CF4, U+1CF7-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B0A;
+}
+
+@font-face {
+  font-family: 'Noto Serif Devanagari';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/static/fonts/noto-serif-devanagari-700.woff2') format('woff2');
+  unicode-range: U+0900-097F, U+1CD0-1CF4, U+1CF7-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B0A;
+}
+
+:root {
+  /* Font Families - Fraunces (Headings) + Nunito (Body) */
+  --font-heading: "Fraunces", "Noto Serif Tamil", "Noto Serif Devanagari", Georgia, serif;
+  --font-body: "Nunito", "Noto Sans Tamil", "Noto Sans Devanagari", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-main: var(--font-body);
+  --font-family: var(--font-body);
+  --font-name: "Nunito";
+  --headingFont: var(--font-heading);
+  --bodyFont: var(--font-body);
+  --contentFont: var(--font-body);
+  --bb-body-font: var(--font-body);
+  --bb-display-font: var(--font-heading);
+  --bs-font-sans-serif: var(--font-body);
+  --bs-body-font-family: var(--font-body);
+  --ft: var(--font-body);
+
+/* Primary Theme Palette */
   --navy: #061446;
   --navy-dark: #040d2e;
   --navy-light: #0a2472;
@@ -126,66 +316,151 @@ html {
 }
 
 html, body {
-  font-family: var(--font-main) !important;
+  font-family: var(--font-body) !important;
   font-size: 16px; /* 1rem */
   line-height: 1.6;
-  font-weight: 400 !important;
-  letter-spacing: 0.01em;
-}
-
-body :is(h1, h2, h3, h4, h5, h6):not([class*="fa-"]):not(.bb-icon):not(svg) {
-  font-family: var(--font-main) !important;
-  font-weight: 400 !important;
-  line-height: 1.2 !important;
-  letter-spacing: 0.01em;
-}
-
-h1, .h1, h2, .h2 {
-  line-height: 1.2 !important;
-  font-weight: 400 !important;
-}
-
-body :is(p, span, a, li, td, dd, dt, label):not([class*="fa-"]):not(.bb-icon):not(svg) {
-  font-family: var(--font-main);
   font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* Fraunces: Headings, Page Titles, Section Headings, Content Card Titles, Modal Titles, Plans, Hero, Footer Col Headings */
+h1, h2, h3, h4,
+.font-heading,
+.page-title,
+.section-title,
+.section-head h2,
+.section-head h3,
+.hero h1,
+.bb18-hero h1,
+.home10-hero h1,
+.hero-unified h1,
+.bb-modal-title,
+.modal-title,
+.checkout-title,
+.plan-card-name,
+.plan-card-price,
+.plan-name,
+.bb-plan-duration-name,
+.bb-price-val,
+.bb18-plans .bb16-price,
+.bb16-price,
+.footer-col h3,
+.site-footer h3,
+.bb8-footer-col h3,
+.event-card__title,
+.event-card h3,
+.media-card__title,
+.media-card h3,
+.collab-card__name,
+.collab-card h3,
+.story-card h3,
+.bb24-video-body h3 {
+  font-family: var(--font-heading) !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.01em !important;
+}
+
+h5, h6 {
+  font-family: var(--font-heading) !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+}
+
+/* Nunito: Body, text, nav, buttons, forms, tables, filter sidebar, dropdown menus, book card text, modal fields, calendar, toasts, footer links, admin panel */
+body :is(p, span, a, li, dd, dt, label):not([class*="fa-"]):not(.bb-icon):not(svg):not(.font-heading):not(.page-title):not(.section-title):not(.bb-modal-title):not(.modal-title):not(.checkout-title):not(.plan-card-name):not(.plan-card-price):not(.plan-name):not(.bb-plan-duration-name):not(.bb-price-val):not(.bb16-price):not(.event-card__title):not(.media-card__title):not(.collab-card__name) {
+  font-family: var(--font-body);
 }
 
 body :is(button, input, select, textarea, option, summary, .btn, .button):not([class*="fa-"]):not(.bb-icon):not(svg) {
-  font-family: var(--font-main) !important;
-  font-weight: 400 !important;
+  font-family: var(--font-body) !important;
+  font-weight: 600;
   font-size: 0.95rem;
 }
 
 body :is(nav a, .folio-nav-link, .main-nav a, .s29-nav-main, .sidebar a):not([class*="fa-"]):not(.bb-icon):not(svg) {
-  font-family: var(--font-main) !important;
-  font-weight: 400 !important;
+  font-family: var(--font-body) !important;
+  font-weight: 600;
   font-size: 0.95rem;
 }
 
 body :is(table, th, td):not([class*="fa-"]):not(.bb-icon):not(svg) {
-  font-family: var(--font-main) !important;
-  font-weight: 400 !important;
+  font-family: var(--font-body) !important;
 }
 
 th {
-  font-weight: 400 !important;
+  font-weight: 700 !important;
 }
 
 b, strong {
-  font-weight: 400 !important;
+  font-weight: 700 !important;
   color: var(--navy);
 }
 
 em, i:not([class*="fa-"]):not(.bb-icon):not(.fas):not(.far):not(.fab):not([class*="icon"]) {
-  font-style: normal !important;
-  color: var(--maroon);
+  font-style: italic;
 }
 
 .eyebrow, .section-kicker, .folio-kicker, .bb-visit-eyebrow, .sidebar summary, .sidebar > p {
-  letter-spacing: 0.02em !important;
+  letter-spacing: 0.05em !important;
   font-size: 0.85rem;
-  font-weight: 400 !important;
+  font-weight: 600 !important;
 }
+
+/* Book catalogue cards explicitly use Nunito (overriding general heading serif rule) */
+article.bb-book-card h2,
+article.bb-book-card h2.bb-book-title,
+.bb-book-card .bb-book-title,
+.bb-book-card h2,
+.bb-book-title,
+.bb-book-title a,
+.book-card__title,
+.book-card h3,
+.bb-book-author,
+.book-card__author,
+.book-card__status,
+.bb-avail-pill,
+.book-card__action,
+.btn-cart-add {
+  font-family: var(--font-body) !important;
+}
+
+article.bb-book-card h2,
+.bb-book-card .bb-book-title,
+.bb-book-title,
+.book-card__title {
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+}
+
+.bb-book-author,
+.book-card__author {
+  font-size: 0.88rem !important;
+  font-weight: 500 !important;
+}
+
+.book-card__status,
+.bb-avail-pill {
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+}
+
+.btn-export,
+.btn-excel,
+.btn-favs,
+.btn-filter-checkout {
+  font-size: 0.88rem !important;
+  font-family: var(--font-body) !important;
+}
+
+/* Minimum font size >= 0.85rem enforcement across the site */
+small, .small, .text-small, .text-sm, .text-muted, .caption,
+.book-card__status, .bb-avail-pill, .badge, .tag, .pill,
+.bb-fav-badge, .filter-badge, .count-badge, .kicker, .eyebrow,
+.bb-book-author, .author, .byline {
+  font-size: max(0.85rem, inherit);
+}
+
 /* ==========================================================================
    Navigation Dropdown & Active States (Desktop & Mobile)
    ========================================================================== */
@@ -1820,8 +2095,9 @@ body.storybook .bb-book-card {
 .bb-book-title,
 body .bb-book-title,
 body.bookbuddy-modern .bb-book-title {
-  font-size: 0.9rem !important;
-  font-weight: 400 !important;
+  font-size: 0.92rem !important;
+  font-weight: 700 !important;
+  font-family: var(--font-body) !important;
   line-height: 1.3 !important;
   margin: 0 0 4px 0 !important;
   white-space: nowrap !important;
@@ -1844,7 +2120,7 @@ body.bookbuddy-modern .bb-book-title {
 .bb-book-author,
 body .bb-book-author,
 body.bookbuddy-modern .bb-book-author {
-  font-size: 0.8rem !important;
+  font-size: 0.85rem !important;
   font-weight: 400 !important;
   line-height: 1.25 !important;
   color: #7b1230 !important;
@@ -1852,7 +2128,7 @@ body.bookbuddy-modern .bb-book-author {
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  font-family: var(--font-family) !important;
+  font-family: var(--font-body) !important;
 }
 
 /* Card footer (replace the current bottom row: stacked layout) */
@@ -1875,8 +2151,9 @@ body.bookbuddy-modern .bb-book-author {
   box-sizing: border-box !important;
   text-align: center !important;
   white-space: nowrap !important;
-  font-size: 0.82rem !important;
-  font-weight: 400 !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  font-family: var(--font-body) !important;
   line-height: 1 !important;
   padding: 7px 10px !important;
   border-radius: 8px !important;
@@ -2409,4 +2686,39 @@ body.folio button.dropdown-item.is-selected {
 
 .dropdown-item:not(.is-selected):not([aria-checked="true"]) .check {
   display: none;
+}
+
+
+/* ==========================================================================
+   End-of-file Typography Enforcement
+   ========================================================================== */
+article.bb-book-card h2,
+article.bb-book-card h2.bb-book-title,
+.bb-book-card .bb-book-title,
+.bb-book-title,
+.bb-book-title a {
+  font-family: var(--font-body) !important;
+  font-weight: 700 !important;
+}
+.bb-book-author,
+.book-card__author {
+  font-family: var(--font-body) !important;
+  font-size: 0.88rem !important;
+}
+.book-card__status,
+.bb-avail-pill {
+  font-family: var(--font-body) !important;
+  font-size: 0.88rem !important;
+}
+.btn-export,
+.btn-excel,
+.btn-favs,
+.btn-filter-checkout {
+  font-family: var(--font-body) !important;
+  font-size: 0.88rem !important;
+}
+.dropdown-item,
+button.dropdown-item {
+  font-family: var(--font-body) !important;
+  font-size: 0.9rem !important;
 }
