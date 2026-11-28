@@ -283,21 +283,161 @@
       });
     });
 
-    // 3. Header nav details[data-nav-dropdown] outside click & Esc
-    document.addEventListener('click', function (e) {
-      document.querySelectorAll('details.bb8-dropdown[open]').forEach(function (det) {
-        if (!det.contains(e.target)) {
+    // 3. Header nav details[data-nav-dropdown] enhancement (hover, ARIA, keyboard nav)
+    var navDropdowns = document.querySelectorAll('.bb8-nav details.bb8-dropdown');
+    navDropdowns.forEach(function (det) {
+      var summary = det.querySelector('summary');
+      var menu = det.querySelector('.nav-dropdown-menu, .bb8-dropdown-menu');
+      if (!summary || !menu) return;
+
+      // ARIA setup
+      summary.setAttribute('aria-haspopup', 'true');
+      summary.setAttribute('aria-expanded', det.open ? 'true' : 'false');
+      menu.setAttribute('role', 'menu');
+      menu.querySelectorAll('a').forEach(function (a) {
+        a.setAttribute('role', 'menuitem');
+      });
+
+      // Sync aria-expanded on toggle
+      det.addEventListener('toggle', function () {
+        summary.setAttribute('aria-expanded', det.open ? 'true' : 'false');
+      });
+
+      // Desktop hover bridge & auto open/close
+      var isDesktop = function () {
+        return window.matchMedia('(min-width: 901px)').matches;
+      };
+
+      var closeTimer = null;
+
+      summary.addEventListener('click', function () {
+        setTimeout(function () {
+          if (det.open) {
+            det.dataset.openedByClick = 'true';
+            summary.setAttribute('aria-expanded', 'true');
+          } else {
+            delete det.dataset.openedByClick;
+            summary.setAttribute('aria-expanded', 'false');
+          }
+        }, 10);
+      });
+
+      det.addEventListener('mouseenter', function () {
+        if (!isDesktop()) return;
+        if (closeTimer) {
+          clearTimeout(closeTimer);
+          closeTimer = null;
+        }
+        navDropdowns.forEach(function (other) {
+          if (other !== det && other.open && other.dataset.openedByClick !== 'true') {
+            other.removeAttribute('open');
+            delete other.dataset.openedByClick;
+            var s = other.querySelector('summary');
+            if (s) s.setAttribute('aria-expanded', 'false');
+          }
+        });
+        if (!det.open) {
+          det.setAttribute('open', '');
+          summary.setAttribute('aria-expanded', 'true');
+        }
+      });
+
+      det.addEventListener('mouseleave', function () {
+        if (!isDesktop()) return;
+        if (det.dataset.openedByClick === 'true') {
+          return;
+        }
+        closeTimer = setTimeout(function () {
+          if (det.dataset.openedByClick !== 'true') {
+            det.removeAttribute('open');
+            summary.setAttribute('aria-expanded', 'false');
+          }
+        }, 120);
+      });
+
+      // Keyboard navigation on summary
+      summary.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+          if (!det.open) {
+            det.setAttribute('open', '');
+            summary.setAttribute('aria-expanded', 'true');
+          }
+          var firstItem = menu.querySelector('a[role="menuitem"]');
+          if (firstItem) {
+            e.preventDefault();
+            firstItem.focus();
+          }
+        } else if (e.key === 'ArrowUp') {
+          if (!det.open) {
+            det.setAttribute('open', '');
+            summary.setAttribute('aria-expanded', 'true');
+          }
+          var items = menu.querySelectorAll('a[role="menuitem"]');
+          if (items.length) {
+            e.preventDefault();
+            items[items.length - 1].focus();
+          }
+        }
+      });
+
+      // Keyboard navigation inside menu
+      menu.addEventListener('keydown', function (e) {
+        var items = Array.from(menu.querySelectorAll('a[role="menuitem"]'));
+        var idx = items.indexOf(document.activeElement);
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          var next = idx < items.length - 1 ? idx + 1 : 0;
+          items[next].focus();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          var prev = idx > 0 ? idx - 1 : items.length - 1;
+          items[prev].focus();
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          if (items[0]) items[0].focus();
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          if (items[items.length - 1]) items[items.length - 1].focus();
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
           det.removeAttribute('open');
+          delete det.dataset.openedByClick;
+          summary.setAttribute('aria-expanded', 'false');
+          summary.focus();
+        } else if (e.key === 'Tab') {
+          det.removeAttribute('open');
+          delete det.dataset.openedByClick;
+          summary.setAttribute('aria-expanded', 'false');
         }
       });
     });
 
+    // Close nav dropdowns on outside click
+    document.addEventListener('click', function (e) {
+      navDropdowns.forEach(function (det) {
+        if (det.open && !det.contains(e.target)) {
+          det.removeAttribute('open');
+          delete det.dataset.openedByClick;
+          var s = det.querySelector('summary');
+          if (s) s.setAttribute('aria-expanded', 'false');
+        }
+      });
+    });
+
+    // Global Esc listener for open nav dropdowns
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
-        document.querySelectorAll('details.bb8-dropdown[open]').forEach(function (det) {
-          det.removeAttribute('open');
-          var summary = det.querySelector('summary');
-          if (summary) summary.focus();
+        navDropdowns.forEach(function (det) {
+          if (det.open) {
+            det.removeAttribute('open');
+            delete det.dataset.openedByClick;
+            var s = det.querySelector('summary');
+            if (s) {
+              s.setAttribute('aria-expanded', 'false');
+              s.focus();
+            }
+          }
         });
       }
     });

@@ -111,7 +111,7 @@ body.bookbuddy-modern :is(h1, h2, h3, h4, h5, h6, .bb8-hero-title, .bb8-hero-lin
   gap: 4px;
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 991px) {
   .bb8-nav {
     display: none;
   }
@@ -418,14 +418,14 @@ body.folio :is(a.bb8-btn-login, button.bb8-btn-login):visited,
   border-radius: var(--radius-sm);
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 991px) {
   .bb8-hamburger {
     display: flex;
     align-items: center;
     justify-content: center;
   }
   .bb8-btn-partner {
-    display: none;
+    display: none !important;
   }
 }
 
