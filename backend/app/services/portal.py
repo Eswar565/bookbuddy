@@ -64,7 +64,7 @@ def install_release17(app,db,render,admin,root):
         additions={
           'admin_users':{'role':"TEXT NOT NULL DEFAULT 'super_admin'",'is_active':'INTEGER NOT NULL DEFAULT 1'},
           'users':{'email_verified':'INTEGER NOT NULL DEFAULT 0','session_version':'INTEGER NOT NULL DEFAULT 0'},
-          'books':{'isbn':"TEXT NOT NULL DEFAULT ''",'publisher':"TEXT NOT NULL DEFAULT ''",'edition':"TEXT NOT NULL DEFAULT ''",'archived':'INTEGER NOT NULL DEFAULT 0'},
+          'books':{'isbn':"TEXT NOT NULL DEFAULT ''",'publisher':"TEXT NOT NULL DEFAULT ''",'edition':"TEXT NOT NULL DEFAULT ''",'archived':'INTEGER NOT NULL DEFAULT 0','category':"TEXT NOT NULL DEFAULT ''"},
           'lending_plans':{
               'duration_days':'INTEGER NOT NULL DEFAULT 30','loan_days':'INTEGER NOT NULL DEFAULT 14','renewal_limit':'INTEGER NOT NULL DEFAULT 1','fine_daily_paise':'INTEGER NOT NULL DEFAULT 0','learning_access':'INTEGER NOT NULL DEFAULT 1','ai_access':'INTEGER NOT NULL DEFAULT 0',
               'tier':"TEXT NOT NULL DEFAULT ''",'tagline':"TEXT NOT NULL DEFAULT ''",'badge':"TEXT NOT NULL DEFAULT ''",'benefits':"TEXT NOT NULL DEFAULT ''",'total_books':'INTEGER NOT NULL DEFAULT 0'
@@ -172,7 +172,7 @@ def install_release17(app,db,render,admin,root):
         c.execute("UPDATE mail_queue17 SET status='Cancelled' WHERE subject='BookBuddy account verify' AND status='Pending'")
         c.commit()
     from management import MODELS,BOOLS
-    MODELS['books']=('Books','books','title author isbn publisher edition collection age_group language price stock description image_path is_active archived audience')
+    MODELS['books']=('Books','books','title author isbn publisher edition collection age_group language category price stock description image_path is_active archived audience')
     BOOLS.update({'archived', 'is_active'})
 
     def rows(sql,args=()): return [dict(r) for r in db().execute(sql,args)]

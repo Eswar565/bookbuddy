@@ -1,26 +1,26 @@
 /* Book Buddy 12: quiet, full-width back-office interface. */
 :root{--primaryColor:#7A1636;--secondaryColor:#7A1636;--line:#e3e9ed;--muted:#637585;--ink:#2A1A20;--accent:#7A1636}
 *{box-sizing:border-box}
-body{background:#f4f7f9!important;color:#1a3544!important;font:14px/1.65 'Inter',system-ui,-apple-system,'Segoe UI',Arial,sans-serif!important}
-h1,h2,h3,h4,h5,h6{font-family:'Lora','Inter',system-ui,sans-serif!important;color:#7A1636;letter-spacing:-.025em}
+body{background:#f4f7f9!important;color:#1a3544!important;font:14px/1.65 var(--font-main)!important}
+h1,h2,h3,h4,h5,h6{font-family:var(--font-main)!important;color:#7A1636;letter-spacing:-.01em}
 .workspace{grid-template-columns:clamp(245px,19vw,286px) minmax(0,1fr)!important;width:100%;background:#f4f7f9}
 .sidebar{border:0!important;border-right:1px solid #e3e9ed!important;background:#fff!important;padding:28px 16px!important;box-shadow:none!important}
-.sidebar>a,.sidebar details a,.sidebar summary{border:0!important;border-radius:9px!important;padding:10px 14px!important;color:#364d5b!important;font-weight:600;font-size:calc(13px * var(--bb-scale))!important;line-height:1.55}
-.sidebar summary{font-weight:800!important;color:#7A1636!important;margin-top:12px}
+.sidebar>a,.sidebar details a,.sidebar summary{border:0!important;border-radius:9px!important;padding:10px 14px!important;color:#364d5b!important;font-weight: 400;font-size:calc(13px * var(--bb-scale))!important;line-height:1.55}
+.sidebar summary{font-weight: 400!important;color:#7A1636!important;margin-top:12px}
 .sidebar a:hover,.sidebar details a:hover{background:#F4E4DB!important;color:#7A1636!important}
-.sidebar a.selected{background:#F4E4DB!important;color:#7A1636!important;font-weight:800}
-.sidebar>p{font-size:calc(10px * var(--bb-scale));letter-spacing:.12em;font-weight:800;text-transform:uppercase;color:#8896a3;padding:21px 14px 4px}
+.sidebar a.selected{background:#F4E4DB!important;color:#7A1636!important;font-weight: 400}
+.sidebar>p{font-size:calc(10px * var(--bb-scale));letter-spacing:.12em;font-weight: 400;text-transform:uppercase;color:#8896a3;padding:21px 14px 4px}
 .notification-badge{background:#F4E4DB!important;color:#7A1636!important;font-size:calc(11px * var(--bb-scale));border-radius:50px!important;padding:3px 8px!important}
 .admin-content{width:100%!important;max-width:none!important;padding:clamp(23px,3vw,48px)!important}
 .admin-content>header{background:transparent;border:0!important;align-items:flex-start;gap:20px;padding-bottom:6px!important;margin-bottom:25px!important}
 .admin-content>header h1{font-size:clamp(calc(26px * var(--bb-scale)),2.4vw,calc(38px * var(--bb-scale)));font-weight:750;line-height:1.2;margin:8px 0 0}
-.admin-content>header .eyebrow{color:#7A1636;font-size:calc(11px * var(--bb-scale));letter-spacing:.12em;font-weight:800}
+.admin-content>header .eyebrow{color:#7A1636;font-size:calc(11px * var(--bb-scale));letter-spacing:.12em;font-weight: 400}
 .admin-header-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.admin-header-actions>a,.admin-header-actions>span{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:white;border-radius:9px;padding:9px 12px;color:#284559;font-weight:700;font-size:calc(12px * var(--bb-scale));text-decoration:none}
+.admin-header-actions>a,.admin-header-actions>span{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:white;border-radius:9px;padding:9px 12px;color:#284559;font-weight: 400;font-size:calc(12px * var(--bb-scale));text-decoration:none}
 .admin-content section,.admin-content .card,.admin-content .welcome,.admin-content .panel,.admin-content .admin-card,.admin-content .stat,.admin-content .metric,.admin-content .summary-card{border:1px solid var(--line)!important;border-left-color:var(--line)!important;border-right-color:var(--line)!important;background:#fff;border-radius:15px!important;box-shadow:0 4px 16px #7A163606}
 .admin-content .welcome{padding:30px!important}
 .admin-content table{border-collapse:collapse;width:100%}
-.admin-content table th{background:#f5f8fa;color:#314c5d;font-size:calc(12px * var(--bb-scale));text-align:left;font-weight:800}
+.admin-content table th{background:#f5f8fa;color:#314c5d;font-size:calc(12px * var(--bb-scale));text-align:left;font-weight: 400}
 .admin-content table th,.admin-content table td{padding:13px 15px!important;border-bottom:1px solid var(--line)!important;vertical-align:middle}
 .admin-content table td{color:#354c5a;font-size:calc(13px * var(--bb-scale))}
 .admin-content table tbody tr:hover{background:#f7f9fe}

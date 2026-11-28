@@ -4,14 +4,10 @@
 {% block body %}
 <main class="section bb-catalogue-page">
   <div class="bb8-container" style="max-width:1280px; margin:0 auto; padding:0 20px;">
-    <!-- Page Header -->
-    <div class="bb-catalogue-heading" style="margin-bottom:24px;">
-      <div>
-        <span class="gallery-badge">The Book Buddy Library</span>
-        <h1 style="font-size:clamp(26px, 4vw, 36px); font-weight:800; color:var(--navy); margin:8px 0;">Book Catalogue</h1>
-        <p style="color:var(--text-muted); font-size:15px; margin:0;">Browse through our curated collection of illustrated picture books, chapter novels, non-fiction, and classics.</p>
-      </div>
-      <a class="bb-catalogue-basket" href="/members/dashboard/">
+    <!-- Page Header: Single compact heading row with h1 and My Borrowed Books button -->
+    <div class="bb-catalogue-heading" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:24px; padding-top:8px;">
+      <h1 style="font-size:1.85rem; font-weight:800; color:var(--navy); margin:0; line-height:1.2;">Book Catalogue</h1>
+      <a class="bb-catalogue-basket" href="/members/dashboard/" style="margin:0;">
         <svg class="bb-icon" style="width:16px;height:16px;margin-right:6px;"><use href="#i-book"/></svg> My Borrowed Books
       </a>
     </div>
@@ -19,18 +15,18 @@
     <!-- Quick Readers & Language Row with Export Buttons (Exact Order: Readers | Download as Excel | Language (dropdown) | Favourites | Checkout) -->
     <nav class="catalogue-quick" aria-label="Quick filters and export" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:14px; background:var(--surface-card); padding:12px 18px; border-radius:var(--radius-lg); border:1px solid var(--border-color); margin-bottom:20px; box-shadow:var(--shadow-sm);">
       <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-        <strong style="color:var(--navy); font-size:13px; font-weight:700;">Readers:</strong>
+        <strong style="color:var(--navy); font-size:14px; font-weight:700;">Readers:</strong>
         {% for value, label in [('', 'All'), ('adult', 'Adults'), ('kids', 'Kids')] %}
         <a href="{{ catalogue_url(audience=value, page=1) }}"
            class="btn-export {% if filters23.audience == value %}btn-excel{% endif %}"
-           style="height:38px; display:inline-flex; align-items:center; padding:0 14px; font-size:13px; {% if filters23.audience == value %}background:var(--navy); color:#fff; border-color:var(--navy); font-weight:700;{% endif %}"
+           style="height:38px; display:inline-flex; align-items:center; padding:0 14px; font-size:14px; {% if filters23.audience == value %}background:var(--navy); color:#fff; border-color:var(--navy); font-weight:700;{% endif %}"
            {% if filters23.audience == value %}aria-current="page"{% endif %}>
           {{ label }}
         </a>
         {% endfor %}
 
         <!-- Download as Excel placed right after Kids -->
-        <a href="{{ export_url(format='xlsx') }}" class="btn-export btn-excel" title="Download currently filtered list as Excel spreadsheet" style="height:38px; display:inline-flex; align-items:center; gap:6px; padding:0 14px; font-size:13px;">
+        <a href="{{ export_url(format='xlsx') }}" class="btn-export btn-excel" title="Download currently filtered list as Excel spreadsheet" style="height:38px; display:inline-flex; align-items:center; gap:6px; padding:0 14px; font-size:14px;">
           <svg class="bb-icon" style="width:14px;height:14px;" aria-hidden="true"><use href="#i-download"/></svg> Download as Excel
         </a>
       </div>
@@ -38,8 +34,8 @@
       <div class="catalogue-right-actions" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
         <!-- Language Dropdown (replaces pill buttons) -->
         <div style="display:flex; align-items:center; gap:6px;">
-          <label for="top-filter-lang" style="color:var(--navy); font-size:13px; font-weight:700;">Language:</label>
-          <select id="top-filter-lang" name="language" onchange="if(this.value){window.location.href=this.value;}" style="height:38px; padding:0 12px; font-size:13px; font-weight:600; color:var(--navy); border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; cursor:pointer;">
+          <label for="top-filter-lang" style="color:var(--navy); font-size:14px; font-weight:700;">Language:</label>
+          <select id="top-filter-lang" name="language" class="js-custom-select" onchange="if(this.value){window.location.href=this.value;}">
             <option value="{{ catalogue_url(language='', page=1) }}" {% if not filters23.language %}selected{% endif %}>All Languages</option>
             {% for lang in filter_options['language'] %}
             <option value="{{ catalogue_url(language=lang, page=1) }}" {% if filters23.language|lower == lang|lower %}selected{% endif %}>{{ lang }}</option>
@@ -48,23 +44,23 @@
         </div>
 
         <!-- Favourites Button with Count Badge -->
-        <a href="/library/favourites/" id="bb-filter-favs-btn" class="btn-export btn-favs js-favs-trigger" title="View your saved favourite books" style="height:38px; display:inline-flex; align-items:center; gap:8px; padding:0 14px; font-size:13px; font-weight:600; color:var(--navy); background:#fff; border:1px solid var(--border-color); border-radius:var(--radius-sm); text-decoration:none; cursor:pointer;">
+        <a href="/library/favourites/" id="bb-filter-favs-btn" class="btn-export btn-favs js-favs-trigger" title="View your saved favourite books" style="height:38px; display:inline-flex; align-items:center; gap:8px; padding:0 14px; font-size:14px; font-weight:600; color:var(--navy); background:#fff; border:1px solid var(--border-color); border-radius:var(--radius-sm); text-decoration:none; cursor:pointer;">
           <svg class="bb-icon" width="16" height="16" viewBox="0 0 24 24" fill="var(--maroon)" stroke="var(--maroon)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
           </svg>
           <span>Favourites</span>
-          <span class="bb-fav-badge js-fav-badge" id="bb-filter-fav-badge" style="display:none; background:var(--maroon); color:#fff; font-size:11px; font-weight:700; padding:2px 7px; border-radius:999px;">0</span>
+          <span class="bb-fav-badge js-fav-badge" id="bb-filter-fav-badge" style="display:none; background:var(--maroon); color:#fff; font-size:14px; font-weight:700; padding:2px 7px; border-radius:999px;">0</span>
         </a>
 
         <!-- Checkout Button -->
-        <button type="button" id="bb-filter-checkout-btn" class="btn-filter-checkout js-checkout-trigger" aria-label="Open borrow cart checkout" aria-haspopup="dialog" style="height:38px; display:inline-flex; align-items:center; gap:8px; padding:0 16px; font-size:13px; font-weight:700; border-radius:var(--radius-sm); background:var(--navy); color:#fff; border:none; cursor:pointer;">
+        <button type="button" id="bb-filter-checkout-btn" class="btn-filter-checkout js-checkout-trigger" aria-label="Open borrow cart checkout" aria-haspopup="dialog" style="height:38px; display:inline-flex; align-items:center; gap:8px; padding:0 16px; font-size:14px; font-weight:700; border-radius:var(--radius-sm); background:var(--navy); color:#fff; border:none; cursor:pointer;">
           <svg class="bb-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
             <line x1="3" y1="6" x2="21" y2="6"></line>
             <path d="M16 10a4 4 0 0 1-8 0"></path>
           </svg>
           <span>Checkout</span>
-          <span class="bb-cart-badge js-cart-badge" id="bb-filter-cart-badge" style="display:none; background:#ff4757; color:#fff; font-size:11px; font-weight:700; padding:2px 7px; border-radius:999px;">0</span>
+          <span class="bb-cart-badge js-cart-badge" id="bb-filter-cart-badge" style="display:none; background:#ff4757; color:#fff; font-size:14px; font-weight:700; padding:2px 7px; border-radius:999px;">0</span>
         </button>
       </div>
     </nav>
@@ -72,124 +68,192 @@
     <!-- Mobile Filter Drawer Toggle Button -->
     <button type="button" class="mobile-filter-toggle-btn" id="filter-drawer-toggle" aria-expanded="false" aria-controls="catalogue-sidebar">
       <svg class="bb-icon" style="width:16px;height:16px;"><use href="#i-sliders"/></svg>
-      <span>Filter &amp; Sort Catalogue</span>
+      <span>Filters</span>
     </button>
 
     <!-- Main Layout: Sidebar Filters + Books Grid -->
     <div class="catalogue-layout">
       <!-- Filter Panel (Sticky on desktop, collapses to bottom-sheet drawer on mobile) -->
-      <aside class="catalogue-sidebar" id="catalogue-sidebar" style="position:sticky; top:80px; max-height:calc(100vh - 90px); overflow-y:auto;">
-        <div class="catalogue-filter-bar">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-            <h3 style="font-size:16px; font-weight:700; color:var(--navy); margin:0; display:flex; align-items:center; gap:6px;">
-              <svg class="bb-icon" style="width:16px;height:16px;"><use href="#i-sliders"/></svg> Refine Catalogue
-            </h3>
-            <a href="/library/" class="filter-clear-all" style="font-size:12px;">Clear All</a>
+      <aside class="catalogue-sidebar" id="catalogue-sidebar" style="position:sticky; top:88px; align-self:flex-start; max-height:calc(100vh - 104px); overflow:visible; z-index:30;">
+        <div class="catalogue-filter-bar" style="display:flex; flex-direction:column; gap:12px; background:var(--surface-card); padding:16px; border-radius:var(--radius-lg); border:1px solid var(--border-color); box-shadow:var(--shadow-sm);">
+          
+          <!-- Heading Row: Filters title, Clear all link (when active), and mobile close btn -->
+          <div class="sidebar-header-row" style="display:flex; align-items:center; justify-content:space-between; padding-bottom:12px; border-bottom:1px solid var(--border-color); width:100%; box-sizing:border-box;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--maroon)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="4" y1="21" x2="4" y2="14"></line>
+                <line x1="4" y1="10" x2="4" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12" y2="3"></line>
+                <line x1="20" y1="21" x2="20" y2="16"></line>
+                <line x1="20" y1="12" x2="20" y2="3"></line>
+                <line x1="1" y1="14" x2="7" y2="14"></line>
+                <line x1="9" y1="8" x2="15" y2="8"></line>
+                <line x1="17" y1="16" x2="23" y2="16"></line>
+              </svg>
+              <h2 style="margin:0; font-size:1rem; font-weight:700; color:var(--maroon); line-height:1.2;">Filters</h2>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; margin-left:auto;">
+              <a href="/library/" id="sidebar-clear-all" class="filter-clear-all js-clear-all"
+                 style="display:{% if query or filters23.new == '1' or (selected_sort and selected_sort != 'newest') or (selected_category and selected_category.lower() != 'all') or selected_lang %}inline{% else %}none{% endif %}; font-size:0.85rem; font-weight:600; color:var(--maroon); text-decoration:none; cursor:pointer;"
+                 aria-label="Clear all filters">Clear all</a>
+              <button type="button" id="sidebar-drawer-close" class="mobile-drawer-close-btn" aria-label="Close filters"
+                      style="display:none; background:none; border:none; font-size:24px; color:var(--navy); cursor:pointer; line-height:1; padding:0 4px;">&times;</button>
+            </div>
           </div>
 
-          <form action="/library/" method="get" id="catalogue-filter-form">
-            <!-- 1. Search Title/Author -->
-            <div style="margin-bottom:14px;">
-              <label for="filter-q" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Search</label>
-              <input id="filter-q" type="search" name="q" value="{{ query }}" placeholder="Search by title, author, topic..." style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); box-sizing:border-box;">
-            </div>
-
-            <!-- 2. Reader Type (All / Adults / Kids) -->
-            <div style="margin-bottom:14px;">
-              <label for="filter-audience" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Reader Type</label>
-              <select id="filter-audience" name="audience" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
-                <option value="">All readers</option>
-                <option value="adult" {% if filters23.audience == 'adult' %}selected{% endif %}>Adults &amp; Parents</option>
-                <option value="kids" {% if filters23.audience == 'kids' %}selected{% endif %}>Children &amp; Young Readers</option>
-              </select>
-            </div>
-
-            <!-- 3. Age Group -->
-            <div style="margin-bottom:14px;">
-              <label for="filter-age_group" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Age Group</label>
-              <select id="filter-age_group" name="age_group" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
-                <option value="">All age groups</option>
-                {% for value in filter_options['age_group'] %}
-                <option value="{{ value }}" {% if value == filters23.age_group %}selected{% endif %}>{{ value }} yrs</option>
-                {% endfor %}
-              </select>
-            </div>
-
-            <!-- 4. Genre / Category -->
-            <div style="margin-bottom:14px;">
-              <label for="filter-collection" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Genre / Category</label>
-              <select id="filter-collection" name="collection" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
-                <option value="">All categories</option>
-                {% for c in collections %}
-                <option value="{{ c }}" {% if c == selected_collection %}selected{% endif %}>{{ c }}</option>
-                {% endfor %}
-              </select>
-            </div>
-
-            <!-- 5. Author -->
-            <div style="margin-bottom:14px;">
-              <label for="filter-author" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Author</label>
-              <select id="filter-author" name="author" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
-                <option value="">All authors</option>
-                {% for value in filter_options['author'] %}
-                <option value="{{ value }}" {% if value == filters23.author %}selected{% endif %}>{{ value }}</option>
-                {% endfor %}
-              </select>
-            </div>
-
-            <!-- 6. Availability -->
-            <div style="margin-bottom:14px;">
-              <label for="filter-availability" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Availability</label>
-              <select id="filter-availability" name="availability" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
-                <option value="">All collection</option>
-                <option value="available" {% if filters23.availability == 'available' %}selected{% endif %}>Available Now</option>
-                <option value="waitlist" {% if filters23.availability == 'waitlist' %}selected{% endif %}>On Loan / Waitlist</option>
-              </select>
-            </div>
-
-            <!-- 7. Sort By -->
-            <div style="margin-bottom:16px;">
-              <label for="filter-sort" style="display:block; font-size:12px; font-weight:700; color:var(--text-main); margin-bottom:4px;">Sort By</label>
-              <select id="filter-sort" name="sort" style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border-color); border-radius:var(--radius-sm); background:#fff; box-sizing:border-box;">
-                <option value="newest" {% if filters23.sort == 'newest' %}selected{% endif %}>Newest Arrivals</option>
-                <option value="title" {% if filters23.sort == 'title' %}selected{% endif %}>Title (A–Z)</option>
-                <option value="author" {% if filters23.sort == 'author' %}selected{% endif %}>Author (A–Z)</option>
-              </select>
-            </div>
-
-            <div style="margin-bottom:16px;">
-              <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-main); cursor:pointer;">
-                <input type="checkbox" name="new" value="1" {% if filters23.new == '1' %}checked{% endif %}>
-                <span>New arrivals only</span>
-              </label>
-            </div>
-
-            <!-- 8. Apply & Clear All -->
-            <div style="display:flex; gap:8px; align-items:center;">
-              <button type="submit" class="btn-book-event" style="flex:1; justify-content:center; padding:10px; font-size:13px; font-weight:700;">
-                Apply Filters
+          <!-- 1. Search Box (title or author, Enter submit, debounce 300ms, clear X) -->
+          <div class="sidebar-search-wrap" style="position:relative; width:100%;">
+            <div style="position:relative; display:flex; align-items:center;">
+              <svg class="bb-icon" style="position:absolute; left:12px; width:16px; height:16px; color:var(--text-muted); pointer-events:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input id="sidebar-search-q" type="text" name="q" value="{{ query }}" placeholder="Search title or author..."
+                     aria-label="Search books"
+                     style="width:100%; height:44px; min-height:44px; padding:0 34px 0 36px; font-size:14px; font-weight:500; font-family:var(--font-family); border:1.5px solid var(--border-color); border-radius:8px; background:#fff; color:var(--navy); box-sizing:border-box; outline:none; transition:border-color 0.15s ease;">
+              <button type="button" id="sidebar-search-clear" aria-label="Clear search"
+                      style="display:{% if query %}flex{% else %}none{% endif %}; position:absolute; right:10px; width:22px; height:22px; border-radius:50%; border:none; background:#f1f5f9; color:#64748b; font-size:14px; line-height:1; align-items:center; justify-content:center; cursor:pointer; padding:0;">
+                &times;
               </button>
-              <a href="/library/" class="btn-export" style="padding:10px; font-size:13px; text-decoration:none; text-align:center;">
-                Clear
-              </a>
             </div>
-          </form>
+          </div>
+
+          <!-- 2. New Arrivals Toggle Button -->
+          <div style="width:100%;">
+            <button type="button" id="sidebar-new-arrivals-btn"
+                    class="sidebar-pill-btn {% if filters23.new == '1' %}is-active{% endif %}"
+                    aria-label="New arrivals"
+                    aria-pressed="{% if filters23.new == '1' %}true{% else %}false{% endif %}"
+                    style="width:100%; height:44px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family:var(--font-family); border-radius:8px; cursor:pointer; box-sizing:border-box; transition:all 0.15s ease; border:1.5px solid {% if filters23.new == '1' %}var(--maroon){% else %}var(--border-color){% endif %}; background:{% if filters23.new == '1' %}var(--maroon){% else %}#ffffff{% endif %}; color:{% if filters23.new == '1' %}#ffffff{% else %}var(--navy){% endif %}; text-align:center;">
+              New Arrivals
+            </button>
+          </div>
+
+          <!-- 3. Sort By Dropdown Button -->
+          <div class="sidebar-dropdown-wrap" style="position:relative; width:100%;">
+            <button type="button" id="sidebar-sort-btn"
+                    class="sidebar-dropdown-btn dropdown-trigger"
+                    aria-label="Sort by"
+                    aria-haspopup="true"
+                    aria-expanded="false">
+              <span id="sidebar-sort-label">Sort By: {% if selected_sort == 'az' %}A–Z{% elif selected_sort == 'za' %}Z–A{% else %}Newest{% endif %}</span>
+              <svg class="bb-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+
+            <!-- Sort Dropdown Menu (role="menu") -->
+            <div id="sidebar-sort-menu" class="dropdown-menu sidebar-menu" role="menu" style="display:none;">
+              {% for s_val, s_label in [('newest', 'Newest'), ('az', 'A–Z'), ('za', 'Z–A')] %}
+              <button type="button" role="menuitem" class="dropdown-item js-sort-opt {% if selected_sort == s_val or (not selected_sort and s_val == 'newest') %}is-selected{% endif %}"
+                      data-value="{{ s_val }}"
+                      aria-checked="{% if selected_sort == s_val or (not selected_sort and s_val == 'newest') %}true{% else %}false{% endif %}">
+                <span>{{ s_label }}</span>
+                <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- 4. Categories Dropdown Button -->
+          <div class="sidebar-dropdown-wrap" style="position:relative; width:100%;">
+            <button type="button" id="sidebar-cat-btn"
+                    class="sidebar-dropdown-btn dropdown-trigger"
+                    aria-label="Categories"
+                    aria-haspopup="true"
+                    aria-expanded="false">
+              <span id="sidebar-cat-label">{% if selected_category and selected_category.lower() != 'all' %}{{ selected_category }}{% if selected_lang %} ({{ selected_lang }}){% endif %}{% else %}Categories{% endif %}</span>
+              <svg class="bb-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+
+            <!-- Categories Dropdown Menu (role="menu") -->
+            <div id="sidebar-cat-menu" class="dropdown-menu sidebar-menu" role="menu" style="display:none;">
+              
+              <!-- All Option -->
+              <button type="button" role="menuitem" class="dropdown-item js-cat-opt {% if not selected_category or selected_category.lower() == 'all' %}is-selected{% endif %}"
+                      data-value="all"
+                      aria-checked="{% if not selected_category or selected_category.lower() == 'all' %}true{% else %}false{% endif %}">
+                <span>All</span>
+                <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+
+              {% for cat in ['Baby', 'Toddler', 'Junior', 'Middle Grade', 'Young Adults', 'Adults', 'Fiction', 'Non Fiction'] %}
+              <button type="button" role="menuitem" class="dropdown-item js-cat-opt {% if selected_category|lower == cat|lower %}is-selected{% endif %}"
+                      data-value="{{ cat }}"
+                      aria-checked="{% if selected_category|lower == cat|lower %}true{% else %}false{% endif %}">
+                <span>{{ cat }}</span>
+                <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+              {% endfor %}
+
+              <!-- Languages (Sub-list / Nested Menu) -->
+              <div class="sidebar-submenu-wrap" style="position:relative; width:100%;">
+                <button type="button" id="sidebar-languages-trigger" class="dropdown-item js-lang-trigger {% if selected_category|lower == 'languages' or selected_lang %}is-selected{% endif %}"
+                        aria-haspopup="true" aria-expanded="false"
+                        aria-checked="{% if selected_category|lower == 'languages' or selected_lang %}true{% else %}false{% endif %}">
+                  <span>Languages</span>
+                  <div style="display:flex; align-items:center; gap:4px;">
+                    {% if selected_lang %}<span style="font-size:14px; font-weight:700; color:var(--maroon);">{{ selected_lang }}</span>{% endif %}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                  </div>
+                </button>
+
+                <!-- Languages Sub-menu -->
+                <div id="sidebar-languages-submenu" class="sidebar-submenu" role="menu"
+                     style="display:none; padding-left:10px; background:var(--surface-body, #f8fafc); border-radius:6px; margin:2px 0;">
+                  <button type="button" role="menuitem" class="dropdown-item js-sublang-opt {% if not selected_lang %}is-selected{% endif %}"
+                          data-lang=""
+                          aria-checked="{% if not selected_lang %}true{% else %}false{% endif %}"
+                          style="font-size:0.85rem;">
+                    <span>All Languages</span>
+                    <svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </button>
+                  {% for lang_item in available_languages %}
+                  <button type="button" role="menuitem" class="dropdown-item js-sublang-opt {% if selected_lang|lower == lang_item|lower %}is-selected{% endif %}"
+                          data-lang="{{ lang_item }}"
+                          aria-checked="{% if selected_lang|lower == lang_item|lower %}true{% else %}false{% endif %}"
+                          style="font-size:0.85rem;">
+                    <span>{{ lang_item }}</span>
+                    <svg class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </button>
+                  {% endfor %}
+                </div>
+              </div>
+
+            </div>
+          </div>
+
         </div>
       </aside>
 
       <!-- Main Catalogue Books Column -->
-      <section class="catalogue-main" aria-label="Book search results">
+      <section class="catalogue-main" id="catalogue-main-container" aria-label="Book search results">
         <!-- Active Filter Chips Bar (No total books count) -->
         {% if active_chips %}
-        <div class="filter-active-chips" style="margin-top:0; margin-bottom:20px; border-top:none; background:var(--surface-card); padding:12px 16px; border-radius:var(--radius-md); border:1px solid var(--border-color);">
-          <span style="font-size:12px; font-weight:700; color:var(--text-muted); margin-right:4px;">Active Filters:</span>
+        <div class="filter-active-chips" style="margin-top:0; margin-bottom:20px; border-top:none; background:var(--surface-card); padding:12px 16px; border-radius:var(--radius-md); border:1px solid var(--border-color); display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
+          <span style="font-size:14px; font-weight:700; color:var(--text-muted); margin-right:4px;">Active Filters:</span>
           {% for chip in active_chips %}
-          <span class="filter-chip">
+          <span class="filter-chip" style="display:inline-flex; align-items:center; gap:6px; background:#f1f5f9; padding:4px 10px; border-radius:999px; font-size:14px; font-weight:600; color:var(--navy);">
             <span>{{ chip.label }}</span>
-            <a href="{{ chip.remove_url }}" class="filter-chip-remove" aria-label="Remove {{ chip.label }} filter">&times;</a>
+            <a href="{{ chip.remove_url }}" class="filter-chip-remove js-chip-remove" data-remove-key="{{ chip.key }}" aria-label="Remove {{ chip.label }} filter" style="color:var(--text-muted); text-decoration:none; font-weight:700;">&times;</a>
           </span>
           {% endfor %}
-          <a href="/library/" class="filter-clear-all">Clear All</a>
+          <a href="/library/" class="filter-clear-all js-clear-all" style="font-size:14px; font-weight:700; color:var(--maroon); margin-left:auto; text-decoration:none;">Clear All</a>
         </div>
         {% endif %}
 
@@ -202,9 +266,21 @@
           </div>
         {% else %}
           <div class="bb-catalogue-empty" style="background:var(--surface-card); padding:48px 24px; text-align:center; border-radius:var(--radius-lg); border:1px dashed var(--border-color);">
-            <h2 style="font-size:20px; font-weight:700; color:var(--navy); margin:0 0 8px;">No matching titles</h2>
-            <p style="color:var(--text-muted); margin:0 0 20px;">Try adjusting your filters or search keywords to discover other wonderful titles.</p>
-            <a href="/library/" class="btn-export">Reset All Filters</a>
+            <h2 style="font-size:20px; font-weight:700; color:var(--navy); margin:0 0 8px;">
+              {% if selected_category and selected_category.lower() != 'all' %}
+                No books found in this category
+              {% else %}
+                No matching titles
+              {% endif %}
+            </h2>
+            <p style="color:var(--text-muted); margin:0 0 20px;">
+              {% if selected_category and selected_category.lower() != 'all' %}
+                Try choosing another category or clearing your active filters to explore our shelves.
+              {% else %}
+                Try adjusting your filters or search keywords to discover other wonderful titles.
+              {% endif %}
+            </p>
+            <a href="/library/" class="btn-export js-clear-all">Reset All Filters</a>
           </div>
         {% endif %}
 
@@ -320,11 +396,11 @@
 
           <div class="bb-form-group">
             <label for="req-delivery-mode" class="bb-form-label">Delivery Mode</label>
-            <select id="req-delivery-mode" name="delivery_mode" class="bb-form-select">
+            <select id="req-delivery-mode" name="delivery_mode" class="bb-form-select js-custom-select">
               <option value="offline" selected>Offline (Self-Pickup at {{ delivery_settings.membership_pickup_address }})</option>
               <option value="online">Online (Doorstep Delivery +₹{{ delivery_settings.membership_delivery_fee_monthly }}/mo)</option>
             </select>
-            <small id="delivery-mode-hint" style="display:block; font-size:11px; color:var(--text-muted); margin-top:5px;">
+            <small id="delivery-mode-hint" style="display:block; font-size:14px; color:var(--text-muted); margin-top:5px;">
               Self-pickup at {{ delivery_settings.membership_pickup_address }}
             </small>
           </div>
@@ -332,12 +408,12 @@
           <div class="bb-form-group" id="delivery-address-group" style="display:none;">
             <label for="req-address" class="bb-form-label">Delivery Address <span style="color:#b91c1c;">*</span></label>
             <textarea id="req-address" name="address" rows="3" placeholder="Enter flat/door no, street, area, pincode..." class="bb-form-textarea">{{ user.address or '' }}</textarea>
-            <small id="delivery-online-hint" style="display:block; font-size:11px; color:var(--text-muted); margin-top:5px;">
+            <small id="delivery-online-hint" style="display:block; font-size:14px; color:var(--text-muted); margin-top:5px;">
               Delivery area: {{ delivery_settings.membership_delivery_area }} · Schedule: {{ delivery_settings.membership_delivery_day }}
             </small>
           </div>
 
-          <div id="bb-modal-submit-error" style="display:none; padding:10px 14px; background:#fee2e2; color:#991b1b; border-radius:6px; font-size:13px; margin-bottom:14px;"></div>
+          <div id="bb-modal-submit-error" style="display:none; padding:10px 14px; background:#fee2e2; color:#991b1b; border-radius:6px; font-size:14px; margin-bottom:14px;"></div>
 
           <div class="bb-modal-actions">
             <button type="button" class="btn-modal-cancel" id="bb-modal-cancel-btn">Cancel</button>
@@ -369,6 +445,519 @@
 </div>
 
 <script src="{{ url_for('static', filename='js/borrow-cart.js') }}?v=1.3"></script>
+<script>
+(function() {
+  'use strict';
+
+  // DOM Elements
+  var searchInput = document.getElementById('sidebar-search-q');
+  var searchClearBtn = document.getElementById('sidebar-search-clear');
+  var newArrivalsBtn = document.getElementById('sidebar-new-arrivals-btn');
+  var sortBtn = document.getElementById('sidebar-sort-btn');
+  var sortMenu = document.getElementById('sidebar-sort-menu');
+  var sortLabel = document.getElementById('sidebar-sort-label');
+  var catBtn = document.getElementById('sidebar-cat-btn');
+  var catMenu = document.getElementById('sidebar-cat-menu');
+  var catLabel = document.getElementById('sidebar-cat-label');
+  var langTrigger = document.getElementById('sidebar-languages-trigger');
+  var langSubmenu = document.getElementById('sidebar-languages-submenu');
+  var topLangSelect = document.getElementById('top-filter-lang');
+  var drawerToggle = document.getElementById('filter-drawer-toggle');
+  var drawerClose = document.getElementById('sidebar-drawer-close');
+  var sidebar = document.getElementById('catalogue-sidebar');
+
+  var searchDebounceTimer = null;
+
+  function updateSidebarClearVisibility() {
+    var clearAllLink = document.getElementById('sidebar-clear-all');
+    if (!clearAllLink) return;
+    var params = getCurrentParams();
+    var qVal = params.get('q') || (searchInput ? searchInput.value.trim() : '');
+    var newVal = params.get('new') || '';
+    var sortVal = params.get('sort') || '';
+    var catVal = params.get('category') || '';
+    var langVal = params.get('lang') || params.get('language') || '';
+    var hasActive = Boolean(
+      qVal ||
+      newVal === '1' ||
+      (sortVal && sortVal !== 'newest') ||
+      (catVal && catVal.toLowerCase() !== 'all') ||
+      langVal
+    );
+    clearAllLink.style.display = hasActive ? 'inline' : 'none';
+  }
+
+  function getCurrentParams() {
+    return new URLSearchParams(window.location.search);
+  }
+
+  function fetchAndUpdate(paramsToUpdate, pushState) {
+    if (typeof pushState === 'undefined') pushState = true;
+    var params = getCurrentParams();
+
+    for (var k in paramsToUpdate) {
+      if (paramsToUpdate.hasOwnProperty(k)) {
+        var v = paramsToUpdate[k];
+        if (v === '' || v === null || typeof v === 'undefined') {
+          params.delete(k);
+          if (k === 'lang') params.delete('language');
+          if (k === 'language') params.delete('lang');
+        } else {
+          params.set(k, v);
+        }
+      }
+    }
+
+    var qs = params.toString();
+    var targetUrl = window.location.pathname + (qs ? '?' + qs : '');
+
+    if (pushState) {
+      window.history.pushState(null, '', targetUrl);
+    }
+
+    var mainContainer = document.getElementById('catalogue-main-container');
+    if (mainContainer) {
+      mainContainer.style.opacity = '0.6';
+    }
+
+    fetch(targetUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(function(res) { return res.text(); })
+      .then(function(html) {
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, 'text/html');
+        var newMain = doc.getElementById('catalogue-main-container');
+        if (newMain && mainContainer) {
+          mainContainer.innerHTML = newMain.innerHTML;
+          mainContainer.style.opacity = '1';
+        }
+
+        if (window.BookBuddyFavs) {
+          window.BookBuddyFavs.render();
+        }
+
+        // Sync Readers pills in top bar
+        var currentAud = params.get('audience') || '';
+        document.querySelectorAll('.catalogue-quick .btn-export').forEach(function(pill) {
+          var href = pill.getAttribute('href') || '';
+          if (href.indexOf('audience=') !== -1 || pill.innerText.trim() === 'All') {
+            var isAud = (pill.innerText.trim().toLowerCase() === 'all' && !currentAud) ||
+                        (pill.innerText.trim().toLowerCase() === 'adults' && currentAud === 'adult') ||
+                        (pill.innerText.trim().toLowerCase() === 'kids' && currentAud === 'kids');
+            if (isAud) {
+              pill.classList.add('btn-excel');
+              pill.style.background = 'var(--navy)';
+              pill.style.color = '#fff';
+              pill.style.borderColor = 'var(--navy)';
+              pill.style.fontWeight = '700';
+            } else {
+              pill.classList.remove('btn-excel');
+              pill.style.background = '';
+              pill.style.color = '';
+              pill.style.borderColor = '';
+              pill.style.fontWeight = '';
+            }
+          }
+        });
+
+        // Sync top-bar Language dropdown
+        var currentLang = params.get('lang') || params.get('language') || '';
+        if (topLangSelect) {
+          var matched = false;
+          for (var i = 0; i < topLangSelect.options.length; i++) {
+            var opt = topLangSelect.options[i];
+            if (opt.text.toLowerCase() === currentLang.toLowerCase()) {
+              topLangSelect.selectedIndex = i;
+              matched = true;
+              break;
+            }
+          }
+          if (!matched) topLangSelect.selectedIndex = 0;
+        }
+
+        // Sync Excel download link
+        var excelBtn = document.querySelector('.catalogue-quick .btn-excel[href*="/library/export/"]');
+        if (excelBtn) {
+          var exportParams = new URLSearchParams(params);
+          exportParams.delete('page');
+          exportParams.set('format', 'xlsx');
+          excelBtn.setAttribute('href', '/library/export/?' + exportParams.toString());
+        }
+
+        // Trigger cart sync so Add/Added buttons render appropriately
+        document.dispatchEvent(new CustomEvent('bb-cart-change'));
+        updateSidebarClearVisibility();
+      })
+      .catch(function(err) {
+        if (mainContainer) mainContainer.style.opacity = '1';
+        console.error('Failed to update catalogue:', err);
+      });
+  }
+
+  // 1. Search Box
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      var val = searchInput.value.trim();
+      if (searchClearBtn) {
+        searchClearBtn.style.display = val ? 'flex' : 'none';
+      }
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(function() {
+        fetchAndUpdate({ q: val, page: 1 });
+      }, 300);
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        clearTimeout(searchDebounceTimer);
+        fetchAndUpdate({ q: searchInput.value.trim(), page: 1 });
+      }
+    });
+  }
+
+  if (searchClearBtn) {
+    searchClearBtn.addEventListener('click', function() {
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+      }
+      searchClearBtn.style.display = 'none';
+      fetchAndUpdate({ q: '', page: 1 });
+    });
+  }
+
+  // 2. New Arrivals Toggle Button
+  if (newArrivalsBtn) {
+    newArrivalsBtn.addEventListener('click', function() {
+      var isPressed = newArrivalsBtn.getAttribute('aria-pressed') === 'true';
+      var nextState = !isPressed;
+      newArrivalsBtn.setAttribute('aria-pressed', nextState ? 'true' : 'false');
+      if (nextState) {
+        newArrivalsBtn.classList.add('is-active');
+        newArrivalsBtn.style.borderColor = 'var(--maroon)';
+        newArrivalsBtn.style.background = 'var(--maroon)';
+        newArrivalsBtn.style.color = '#ffffff';
+      } else {
+        newArrivalsBtn.classList.remove('is-active');
+        newArrivalsBtn.style.borderColor = 'var(--border-color)';
+        newArrivalsBtn.style.background = '#ffffff';
+        newArrivalsBtn.style.color = 'var(--navy)';
+      }
+      fetchAndUpdate({ new: nextState ? '1' : '', page: 1 });
+    });
+  }
+
+  function positionMenu(btn, menu) {
+    if (!btn || !menu) return;
+    var btnRect = btn.getBoundingClientRect();
+    var estimatedHeight = Math.min(320, menu.scrollHeight || 320);
+    var spaceBelow = window.innerHeight - btnRect.bottom;
+    var spaceAbove = btnRect.top;
+    
+    // If not enough room below (spaceBelow < estimatedHeight + 8) and more room above:
+    if (spaceBelow < (estimatedHeight + 8) && spaceAbove > spaceBelow) {
+      menu.classList.add('dropdown-menu--up');
+    } else {
+      menu.classList.remove('dropdown-menu--up');
+    }
+  }
+
+  // 3. Sort By Dropdown
+  function closeSortMenu() {
+    if (sortMenu) {
+      sortMenu.style.display = 'none';
+      sortMenu.classList.remove('dropdown-menu--up');
+    }
+    if (sortBtn) sortBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  function openSortMenu() {
+    closeCatMenu();
+    if (sortMenu) {
+      sortMenu.style.display = 'block';
+      positionMenu(sortBtn, sortMenu);
+    }
+    if (sortBtn) sortBtn.setAttribute('aria-expanded', 'true');
+  }
+
+  if (sortBtn) {
+    sortBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var isOpen = sortMenu && sortMenu.style.display === 'block';
+      if (isOpen) closeSortMenu();
+      else openSortMenu();
+    });
+  }
+
+  if (sortMenu) {
+    sortMenu.addEventListener('click', function(e) {
+      var opt = e.target.closest('.js-sort-opt');
+      if (!opt) return;
+      var sortVal = opt.getAttribute('data-value');
+      var labelSpan = opt.querySelector('span');
+      var text = labelSpan ? labelSpan.innerText.trim() : sortVal;
+
+      if (sortLabel) sortLabel.innerText = 'Sort By: ' + text;
+
+      sortMenu.querySelectorAll('.js-sort-opt').forEach(function(item) {
+        var isThis = item === opt;
+        item.classList.toggle('is-selected', isThis);
+        item.setAttribute('aria-checked', isThis ? 'true' : 'false');
+      });
+
+      closeSortMenu();
+      fetchAndUpdate({ sort: sortVal, page: 1 });
+    });
+  }
+
+  // 4. Categories Dropdown
+  function closeCatMenu() {
+    if (catMenu) {
+      catMenu.style.display = 'none';
+      catMenu.classList.remove('dropdown-menu--up');
+    }
+    if (catBtn) catBtn.setAttribute('aria-expanded', 'false');
+    if (langSubmenu) langSubmenu.style.display = 'none';
+  }
+
+  function openCatMenu() {
+    closeSortMenu();
+    if (catMenu) {
+      catMenu.style.display = 'block';
+      positionMenu(catBtn, catMenu);
+    }
+    if (catBtn) catBtn.setAttribute('aria-expanded', 'true');
+  }
+
+  if (catBtn) {
+    catBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var isOpen = catMenu && catMenu.style.display === 'block';
+      if (isOpen) closeCatMenu();
+      else openCatMenu();
+    });
+  }
+
+  if (catMenu) {
+    catMenu.addEventListener('click', function(e) {
+      // Submenu language trigger
+      if (e.target.closest('#sidebar-languages-trigger')) {
+        e.stopPropagation();
+        var isSubOpen = langSubmenu && langSubmenu.style.display === 'block';
+        if (langSubmenu) langSubmenu.style.display = isSubOpen ? 'none' : 'block';
+        return;
+      }
+
+      // Submenu language option
+      var subLangOpt = e.target.closest('.js-sublang-opt');
+      if (subLangOpt) {
+        e.stopPropagation();
+        var langVal = subLangOpt.getAttribute('data-lang') || '';
+        if (catLabel) catLabel.innerText = langVal ? 'Languages (' + langVal + ')' : 'Categories';
+
+        if (catMenu) {
+          catMenu.querySelectorAll('.js-cat-opt, .js-sublang-opt').forEach(function(item) {
+            item.classList.remove('is-selected');
+            item.setAttribute('aria-checked', 'false');
+          });
+        }
+        subLangOpt.classList.add('is-selected');
+        subLangOpt.setAttribute('aria-checked', 'true');
+
+        closeCatMenu();
+        fetchAndUpdate({ category: langVal ? 'Languages' : '', lang: langVal, language: langVal, page: 1 });
+        return;
+      }
+
+      // Normal category option
+      var catOpt = e.target.closest('.js-cat-opt');
+      if (!catOpt) return;
+      var catVal = catOpt.getAttribute('data-value') || '';
+      var labelSpan = catOpt.querySelector('span');
+      var catText = labelSpan ? labelSpan.innerText.trim() : catVal;
+
+      if (catLabel) {
+        catLabel.innerText = (catVal.toLowerCase() === 'all' || !catVal) ? 'Categories' : catText;
+      }
+
+      catMenu.querySelectorAll('.js-cat-opt').forEach(function(item) {
+        var isThis = item === catOpt;
+        item.classList.toggle('is-selected', isThis);
+        item.setAttribute('aria-checked', isThis ? 'true' : 'false');
+      });
+
+      closeCatMenu();
+      fetchAndUpdate({ category: (catVal.toLowerCase() === 'all' ? '' : catVal), lang: '', language: '', page: 1 });
+    });
+  }
+
+  // Keyboard navigation for dropdowns (Esc to close, Up/Down arrows to navigate)
+  function handleDropdownKeydown(e, menu, btn, closeFn) {
+    if (!menu || menu.style.display !== 'block') return;
+    var items = Array.from(menu.querySelectorAll('.dropdown-item:not([disabled])'));
+    var currentIndex = items.indexOf(document.activeElement);
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeFn();
+      if (btn) btn.focus();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      var nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+      if (items[nextIndex]) items[nextIndex].focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      var prevIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+      if (items[prevIndex]) items[prevIndex].focus();
+    }
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (sortMenu && sortMenu.style.display === 'block') {
+      handleDropdownKeydown(e, sortMenu, sortBtn, closeSortMenu);
+    } else if (catMenu && catMenu.style.display === 'block') {
+      handleDropdownKeydown(e, catMenu, catBtn, closeCatMenu);
+    }
+  });
+
+  // Top Bar Language select sync
+  if (topLangSelect) {
+    topLangSelect.onchange = function() {
+      var val = topLangSelect.value;
+      var selectedText = topLangSelect.options[topLangSelect.selectedIndex].text;
+      var chosenLang = (selectedText.toLowerCase() === 'all languages') ? '' : selectedText;
+      if (catLabel) {
+        catLabel.innerText = chosenLang ? 'Languages (' + chosenLang + ')' : 'Categories';
+      }
+      fetchAndUpdate({ lang: chosenLang, language: chosenLang, page: 1 });
+    };
+  }
+
+  // Top Bar Readers Buttons
+  document.querySelectorAll('.catalogue-quick .btn-export').forEach(function(pill) {
+    var href = pill.getAttribute('href') || '';
+    if (href.indexOf('audience=') !== -1 || pill.innerText.trim() === 'All') {
+      pill.addEventListener('click', function(e) {
+        e.preventDefault();
+        var text = pill.innerText.trim().toLowerCase();
+        var audVal = text === 'all' ? '' : (text === 'adults' ? 'adult' : 'kids');
+        fetchAndUpdate({ audience: audVal, page: 1 });
+      });
+    }
+  });
+
+  // Global Outside Clicks & Esc Key
+  document.addEventListener('click', function(e) {
+    if (sortMenu && !sortMenu.contains(e.target) && !sortBtn.contains(e.target)) {
+      closeSortMenu();
+    }
+    if (catMenu && !catMenu.contains(e.target) && !catBtn.contains(e.target)) {
+      closeCatMenu();
+    }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeSortMenu();
+      closeCatMenu();
+    }
+  });
+
+  // Mobile Drawer Toggle
+  if (drawerToggle && sidebar) {
+    drawerToggle.addEventListener('click', function() {
+      var isOpen = sidebar.classList.contains('is-open');
+      if (isOpen) {
+        sidebar.classList.remove('is-open');
+        drawerToggle.setAttribute('aria-expanded', 'false');
+      } else {
+        sidebar.classList.add('is-open');
+        drawerToggle.setAttribute('aria-expanded', 'true');
+      }
+    });
+  }
+
+  if (drawerClose && sidebar) {
+    drawerClose.addEventListener('click', function() {
+      sidebar.classList.remove('is-open');
+      if (drawerToggle) drawerToggle.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  // Active Chips and Clear All event delegation on document
+  document.addEventListener('click', function(e) {
+    var chipRemove = e.target.closest('.js-chip-remove');
+    if (chipRemove) {
+      e.preventDefault();
+      var key = chipRemove.getAttribute('data-remove-key');
+      var updates = { page: 1 };
+      updates[key] = '';
+      if (key === 'category') {
+        if (catLabel) catLabel.innerText = 'Categories';
+      } else if (key === 'new') {
+        if (newArrivalsBtn) {
+          newArrivalsBtn.setAttribute('aria-pressed', 'false');
+          newArrivalsBtn.classList.remove('is-active');
+          newArrivalsBtn.style.background = '#ffffff';
+          newArrivalsBtn.style.color = 'var(--navy)';
+          newArrivalsBtn.style.borderColor = 'var(--border-color)';
+        }
+      } else if (key === 'q') {
+        if (searchInput) searchInput.value = '';
+        if (searchClearBtn) searchClearBtn.style.display = 'none';
+      } else if (key === 'sort') {
+        if (sortLabel) sortLabel.innerText = 'Sort By: Newest';
+      } else if (key === 'lang') {
+        updates['language'] = '';
+        if (topLangSelect) topLangSelect.selectedIndex = 0;
+        if (catLabel) catLabel.innerText = 'Categories';
+      }
+      fetchAndUpdate(updates);
+      return;
+    }
+
+    var clearAll = e.target.closest('.js-clear-all');
+    if (clearAll) {
+      e.preventDefault();
+      if (searchInput) searchInput.value = '';
+      if (searchClearBtn) searchClearBtn.style.display = 'none';
+      if (newArrivalsBtn) {
+        newArrivalsBtn.setAttribute('aria-pressed', 'false');
+        newArrivalsBtn.classList.remove('is-active');
+        newArrivalsBtn.style.background = '#ffffff';
+        newArrivalsBtn.style.color = 'var(--navy)';
+        newArrivalsBtn.style.borderColor = 'var(--border-color)';
+      }
+      if (sortLabel) sortLabel.innerText = 'Sort By: Newest';
+      if (catLabel) catLabel.innerText = 'Categories';
+      if (topLangSelect) topLangSelect.selectedIndex = 0;
+      fetchAndUpdate({ q: '', new: '', sort: '', category: '', lang: '', language: '', audience: '', page: 1 });
+      return;
+    }
+
+    // Pagination link delegation
+    var pageLink = e.target.closest('.bb-catalogue-pages a');
+    if (pageLink) {
+      e.preventDefault();
+      var href = pageLink.getAttribute('href') || '';
+      var match = href.match(/[?&]page=(\d+)/);
+      var pageNum = match ? match[1] : '1';
+      fetchAndUpdate({ page: pageNum });
+      var mainEl = document.getElementById('catalogue-main-container');
+      if (mainEl) {
+        window.scrollTo({ top: mainEl.offsetTop - 90, behavior: 'smooth' });
+      }
+    }
+  });
+
+  // Handle browser back/forward buttons
+  updateSidebarClearVisibility();
+
+  window.addEventListener('popstate', function() {
+    fetchAndUpdate({}, false);
+  });
+})();
+</script>
 <script>
   // Automation helper for capturing test states
   try {

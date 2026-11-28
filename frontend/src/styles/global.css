@@ -1,3 +1,4 @@
+@import './theme.css';
 @import './tokens.css';
 
 /* CSS Reset & Global Styling */
@@ -7,37 +8,56 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  font-family: inherit;
 }
 
 html {
-  font-family: var(--font-family);
+  font-synthesis: none !important;
+  -webkit-font-synthesis: none !important;
+  font-family: var(--font-body) !important;
+  font-size: 16px; /* 1rem */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--surface-body);
   color: var(--text-main);
-  line-height: 1.5;
+  letter-spacing: 0.01em;
+  line-height: 1.6;
+  font-weight: 400 !important;
+  font-weight: 400;
 }
 
 body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  font-family: var(--font-family);
+  font-family: var(--font-body) !important;
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 400 !important;
+  font-weight: 400;
 }
 
-#root {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+h1, h2, h3, h4 {
+  font-family: var(--font-heading) !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.01em;
+}
+h5, h6 {
+  font-family: var(--font-heading) !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+h1, h2 {
+  letter-spacing: -0.01em;
 }
 
 button {
-  font-family: var(--font-family);
+  font-family: var(--font-body) !important;
+  font-weight: 600;
+  font-weight: 400;
+  font-size: 0.95rem;
   cursor: pointer;
   border: none;
   background: none;
@@ -46,5 +66,151 @@ button {
 input,
 select,
 textarea {
-  font-family: var(--font-family);
+  font-family: var(--font-body) !important;
+  font-weight: 400;
+  font-size: 0.95rem;
 }
+
+/* Card footer (stacked layout) */
+.book-card__footer {
+  display: flex;
+  flex-direction: column;      /* stacked */
+  gap: 8px;
+  margin-top: auto;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.book-card__status {            /* the "Available: N" / "Unavailable" pill */
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  line-height: 1;
+  padding: 7px 10px;
+  border-radius: 8px;
+  overflow: visible;            /* never clip the number */
+  text-overflow: clip;
+  background: var(--color-secondary); color:#fff;      /* Available */
+}
+.book-card__status--unavailable { background:#6b7280; }  /* grey */
+.book-card__action {            /* the Add / Added button */
+  width: 100%;
+  height: 36px;
+  box-sizing: border-box;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 0 10px;
+  font-size: 0.85rem; font-weight: 600; font-family: var(--font-body); white-space: nowrap;
+  border-radius: 10px;
+}
+.book-card__action--add   { background: var(--color-primary); color:#fff; border:1px solid var(--color-primary); }
+.book-card__action--added { background:#fff; color: var(--color-secondary); border:1px solid var(--color-secondary); }
+.book-card__action[disabled] { display:none; }   /* unavailable books show only the grey pill */
+
+/* ==========================================================================
+   Shared Catalogue Sidebar Dropdown Menus (Sort By & Categories)
+   ========================================================================== */
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  padding: 4px;
+  margin-top: 4px;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(10,36,114,.12);
+  max-height: min(320px, calc(100vh - 160px));   /* never taller than the viewport */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  z-index: 50;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+.dropdown-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.dropdown-menu.dropdown-menu--up,
+.dropdown-menu--up {
+  top: auto;
+  bottom: calc(100% + 4px);
+  margin-top: 0;
+  margin-bottom: 4px;
+}
+
+.dropdown-item,
+body.folio button.dropdown-item,
+.catalogue-sidebar button.dropdown-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  height: 36px !important;
+  padding: 8px 12px !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+  font-size: 0.9rem !important;
+  font-weight: 400 !important;
+  color: var(--color-text) !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  font-family: inherit !important;
+  transition: background 0.15s ease, color 0.15s ease !important;
+}
+
+.dropdown-item + .dropdown-item,
+body.folio button.dropdown-item + button.dropdown-item,
+.catalogue-sidebar button.dropdown-item + button.dropdown-item {
+  margin-top: 0 !important;
+  border-top: 0 !important;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus-visible,
+body.folio button.dropdown-item:hover,
+body.folio button.dropdown-item:focus-visible {
+  background: var(--color-primary-soft) !important;
+  color: var(--color-primary) !important;
+  outline: none !important;
+}
+
+.dropdown-item[aria-checked="true"],
+.dropdown-item.is-selected,
+body.folio button.dropdown-item[aria-checked="true"],
+body.folio button.dropdown-item.is-selected {
+  font-weight: 400 !important;
+  color: var(--color-primary) !important;
+  background: transparent !important;
+}
+
+.dropdown-item .check {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}   /* inline SVG check on the right */
+
+.dropdown-item:not(.is-selected):not([aria-checked="true"]) .check {
+  display: none;
+}
+

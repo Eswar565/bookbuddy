@@ -60,7 +60,7 @@
 	|___ End Style Sheet Indexing
 
 ***************************************************************/
-@import url("https://fonts.googleapis.com/css2?family=Hind:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Love+Ya+Like+A+Sister&family=Noto+Sans+Devanagari:wght@400;600&family=Noto+Sans+Tamil:wght@400;600&display=swap");
 
 :root {
   --bodyColor: #222222;
@@ -125,9 +125,9 @@
   --borderRadius2: 20px;
   --borderRadius3: 10px;
   --transition: .3s;
-  --bodyFont: "Inter", sans-serif;
-  --headingFont: "Hind", sans-serif;
-  --contentFont: "Inter", sans-serif;
+  --bodyFont: var(--font-main);
+  --headingFont: var(--font-main);
+  --contentFont: var(--font-main);
 }
 
 .is_dark {
@@ -7803,7 +7803,7 @@ Counter Area
   font-weight: 700;
   font-size: calc(34px * var(--bb-scale));
   line-height: 1.1;
-  font-family: "Hind";
+  font-family: var(--font-main);
   color: var(--blackColor);
 }
 
@@ -8572,7 +8572,7 @@ Blog
 
 .blogarae__img__2 .blogarea__date__2 span {
   display: block;
-  font-family: "Hind";
+  font-family: var(--font-main);
   font-style: normal;
   font-weight: 600;
   font-size: calc(22px * var(--bb-scale));

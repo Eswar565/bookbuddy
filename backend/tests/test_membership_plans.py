@@ -79,9 +79,10 @@ def test_membership_page_render_and_layout(client):
     assert res.status_code == 200
     html = res.data.decode('utf-8')
 
-    # Headings
-    assert 'Choose Your Membership Tier' in html
-    assert "Pick the plan that fits your family&#39;s reading appetite." in html or "Pick the plan that fits your family's reading appetite." in html
+    # Headings and SEO
+    assert 'Choose Your Membership Tier' in html  # In SEO title / meta
+    assert 'Membership Plans' in html  # Visually hidden accessible H1
+    assert 'Flexible Service Modes' in html
 
     # Table columns & badges
     assert '2 Months' in html

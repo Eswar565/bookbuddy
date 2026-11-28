@@ -30,7 +30,7 @@
   justify-content: center;
   background: #eef2fb;
   color: var(--navy, #061446);
-  font-family: var(--font-body, 'Inter', sans-serif);
+  font-family: var(--font-main);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -40,7 +40,7 @@
 }
 
 .bb-gallery-heading {
-  font-family: var(--font-heading, 'Hind', sans-serif) !important;
+  font-family: var(--font-main) !important;
   font-size: clamp(28px, 3.4vw, 42px);
   font-weight: 700 !important;
   color: var(--navy, #061446) !important;
@@ -232,7 +232,7 @@
 .bb-lightbox-counter {
   margin-top: 14px;
   color: rgba(255, 255, 255, 0.85);
-  font-family: var(--font-body, 'Inter', sans-serif);
+  font-family: var(--font-main);
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.05em;

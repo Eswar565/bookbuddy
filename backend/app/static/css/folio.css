@@ -1,10 +1,10 @@
 /* Book Buddy / Folio v3. Shared public, member and staff design system. */
 :root{
-  --bb-body-font: 'Inter', 'Hind', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --bb-display-font: 'Lora', Georgia, 'Times New Roman', serif;
-  --headingFont: 'Lora', Georgia, serif;
-  --bodyFont: 'Inter', sans-serif;
-  --contentFont: 'Inter', sans-serif;
+  --bb-body-font: var(--font-main);
+  --bb-display-font: var(--font-main);
+  --headingFont: var(--font-main);
+  --bodyFont: var(--font-main);
+  --contentFont: var(--font-main);
   --primary:#7A1636;--primaryColor:#7A1636;--secondaryColor:#7A1636;--accent:#7A1636;--ink:#2A1A20;--muted:#606a7b;--line:#e2e6ed;--paper:#fff;--soft:#f4f6fa;--radius:12px;--bb-primary:#7A1636;--bb-navy:#7A1636;--bb-ink:#2A1A20;--bb31-primary:#7A1636;--bb31-line:#e2e6ed;
 }
 html{scroll-behavior:smooth;scroll-padding-top:100px}

@@ -33,8 +33,8 @@
   --accent-on-dark: #fde047;
   --border-on-dark: rgba(255, 255, 255, 0.18);
 
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-heading: 'Hind', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: var(--font-main);
+  --font-heading: var(--font-main);
   --shadow-sm: 0 2px 8px rgba(10, 36, 114, 0.04);
   --shadow-md: 0 8px 24px rgba(10, 36, 114, 0.08);
   --shadow-lg: 0 16px 40px rgba(10, 36, 114, 0.12);
@@ -1177,7 +1177,7 @@ body.folio :is(a.bb8-btn-secondary, button.bb8-btn-secondary):visited,
   color: var(--white) !important;
   padding: 24px 0 12px;
   position: relative;
-  font-family: var(--font-family, 'Inter', sans-serif);
+  font-family: var(--font-main);
 }
 
 .bb8-footer-grid {
@@ -1243,7 +1243,7 @@ body.folio .bb8-footer-brand p,
 body.bookbuddy-modern .bb8-footer-col h3,
 body.folio .bb8-footer-col h3,
 .bb8-footer-col h3 {
-  font-family: var(--font-family, 'Inter', sans-serif) !important;
+  font-family: var(--font-main) !important;
   font-size: 15px !important;
   font-weight: 700 !important;
   color: #ffffff !important;
@@ -1589,7 +1589,7 @@ body.bookbuddy-modern.folio :is(.surface-dark, .bb8-footer) a:not([class*="btn"]
 }
 
 .bb8-borrow-title {
-  font-family: var(--font-heading, "Playfair Display", Georgia, serif);
+  font-family: var(--font-main);
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--navy, #0b1f6b);
@@ -1627,7 +1627,7 @@ body.bookbuddy-modern.folio :is(.surface-dark, .bb8-footer) a:not([class*="btn"]
 }
 
 .bb8-borrow-block-title {
-  font-family: var(--font-heading, "Playfair Display", Georgia, serif);
+  font-family: var(--font-main);
   font-size: 1.45rem;
   font-weight: 700;
   color: var(--navy, #0b1f6b);
@@ -1690,7 +1690,7 @@ body.bookbuddy-modern.folio :is(.surface-dark, .bb8-footer) a:not([class*="btn"]
 }
 
 .bb8-borrow-card-title {
-  font-family: var(--font-heading, "Playfair Display", Georgia, serif);
+  font-family: var(--font-main);
   font-size: 1.4rem;
   font-weight: 700;
   color: var(--navy, #0b1f6b);

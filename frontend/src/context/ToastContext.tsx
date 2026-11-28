@@ -34,65 +34,66 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <ToastContext.Provider value={{ toasts, showToast, removeToast }}>
       {children}
-      <div
-        style={{
-          position: 'fixed',
-          bottom: '24px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 9999,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px',
-          pointerEvents: 'none',
-          maxWidth: '90vw',
-          width: 'max-content',
-        }}
-      >
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            role="status"
-            aria-live="polite"
-            style={{
-              padding: '10px 18px',
-              borderRadius: '24px',
-              backgroundColor:
-                toast.type === 'error'
-                  ? '#740f28'
-                  : toast.type === 'success'
-                  ? '#0a2472'
-                  : '#1e293b',
-              color: '#ffffff',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
-              pointerEvents: 'auto',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              animation: 'fadeSlideUp 0.2s ease-out',
-            }}
-          >
-            <span>{toast.message}</span>
-            <button
-              onClick={() => removeToast(toast.id)}
+      {toasts.length > 0 && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            right: '24px',
+            zIndex: 9999,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            pointerEvents: 'none',
+            maxWidth: 'min(90vw, 360px)',
+            width: 'max-content',
+          }}
+        >
+          {toasts.map((toast) => (
+            <div
+              key={toast.id}
+              role="status"
+              aria-live="polite"
               style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#fff',
-                cursor: 'pointer',
-                opacity: 0.8,
-                padding: '0 2px',
-                fontSize: '1rem',
+                padding: '10px 18px',
+                borderRadius: '24px',
+                backgroundColor:
+                  toast.type === 'error'
+                    ? '#740f28'
+                    : toast.type === 'success'
+                    ? '#0a2472'
+                    : '#1e293b',
+                color: '#ffffff',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+                pointerEvents: 'auto',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                animation: 'fadeSlideUp 0.2s ease-out',
               }}
-              aria-label="Close notification"
             >
-              &times;
-            </button>
-          </div>
-        ))}
-      </div>
+              <span>{toast.message}</span>
+              <button
+                onClick={() => removeToast(toast.id)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  opacity: 0.8,
+                  padding: '0 2px',
+                  fontSize: '1rem',
+                }}
+                aria-label="Close notification"
+              >
+                &times;
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </ToastContext.Provider>
   );
 };

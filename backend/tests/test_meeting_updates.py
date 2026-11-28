@@ -119,6 +119,12 @@ def test_catalogue_filter_panel_and_no_total_count(client):
     assert "Download as Excel" in html
     assert "Download as PDF" not in html
     assert "Refine Catalogue" in html
+    assert "Search the shelves, find a favorite" not in html
+    assert "BOOK BUDDY / THE COLLECTION" not in html
+    assert "The Book Buddy Library" not in html
+    assert "Browse through our curated collection" not in html
+    assert "Book Catalogue" in html
+    assert "My Borrowed Books" in html
 
 
 def test_admin_created_events_appear_on_public_page(client):

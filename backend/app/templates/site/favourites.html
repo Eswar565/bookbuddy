@@ -30,6 +30,20 @@
       </div>
     </div>
 
+    <!-- Guest Banner -->
+    <div id="bb-guest-favs-banner" style="{% if not is_guest %}display:none;{% endif %} background:#fef3c7; border:1px solid #fde68a; color:#92400e; padding:12px 18px; border-radius:var(--radius-md); font-size:14px; font-weight:600; margin-bottom:20px; display:{% if is_guest %}flex{% else %}none{% endif %}; align-items:center; justify-content:space-between; gap:12px;">
+      <span>Log in to save your favourites to your account</span>
+      <a href="/login/?next=/library/favourites/" style="background:#92400e; color:#fff; padding:6px 14px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:700;">Log In</a>
+    </div>
+
+    <!-- Inline Error Box with Retry -->
+    <div id="bb-favs-error" style="display:none; background:#fef2f2; border:1px solid #fee2e2; color:#991b1b; padding:14px 18px; border-radius:8px; text-align:center; font-size:14px; margin-bottom:20px;">
+      <span id="bb-favs-error-msg">Something went wrong loading your favourites.</span>
+      <button type="button" id="bb-favs-retry-btn" style="margin-left:12px; padding:6px 14px; background:#991b1b; color:#ffffff; border:none; border-radius:6px; font-size:13px; font-weight:700; cursor:pointer;">
+        Retry
+      </button>
+    </div>
+
     <!-- Favourites Content Area -->
     <div id="bb-favs-container">
       {% if fav_books %}
@@ -45,7 +59,7 @@
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
             </svg>
           </div>
-          <h2 style="font-size:20px; font-weight:700; color:var(--navy); margin:0 0 8px;">No favourites saved yet</h2>
+          <h2 style="font-size:20px; font-weight:700; color:var(--navy); margin:0 0 8px;">No favourites yet. Tap the heart on a book to save it.</h2>
           <p style="color:var(--text-muted); font-size:14px; margin:0 0 24px; max-width:420px; margin-left:auto; margin-right:auto;">
             Click the heart icon on any book in the catalogue to save it to your personal reading list.
           </p>
@@ -55,4 +69,159 @@
     </div>
   </div>
 </main>
+
+<!-- Configuration element for JS -->
+<div id="borrow-cart-config"
+  data-is-logged-in="{{ '1' if user.is_authenticated else '0' }}"
+  data-has-plan="{{ '1' if member_active_sub else '0' }}"
+  data-plan-name="{{ (member_active_sub.name if member_active_sub else '')|e }}"
+  data-plan-limit="{{ member_active_sub.book_limit if member_active_sub else 2 }}"
+  data-active-loans="{{ member_active_cnt|default(0) }}"
+  data-remaining-slots="{{ [0, member_active_sub.book_limit|int - member_active_cnt|int]|max if member_active_sub else 0 }}"
+  data-pickup-addr="{{ (delivery_settings.membership_pickup_address if delivery_settings else '')|e }}"
+  data-delivery-area="{{ (delivery_settings.membership_delivery_area if delivery_settings else '')|e }}"
+  data-delivery-fee="{{ (delivery_settings.membership_delivery_fee_monthly if delivery_settings else '')|e }}"
+  data-csrf-token="{{ session.get('csrf_token', '') or workspace_token() }}">
+</div>
+<div id="bb-cart-toast" class="bb-cart-toast" style="display:none;" role="status" aria-live="polite"></div>
+
+<script src="{{ url_for('static', filename='js/borrow-cart.js') }}?v=1.3"></script>
+<script>
+(function() {
+  const isGuest = {{ 'true' if is_guest else 'false' }};
+  const container = document.getElementById('bb-favs-container');
+  const errorBox = document.getElementById('bb-favs-error');
+  const retryBtn = document.getElementById('bb-favs-retry-btn');
+  const guestBanner = document.getElementById('bb-guest-favs-banner');
+
+  function renderEmptyState() {
+    container.innerHTML = `
+      <div class="bb-catalogue-empty" id="bb-favs-empty" style="background:var(--surface-card); padding:56px 24px; text-align:center; border-radius:var(--radius-lg); border:1px dashed var(--border-color);">
+        <div style="width:56px; height:56px; border-radius:50%; background:#fce7f3; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
+          <svg class="bb-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--maroon)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+        </div>
+        <h2 style="font-size:20px; font-weight:700; color:var(--navy); margin:0 0 8px;">No favourites yet. Tap the heart on a book to save it.</h2>
+        <p style="color:var(--text-muted); font-size:14px; margin:0 0 24px; max-width:420px; margin-left:auto; margin-right:auto;">
+          Click the heart icon on any book in the catalogue to save it to your personal reading list.
+        </p>
+        <a href="/library/" class="btn-export" style="background:var(--navy); color:#fff; border-color:var(--navy); padding:10px 20px; font-weight:700;">Browse Book Catalogue</a>
+      </div>
+    `;
+  }
+
+  function loadFavourites() {
+    if (errorBox) errorBox.style.display = 'none';
+
+    if (isGuest) {
+      if (guestBanner) guestBanner.style.display = 'flex';
+      const localIds = window.BookBuddyFavs ? window.BookBuddyFavs.ids() : [];
+      if (!localIds || localIds.length === 0) {
+        renderEmptyState();
+        return;
+      }
+
+      fetch('/api/v1/library/favourites?ids=' + encodeURIComponent(localIds.join(',')))
+        .then(function(res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        })
+        .then(function(data) {
+          const books = data && data.data && data.data.favourites ? data.data.favourites : [];
+          if (books.length === 0) {
+            renderEmptyState();
+            return;
+          }
+          let html = '<div class="bb-book-grid" id="bb-favs-grid" aria-label="Favourite books">';
+          books.forEach(function(b) {
+            const isAvail = (b.stock > 0 || b.available_copies > 0);
+            const statusLabel = isAvail ? 'Available: ' + (b.available_copies || b.stock || 1) : 'Unavailable';
+            const statusClass = isAvail ? '' : 'book-card__status--unavailable';
+            const cover = b.image_url || b.image_path || '/static/img/placeholder-book.png';
+            html += `
+              <article class="bb-book-card" data-book-id="${b.id}">
+                <div class="bb-card-cover-wrap">
+                  <a href="/library/${b.id}" class="bb-card-cover-link" aria-label="View details for ${b.title}">
+                    <img src="${cover}" alt="Cover: ${b.title}" class="bb-card-cover-img" loading="lazy" onerror="this.src='/static/img/placeholder-book.png'">
+                  </a>
+                  <button type="button"
+                          class="bb-card-wishlist js-wishlist-btn js-wishlist-toggle is-active"
+                          data-book-id="${b.id}"
+                          data-fav-toggle
+                          aria-label="Remove from favourites"
+                          aria-pressed="true">
+                    <svg class="bb-icon-heart" width="15" height="15" viewBox="0 0 24 24" fill="var(--maroon, #7b1230)" stroke="var(--maroon, #7b1230)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                  </button>
+                </div>
+                <h2 class="bb-book-title" title="${b.title}"><a href="/library/${b.id}">${b.title}</a></h2>
+                <p class="bb-book-author" title="${b.author || 'Author not listed'}">${b.author || 'Author not listed'}</p>
+                <div class="book-card__footer bb-card-bottom-row">
+                  <span class="book-card__status ${statusClass} bb-avail-pill ${isAvail ? '' : 'is-unavailable'}">${statusLabel}</span>
+                  <button type="button"
+                          class="book-card__action book-card__action--add btn-cart-add js-cart-btn"
+                          data-add-to-cart
+                          data-book-id="${b.id}"
+                          data-title="${b.title}"
+                          data-book-title="${b.title}"
+                          data-author="${b.author || 'Author not listed'}"
+                          data-book-author="${b.author || 'Author not listed'}"
+                          ${isAvail ? '' : 'disabled aria-disabled="true"'}>
+                    Add
+                  </button>
+                </div>
+              </article>
+            `;
+          });
+          html += '</div>';
+          container.innerHTML = html;
+          if (window.BookBuddyFavs) window.BookBuddyFavs.render();
+        })
+        .catch(function(err) {
+          console.error('Failed to load guest favourites:', err);
+          if (errorBox) {
+            errorBox.style.display = 'block';
+            const msg = document.getElementById('bb-favs-error-msg');
+            if (msg) msg.innerText = 'Failed to load favourites. Please try again.';
+          }
+        });
+    }
+  }
+
+  window.loadFavourites = loadFavourites;
+
+  if (retryBtn) {
+    retryBtn.addEventListener('click', function() {
+      loadFavourites();
+    });
+  }
+
+  // React to bb-fav-change event
+  window.addEventListener('bb-fav-change', function(e) {
+    const detail = e.detail || {};
+    if (detail.action === 'remove' && detail.id) {
+      const card = container.querySelector('[data-book-id="' + detail.id + '"]');
+      if (card) {
+        card.remove();
+      }
+      const remainingCards = container.querySelectorAll('.bb-book-card, .book-card');
+      if (remainingCards.length === 0) {
+        renderEmptyState();
+      }
+    } else if (detail.action === 'sync') {
+      const remainingCards = container.querySelectorAll('.bb-book-card, .book-card');
+      if (detail.count === 0 || remainingCards.length === 0) {
+        loadFavourites();
+      }
+    }
+  });
+
+  // Initial load for guest
+  if (isGuest) {
+    loadFavourites();
+  }
+})();
+</script>
 {% endblock %}

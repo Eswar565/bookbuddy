@@ -368,6 +368,7 @@ def init_db() -> None:
         "product_type": "TEXT NOT NULL DEFAULT 'book'",
         "is_active": "INTEGER NOT NULL DEFAULT 1",
         "archived": "INTEGER NOT NULL DEFAULT 0",
+        "category": "TEXT NOT NULL DEFAULT ''",
     }.items():
         if column not in existing_columns:
             connection.execute(f"ALTER TABLE books ADD COLUMN {column} {definition}")
@@ -484,6 +485,10 @@ def init_db() -> None:
         """
     )
     connection.execute("CREATE INDEX IF NOT EXISTS idx_member_favourites_user ON member_favourites(user_id);")
+
+    # Migrate and populate book_languages join table
+    from languages import ensure_book_languages_table
+    ensure_book_languages_table(connection)
 
     # Migrate Summer Special to Beginner Plan across all existing plan records
     has_lending_plans = bool(connection.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='lending_plans'").fetchone())
@@ -693,6 +698,12 @@ def site_context(section: str = "home") -> dict[str, Any]:
         # Lending plan context — safe defaults for all pages; paged_books() overwrites for /library/
         "member_active_sub": _member_active_sub,
         "member_active_cnt": _member_active_cnt,
+        "delivery_settings": {
+            "membership_delivery_fee_monthly": "350",
+            "membership_delivery_area": "Gandhi Nagar, Saligramam and surrounding areas (within 5 km)",
+            "membership_pickup_address": "Gandhi Nagar, Saligramam, Chennai",
+            "membership_delivery_day": "Fixed pick-up & drop on designated weekday (e.g. Saturday)"
+        },
     }
 
 
@@ -878,6 +889,11 @@ def paged_books(*, collection_filter: bool = True) -> dict[str, Any]:
     db = get_db()
     search = flask_request.args.get("q", "").strip()[:120]
     collection = flask_request.args.get("collection", "").strip()[:120] if collection_filter else ""
+    category = flask_request.args.get("category", "").strip()[:120]
+    lang = flask_request.args.get("lang", "").strip()[:120] or flask_request.args.get("language", "").strip()[:120]
+    if lang.lower() == "all":
+        lang = ""
+    sort = flask_request.args.get("sort", "newest").strip().lower()
     try:
         requested_page = int(flask_request.args.get("page", "1"))
     except (TypeError, ValueError):
@@ -885,24 +901,68 @@ def paged_books(*, collection_filter: bool = True) -> dict[str, Any]:
     filters: list[str] = ["archived=0"]
     params: list[Any] = []
     if search:
-        filters.append("(LOWER(title) LIKE ? OR LOWER(author) LIKE ? OR LOWER(description) LIKE ?)")
-        # Escape SQL LIKE wildcard characters to treat search as literal text.
         pattern = "%" + search.lower().replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%"
-        filters[-1] = "(LOWER(title) LIKE ? ESCAPE '!' OR LOWER(author) LIKE ? ESCAPE '!' OR LOWER(description) LIKE ? ESCAPE '!')"
+        filters.append("(LOWER(title) LIKE ? ESCAPE '!' OR LOWER(author) LIKE ? ESCAPE '!' OR LOWER(description) LIKE ? ESCAPE '!')")
         params.extend([pattern] * 3)
     if collection:
         filters.append("collection = ?")
         params.append(collection)
-    chosen={k:flask_request.args.get(k,'').strip()[:120] for k in ['language','age_group','author','product_type','availability','new','sort','audience']}
-    if chosen['audience'] in {'adult','kids'}:
-        filters.append("audience IN (?, 'all')");params.append(chosen['audience'])
-    for key in ['language','age_group','author','product_type']:
+    chosen = {k: flask_request.args.get(k, '').strip()[:120] for k in ['language', 'age_group', 'author', 'product_type', 'availability', 'new', 'sort', 'audience', 'category', 'lang']}
+    chosen['category'] = category
+    chosen['lang'] = lang
+    chosen['sort'] = sort
+
+    # Category filter mapping
+    if category and category.lower() != "all":
+        cat_lower = category.lower()
+        if cat_lower == "baby":
+            filters.append("(LOWER(category) LIKE '%baby%' OR age_group IN ('0-2', '0-3', 'Baby'))")
+        elif cat_lower == "toddler":
+            filters.append("(LOWER(category) LIKE '%toddler%' OR age_group IN ('3-5', '2-4', 'Toddler'))")
+        elif cat_lower == "junior":
+            filters.append("(LOWER(category) LIKE '%junior%' OR age_group IN ('5', '6-8', 'Junior'))")
+        elif cat_lower == "middle grade":
+            filters.append("(LOWER(category) LIKE '%middle grade%' OR LOWER(category) LIKE '%middle-grade%' OR age_group IN ('9-12', 'Middle Grade'))")
+        elif cat_lower == "young adults":
+            filters.append("(LOWER(category) LIKE '%young adult%' OR age_group IN ('12+', '13-18', 'Young Adults'))")
+        elif cat_lower == "adults":
+            filters.append("(LOWER(category) LIKE '%adult%' OR LOWER(audience) IN ('adult', 'adults'))")
+        elif cat_lower == "fiction":
+            filters.append("(LOWER(category) LIKE '%fiction%' AND LOWER(category) NOT LIKE '%non-fiction%' AND LOWER(category) NOT LIKE '%non fiction%' OR collection IN ('Picture Books', 'Chapter Books', 'Adventure', 'Classics', 'Sci-Fi', 'Fantasy', 'Folktales', 'Story') OR product_type = 'fiction')")
+        elif cat_lower in ("non fiction", "non-fiction"):
+            filters.append("(LOWER(category) LIKE '%non fiction%' OR LOWER(category) LIKE '%non-fiction%' OR collection IN ('Non-Fiction', 'Non Fiction', 'AI') OR product_type = 'non-fiction')")
+        elif cat_lower == "languages":
+            if not lang:
+                filters.append("books.id IN (SELECT book_id FROM book_languages WHERE language IS NOT NULL AND TRIM(language) <> '')")
+        else:
+            filters.append("(LOWER(category) LIKE ? OR LOWER(collection) LIKE ?)")
+            params.extend([f"%{cat_lower}%", f"%{cat_lower}%"])
+
+    if lang:
+        filters.append("books.id IN (SELECT book_id FROM book_languages WHERE LOWER(language) = LOWER(?))")
+        params.append(lang)
+
+    if chosen['audience'] in {'adult', 'kids'}:
+        filters.append("audience IN (?, 'all')")
+        params.append(chosen['audience'])
+    for key in ['age_group', 'author', 'product_type']:
         if chosen[key]:
-            filters.append('LOWER('+key+') = LOWER(?)');params.append(chosen[key])
-    if chosen['availability']=='available':filters.append("(SELECT COUNT(*) FROM copies17 c WHERE c.book_id=books.id AND c.status='Available') > (SELECT COUNT(*) FROM lending_loans l WHERE l.book_id=books.id AND l.status='Requested')")
-    elif chosen['availability']=='waitlist':filters.append("(SELECT COUNT(*) FROM copies17 c WHERE c.book_id=books.id AND c.status='Available') <= (SELECT COUNT(*) FROM lending_loans l WHERE l.book_id=books.id AND l.status='Requested')")
-    if chosen['new']=='1':filters.append('is_new_arrival=1')
-    ordering={'newest':'is_new_arrival DESC, id DESC','title':'title COLLATE NOCASE ASC,id','author':'author COLLATE NOCASE ASC,id','price-low':'price ASC,id','price-high':'price DESC,id'}.get(chosen['sort'],'is_new_arrival DESC, id DESC')
+            filters.append('LOWER(' + key + ') = LOWER(?)')
+            params.append(chosen[key])
+    if chosen['availability'] == 'available':
+        filters.append("(SELECT COUNT(*) FROM copies17 c WHERE c.book_id=books.id AND c.status='Available') > (SELECT COUNT(*) FROM lending_loans l WHERE l.book_id=books.id AND l.status='Requested')")
+    elif chosen['availability'] == 'waitlist':
+        filters.append("(SELECT COUNT(*) FROM copies17 c WHERE c.book_id=books.id AND c.status='Available') <= (SELECT COUNT(*) FROM lending_loans l WHERE l.book_id=books.id AND l.status='Requested')")
+    if chosen['new'] == '1':
+        filters.append('is_new_arrival=1')
+
+    if sort in ('az', 'title'):
+        ordering = 'title COLLATE NOCASE ASC, id ASC'
+    elif sort == 'za':
+        ordering = 'title COLLATE NOCASE DESC, id DESC'
+    else:
+        ordering = 'is_new_arrival DESC, id DESC'
+
     # Age-aware recommendations: valid age bands come from catalogue metadata.
     reader = current_user()
     if reader.is_authenticated:
@@ -917,37 +977,44 @@ def paged_books(*, collection_filter: bool = True) -> dict[str, Any]:
     pages = max(1, (count + CATALOGUE_PAGE_SIZE - 1) // CATALOGUE_PAGE_SIZE)
     page = min(max(1, requested_page), pages)
     rows = db.execute(
-        "SELECT * FROM books" + where + " ORDER BY "+ordering+" LIMIT ? OFFSET ?",
+        "SELECT * FROM books" + where + " ORDER BY " + ordering + " LIMIT ? OFFSET ?",
         (*params, CATALOGUE_PAGE_SIZE, (page - 1) * CATALOGUE_PAGE_SIZE),
     ).fetchall()
     collections = [row[0] for row in db.execute(
         "SELECT DISTINCT collection FROM books WHERE collection IS NOT NULL AND TRIM(collection) <> '' ORDER BY collection"
     ).fetchall()] if collection_filter else []
-    options={key:[r[0] for r in db.execute('SELECT DISTINCT '+key+' FROM books WHERE archived=0 AND TRIM('+key+")<>'' ORDER BY "+key)] for key in ['language','age_group','author','product_type']}
+
+    from languages import get_distinct_languages
+    available_languages = get_distinct_languages(db)
+    options = {key: [r[0] for r in db.execute('SELECT DISTINCT ' + key + ' FROM books WHERE archived=0 AND TRIM(' + key + ")<>'' ORDER BY " + key)] for key in ['age_group', 'author', 'product_type']}
+    options['language'] = available_languages
+    options['languages'] = available_languages
+
+    categories_list = [
+        "Baby", "Toddler", "Junior", "Middle Grade", "Young Adults", "Adults", "Fiction", "Non Fiction", "Languages"
+    ]
+
     from urllib.parse import urlencode
     def catalogue_url(**changes):
-        args=dict(flask_request.args);args.update(changes)
-        return '/library/?'+urlencode({k:v for k,v in args.items() if v not in ('',None)})
+        args = dict(flask_request.args)
+        args.update(changes)
+        return '/library/?' + urlencode({k: v for k, v in args.items() if v not in ('', None)})
 
     active_chips = []
     if search:
         active_chips.append({"key": "q", "label": f'Search: "{search}"', "remove_url": catalogue_url(q="")})
-    if collection:
-        active_chips.append({"key": "collection", "label": f'Category: {collection}', "remove_url": catalogue_url(collection="")})
+    if category and category.lower() != "all":
+        active_chips.append({"key": "category", "label": f'Category: {category}', "remove_url": catalogue_url(category="")})
+    if chosen.get("new") == "1":
+        active_chips.append({"key": "new", "label": "New Arrivals", "remove_url": catalogue_url(new="")})
+    if sort in ('az', 'za'):
+        active_chips.append({"key": "sort", "label": f"Sort: {'A–Z' if sort == 'az' else 'Z–A'}", "remove_url": catalogue_url(sort="")})
+    if lang:
+        active_chips.append({"key": "lang", "label": f'Language: {lang}', "remove_url": catalogue_url(lang="", language="")})
     if chosen.get("audience"):
         active_chips.append({"key": "audience", "label": f'Readers: {chosen["audience"].title()}', "remove_url": catalogue_url(audience="")})
-    if chosen.get("language"):
-        active_chips.append({"key": "language", "label": f'Language: {chosen["language"]}', "remove_url": catalogue_url(language="")})
-    if chosen.get("age_group"):
-        active_chips.append({"key": "age_group", "label": f'Age: {chosen["age_group"]} yrs', "remove_url": catalogue_url(age_group="")})
-    if chosen.get("author"):
-        active_chips.append({"key": "author", "label": f'Author: {chosen["author"]}', "remove_url": catalogue_url(author="")})
-    if chosen.get("availability") == "available":
-        active_chips.append({"key": "availability", "label": "Available Now", "remove_url": catalogue_url(availability="")})
-    elif chosen.get("availability") == "waitlist":
-        active_chips.append({"key": "availability", "label": "On Loan / Waitlist", "remove_url": catalogue_url(availability="")})
-    if chosen.get("new") == "1":
-        active_chips.append({"key": "new", "label": "New Arrivals Only", "remove_url": catalogue_url(new="")})
+    if collection:
+        active_chips.append({"key": "collection", "label": f'Collection: {collection}', "remove_url": catalogue_url(collection="")})
 
     def export_url(format="xlsx"):
         args = dict(flask_request.args)
@@ -992,6 +1059,11 @@ def paged_books(*, collection_filter: bool = True) -> dict[str, Any]:
         "query": search,
         "selected_collection": collection,
         "collections": collections,
+        "categories_list": categories_list,
+        "available_languages": available_languages,
+        "selected_category": category,
+        "selected_sort": sort,
+        "selected_lang": lang,
         "catalogue_count": count,
         "catalogue_page": page,
         "catalogue_pages": pages,
@@ -1039,7 +1111,8 @@ def library_favourites() -> Response:
     u = current_user()
     db = get_db()
     fav_books = []
-    if u and u.is_authenticated:
+    is_guest = not (u and u.is_authenticated)
+    if not is_guest:
         rows = db.execute(
             """SELECT b.* FROM books b
                JOIN member_favourites mf ON b.id = mf.book_id
@@ -1048,7 +1121,7 @@ def library_favourites() -> Response:
             (u.id,)
         ).fetchall()
         fav_books = [row_dict(r) for r in rows]
-    return render_site("library", "favourites", fav_books=fav_books, user=u)
+    return render_site("favourites", "favourites", fav_books=fav_books, user=u, is_guest=is_guest)
 
 
 @app.post("/library/checkout/", endpoint="library_checkout")

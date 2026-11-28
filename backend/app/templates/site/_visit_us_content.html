@@ -1,15 +1,8 @@
 <!-- Shared Visit Us Content: Used by both public /visit-us/ and admin live preview -->
 <div class="bb-visit-page">
-  <!-- 1. Header Band -->
-  <header class="bb-visit-hero">
-    <div class="bb-visit-hero-inner">
-      <span class="bb-visit-eyebrow">{{ visit.eyebrow }}</span>
-      <h1 class="bb-visit-title">{{ visit.heading }}</h1>
-      <p class="bb-visit-subtitle">{{ visit.subtitle }}</p>
-    </div>
-  </header>
+  <h1 class="sr-only">Visit Us</h1>
 
-  <!-- 2. Main Two-Column Container -->
+  <!-- 1. Main Two-Column Container -->
   <div class="bb-visit-container">
     <div class="bb-visit-grid">
       
@@ -88,11 +81,12 @@
         </div>
       </section>
 
-      <!-- RIGHT COLUMN: Map Embed -->
+      <!-- RIGHT COLUMN: Map Embed with Fallback -->
       <section class="bb-visit-map-col" aria-label="Library Location Map">
-        <div class="bb-visit-map-card">
-          <div class="bb-visit-map-frame-wrap">
+        <div class="bb-visit-map-card" id="bb-map-card">
+          <div class="bb-visit-map-frame-wrap" id="bb-map-frame-wrap">
             <iframe
+              id="bb-map-iframe"
               class="bb-visit-map-frame"
               src="{{ visit.embed_url }}"
               loading="lazy"
@@ -101,11 +95,44 @@
               allowfullscreen
             ></iframe>
           </div>
+
+          <!-- Fallback Card for Offline / Blocked / Timeout -->
+          <div id="bb-map-fallback" class="bb-visit-map-fallback" style="display: none;" role="region" aria-label="Library Location Fallback">
+            <div class="bb-visit-fallback-inner">
+              <div class="bb-visit-fallback-badge" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><use href="#i-map-pin"></use></svg>
+              </div>
+              <h3 class="bb-visit-fallback-title">Book Buddy Library</h3>
+              <p class="bb-visit-fallback-address">{{ visit.address }}</p>
+              <p class="bb-visit-fallback-note">Interactive map is unavailable offline or could not be loaded.</p>
+              <div class="bb-visit-fallback-actions">
+                <a
+                  href="{{ visit.maps_url }}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="bb-visit-fallback-btn bb-visit-fallback-btn--primary"
+                >
+                  <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-external-link"></use></svg>
+                  <span>Open in Maps</span>
+                </a>
+                <button
+                  type="button"
+                  class="bb-visit-fallback-btn bb-visit-fallback-btn--secondary"
+                  onclick="handleFallbackDirections()"
+                >
+                  <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-route"></use></svg>
+                  <span>Get Directions</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
           <a
             href="{{ visit.maps_url }}"
             target="_blank"
             rel="noopener noreferrer"
             class="bb-visit-map-bottom-bar"
+            id="bb-map-bottom-bar"
           >
             <svg aria-hidden="true"><use href="#i-external-link"></use></svg>
             <span>Open in Maps</span>
@@ -116,7 +143,7 @@
     </div>
   </div>
 
-  <!-- 3. Extra Section: Library Tour -->
+  <!-- 2. Extra Section: Library Tour -->
   {% if visit.tour_photos %}
   <section class="bb-visit-tour-section" aria-labelledby="bb-visit-tour-heading">
     <div class="bb-visit-tour-header">
@@ -140,16 +167,63 @@ function handleGetDirections(e) {
   if (e) e.preventDefault();
   var input = document.getElementById('bb-directions-input');
   var origin = input ? input.value.trim() : '';
-  var destination = {{ visit.encoded_dest | tojson }};
-  
-  var mapsUrl = '';
-  if (origin) {
-    mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(origin) + '&destination=' + destination + '&travelmode=driving';
-  } else {
-    mapsUrl = 'https://www.google.com/maps/dir/?api=1&destination=' + destination;
+  if (!origin) {
+    origin = 'Current location';
   }
+  var destination = {{ visit.encoded_dest | tojson }};
+  var mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(origin) + '&destination=' + destination + '&travelmode=driving';
   window.open(mapsUrl, '_blank', 'noopener,noreferrer');
   return false;
 }
+
+function handleFallbackDirections() {
+  var destination = {{ visit.encoded_dest | tojson }};
+  var mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent('Current location') + '&destination=' + destination + '&travelmode=driving';
+  window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+}
+
+(function() {
+  var iframe = document.getElementById('bb-map-iframe');
+  var frameWrap = document.getElementById('bb-map-frame-wrap');
+  var fallback = document.getElementById('bb-map-fallback');
+  var bottomBar = document.getElementById('bb-map-bottom-bar');
+  var loaded = false;
+
+  function showFallback() {
+    if (loaded) return;
+    if (frameWrap) frameWrap.style.display = 'none';
+    if (fallback) fallback.style.display = 'flex';
+  }
+
+  // Exposed for tests
+  window.__showMapFallback = showFallback;
+
+  // 1. Check if browser is offline
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    showFallback();
+  }
+
+  // 2. Offline event
+  window.addEventListener('offline', function() {
+    if (!loaded) showFallback();
+  });
+
+  // 3. Iframe load / error events and timeout
+  if (iframe) {
+    iframe.addEventListener('load', function() {
+      loaded = true;
+    });
+
+    iframe.addEventListener('error', function() {
+      showFallback();
+    });
+
+    setTimeout(function() {
+      if (!loaded) {
+        showFallback();
+      }
+    }, 6000);
+  }
+})();
 </script>
 

@@ -14,7 +14,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 # Only these fields can be edited. Password hashes are never exposed.
 MODELS = {
-    'books': ('Books', 'books', 'title author collection age_group language price stock description image_path is_active archived audience'),
+    'books': ('Books', 'books', 'title author collection age_group language category price stock description image_path is_active archived audience'),
     'events': ('Events', 'events', 'title description event_date event_time location fee capacity is_online is_active'),
     'publications': ('Publications', 'publications', 'title kind description edition file_path published_on is_active download_count'),
     'pages': ('Website pages', 'cms_pages', 'slug title summary body is_active'),
@@ -68,7 +68,7 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
             CREATE TABLE IF NOT EXISTS site_settings (
                 id INTEGER PRIMARY KEY,
                 theme TEXT NOT NULL DEFAULT 'maroon',
-                font TEXT NOT NULL DEFAULT 'inter',
+                font TEXT NOT NULL DEFAULT 'fraunces_nunito',
                 custom_p TEXT NOT NULL DEFAULT '#7a1230',
                 custom_bg TEXT NOT NULL DEFAULT '#f7f8fc',
                 custom_card TEXT NOT NULL DEFAULT '#ffffff',
@@ -78,7 +78,7 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
         cols = [r[1] for r in get_db().execute("PRAGMA table_info(site_settings)").fetchall()]
         for col, default in [
             ('theme', "'maroon'"),
-            ('font', "'inter'"),
+            ('font', "'fraunces_nunito'"),
             ('custom_p', "'#7a1230'"),
             ('custom_bg', "'#f7f8fc'"),
             ('custom_card', "'#ffffff'"),
@@ -89,14 +89,14 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
         if not get_db().execute("SELECT id FROM site_settings WHERE id=1").fetchone():
             get_db().execute(
                 "INSERT INTO site_settings (id, theme, font, custom_p, custom_bg, custom_card, custom_tx) "
-                "VALUES (1, 'maroon', 'inter', '#7a1230', '#f7f8fc', '#ffffff', '#1a1a2e')"
+                "VALUES (1, 'maroon', 'fraunces_nunito', '#7a1230', '#f7f8fc', '#ffffff', '#1a1a2e')"
             )
         get_db().commit()
 
     @app.context_processor
     def appearance_context():
         theme = 'maroon'
-        font = 'inter'
+        font = 'fraunces_nunito'
         custom_p = '#7a1230'
         custom_bg = '#f7f8fc'
         custom_card = '#ffffff'
@@ -105,7 +105,7 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
             row = get_db().execute('SELECT theme, font, custom_p, custom_bg, custom_card, custom_tx FROM site_settings WHERE id=1').fetchone()
             if row:
                 theme = row['theme'] or 'maroon'
-                font = row['font'] or 'inter'
+                font = row['font'] or 'fraunces_nunito'
                 custom_p = row['custom_p'] or '#7a1230'
                 custom_bg = row['custom_bg'] or '#f7f8fc'
                 custom_card = row['custom_card'] or '#ffffff'
@@ -504,6 +504,31 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
                 except ValueError as exc:
                     errors.append(str(exc))
             if kind == 'books':
+                cats = request.form.getlist('category')
+                if cats:
+                    values['category'] = ', '.join([c.strip() for c in cats if c.strip()])
+                elif 'category' in request.form:
+                    values['category'] = request.form.get('category', '').strip()
+
+                try:
+                    from app.services.languages import parse_languages, sync_book_languages
+                except ImportError:
+                    from languages import parse_languages, sync_book_languages
+                raw_langs = request.form.getlist('language')
+                if raw_langs:
+                    parsed_l = []
+                    for rl in raw_langs:
+                        parsed_l.extend(parse_languages(rl))
+                    deduped_l = []
+                    seen_l = set()
+                    for pl in parsed_l:
+                        if pl.lower() not in seen_l:
+                            seen_l.add(pl.lower())
+                            deduped_l.append(pl)
+                    values['language'] = ', '.join(deduped_l) if deduped_l else 'English'
+                elif 'language' in request.form:
+                    parsed_l = parse_languages(request.form.get('language', ''))
+                    values['language'] = ', '.join(parsed_l) if parsed_l else 'English'
                 if not values.get('audience') or values.get('audience') not in {'all', 'kids', 'adult'}:
                     values['audience'] = 'all'
                 if values.get('stock') is None or values.get('stock') == '' or (not record_id and values.get('stock') == 0 and request.form.get('stock') is None):
@@ -586,6 +611,13 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
                                 insert_cols.append('thumbnail_path')
                                 insert_vals.append(get_or_create_thumbnail(values['image_path']))
                         get_db().execute('INSERT INTO '+table+' ('+','.join(insert_cols)+') VALUES ('+','.join('?' for _ in insert_cols)+')',insert_vals)
+                    if kind == 'books':
+                        try:
+                            from app.services.languages import sync_book_languages
+                        except ImportError:
+                            from languages import sync_book_languages
+                        saved_b_id = record_id or get_db().execute("SELECT last_insert_rowid()").fetchone()[0]
+                        sync_book_languages(get_db(), saved_b_id, values.get('language', 'English'))
                     if kind == 'pages' and values.get('slug') in {'about', 'contact'}:
                         # Dedicated page routes use site_content rather than
                         # cms_pages.body; never report a successful edit that
@@ -631,7 +663,12 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
         if kind in ('home-sections','homepage_sections'):
             options['section_key']=[('hero','Hero Section'),('community','Community & Events'),('publications','Publications'),('reviews','Reviews & Ratings'),('footer','Footer Details')]
         pass
-        return workspace('edit', options=options, title=('Edit ' if record_id else 'New ')+label, active=kind, fields=fields, record=record, record_id=record_id, errors=errors, long_fields=LONG, numbers=NUMBERS, bools=BOOLS, related=related)
+        try:
+            from app.services.languages import get_distinct_languages, parse_languages
+        except ImportError:
+            from languages import get_distinct_languages, parse_languages
+        distinct_languages = get_distinct_languages(get_db())
+        return workspace('edit', options=options, title=('Edit ' if record_id else 'New ')+label, active=kind, fields=fields, record=record, record_id=record_id, errors=errors, long_fields=LONG, numbers=NUMBERS, bools=BOOLS, related=related, distinct_languages=distinct_languages, parse_languages=parse_languages)
 
     @app.post('/admin/manage/<kind>/<int:record_id>/delete/')
     @guard
@@ -824,7 +861,7 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
         return workspace('password',title='Change password',active='password')
 
     ALLOWED_THEMES = {'maroon', 'navy', 'dark', 'custom'}
-    ALLOWED_FONTS = {'inter', 'playfair', 'poppins'}
+    ALLOWED_FONTS = {'fraunces_nunito', 'love_ya_like_a_sister', 'playfair', 'inter', 'poppins'}
     HEX_COLOR_RE = re.compile(r'^#[0-9a-fA-F]{6}$')
 
     DEFAULT_P = '#7a1230'
@@ -839,14 +876,14 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
             action = request.form.get('action', 'save')
             if action == 'reset':
                 theme = 'maroon'
-                font = 'inter'
+                font = 'fraunces_nunito'
                 custom_p = DEFAULT_P
                 custom_bg = DEFAULT_BG
                 custom_card = DEFAULT_CARD
                 custom_tx = DEFAULT_TX
             else:
                 theme = request.form.get('theme', 'maroon').strip().lower()
-                font = request.form.get('font', 'inter').strip().lower()
+                font = request.form.get('font', 'fraunces_nunito').strip().lower()
                 custom_p = request.form.get('custom_p', DEFAULT_P).strip()
                 custom_bg = request.form.get('custom_bg', DEFAULT_BG).strip()
                 custom_card = request.form.get('custom_card', DEFAULT_CARD).strip()
@@ -855,7 +892,7 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
                 if theme not in ALLOWED_THEMES:
                     theme = 'maroon'
                 if font not in ALLOWED_FONTS:
-                    font = 'inter'
+                    font = 'fraunces_nunito'
 
                 for color_name, val in [('Primary', custom_p), ('Background', custom_bg), ('Card', custom_card), ('Text', custom_tx)]:
                     if not HEX_COLOR_RE.match(val):
@@ -877,7 +914,7 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
             return redirect('/admin/appearance/')
 
         theme = 'maroon'
-        font = 'inter'
+        font = 'fraunces_nunito'
         custom_p = DEFAULT_P
         custom_bg = DEFAULT_BG
         custom_card = DEFAULT_CARD
@@ -886,7 +923,7 @@ def install_management(app, get_db, render_site, current_admin, base_dir):
             row = get_db().execute('SELECT theme, font, custom_p, custom_bg, custom_card, custom_tx FROM site_settings WHERE id=1').fetchone()
             if row:
                 theme = row['theme'] or 'maroon'
-                font = row['font'] or 'inter'
+                font = row['font'] or 'fraunces_nunito'
                 custom_p = row['custom_p'] or DEFAULT_P
                 custom_bg = row['custom_bg'] or DEFAULT_BG
                 custom_card = row['custom_card'] or DEFAULT_CARD

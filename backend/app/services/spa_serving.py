@@ -29,6 +29,12 @@ def install_spa_serving(app: Flask, base_dir: Path) -> None:
             return send_from_directory(str(frontend_dist), "vite.svg")
         return "Not found", 404
 
+    @app.route("/favicon.svg")
+    def serve_favicon_svg():
+        if (frontend_dist / "favicon.svg").exists():
+            return send_from_directory(str(frontend_dist), "favicon.svg")
+        return "Not found", 404
+
     def serve_spa_index():
         if not (frontend_dist / "index.html").exists():
             return "React frontend build not found. Run 'npm run build' in frontend/.", 404

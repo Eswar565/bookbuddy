@@ -98,6 +98,9 @@
 
   // 2. Safe Wishlist Access
   function getWishlist() {
+    if (window.BookBuddyFavs && typeof window.BookBuddyFavs.ids === 'function') {
+      return window.BookBuddyFavs.ids();
+    }
     if (hasLocalStorage) {
       try {
         var raw = window.localStorage.getItem(WISHLIST_KEY);
@@ -111,6 +114,10 @@
   }
 
   function saveWishlist(list) {
+    if (window.BookBuddyFavs && typeof window.BookBuddyFavs.render === 'function') {
+      window.BookBuddyFavs.render();
+      return;
+    }
     memoryWishlist = list.slice();
     if (hasLocalStorage) {
       try {
@@ -121,6 +128,10 @@
   }
 
   function toggleWishlist(bookId) {
+    if (window.BookBuddyFavs && typeof window.BookBuddyFavs.toggle === 'function') {
+      window.BookBuddyFavs.toggle(bookId);
+      return;
+    }
     var id = parseInt(bookId, 10);
     if (isNaN(id)) return;
     var list = getWishlist();
@@ -159,6 +170,10 @@
   }
 
   function updateWishlistUI() {
+    if (window.BookBuddyFavs && typeof window.BookBuddyFavs.render === 'function') {
+      window.BookBuddyFavs.render();
+      return;
+    }
     var list = getWishlist();
     var buttons = document.querySelectorAll('.js-wishlist-btn');
     buttons.forEach(function (btn) {
@@ -193,6 +208,10 @@
   }
 
   function syncWishlistFromServer() {
+    if (window.BookBuddyFavs && typeof window.BookBuddyFavs.hydrate === 'function') {
+      window.BookBuddyFavs.hydrate();
+      return;
+    }
     fetch('/api/v1/library/favourites/', { credentials: 'include' })
       .then(function(res) { return res.json(); })
       .then(function(data) {
@@ -326,12 +345,14 @@
       var checkIcon = btn.querySelector('.cart-check-icon');
 
       if (inCart) {
-        btn.classList.add('is-in-cart');
+        btn.classList.add('is-in-cart', 'book-card__action--added');
+        btn.classList.remove('book-card__action--add');
         btn.setAttribute('aria-pressed', 'true');
         if (checkIcon) checkIcon.style.display = 'inline-block';
         if (labelEl) labelEl.textContent = 'Added';
       } else {
-        btn.classList.remove('is-in-cart');
+        btn.classList.remove('is-in-cart', 'book-card__action--added');
+        btn.classList.add('book-card__action--add');
         btn.setAttribute('aria-pressed', 'false');
         if (checkIcon) checkIcon.style.display = 'none';
         if (labelEl) labelEl.textContent = 'Add';
@@ -482,12 +503,14 @@
     }
 
     // C. Wishlist heart toggle delegation
-    var wishBtn = e.target.closest('.js-wishlist-btn');
+    var wishBtn = e.target.closest('[data-fav-toggle], .js-wishlist-btn, .js-wishlist-toggle');
     if (wishBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-      var wishId = parseInt(wishBtn.dataset.bookId, 10);
-      toggleWishlist(wishId);
+      if (!window.BookBuddyFavs) {
+        e.preventDefault();
+        e.stopPropagation();
+        var wishId = parseInt(wishBtn.dataset.bookId || wishBtn.getAttribute('data-book-id'), 10);
+        toggleWishlist(wishId);
+      }
       return;
     }
 
@@ -672,16 +695,6 @@
     render();
     updateWishlistUI();
     syncWishlistFromServer();
-
-    // Mobile filter drawer toggle
-    var toggleBtn = document.getElementById('filter-drawer-toggle');
-    var sidebar = document.getElementById('catalogue-sidebar');
-    if (toggleBtn && sidebar) {
-      toggleBtn.addEventListener('click', function () {
-        var isOpen = sidebar.classList.toggle('is-open');
-        toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-      });
-    }
   });
 
   if (document.readyState !== 'loading') {

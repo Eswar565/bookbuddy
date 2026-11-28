@@ -64,6 +64,8 @@ export const BookCard: React.FC<BookCardProps> = ({
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
+        minWidth: 0,
+        boxSizing: 'border-box',
         position: 'relative',
         transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-bottom 0.18s ease',
         borderBottom: '3px solid transparent',
@@ -81,56 +83,67 @@ export const BookCard: React.FC<BookCardProps> = ({
       }}
     >
       {/* Cover Container */}
-      <Link
-        to={`/library/${book.id}`}
+      <div
         style={{
-          display: 'block',
           position: 'relative',
           width: '100%',
+          minWidth: 0,
+          boxSizing: 'border-box',
           aspectRatio: '3/4',
           maxHeight: '210px',
           backgroundColor: '#e1e6f0',
           borderRadius: '8px',
           overflow: 'hidden',
-          textDecoration: 'none',
         }}
       >
-        {coverUrl && !imageError ? (
-          <img
-            src={coverUrl.startsWith('/') ? coverUrl : `/${coverUrl}`}
-            alt={book.title}
-            loading="lazy"
-            onError={() => setImageError(true)}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              display: 'block',
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--navy, #0a2472)',
-              fontWeight: 800,
-              fontSize: '0.85rem',
-              letterSpacing: '0.5px',
-              textTransform: 'uppercase',
-            }}
-          >
-            No Cover
-          </div>
-        )}
+        <Link
+          to={`/library/${book.id}`}
+          style={{
+            display: 'block',
+            width: '100%',
+            height: '100%',
+            textDecoration: 'none',
+          }}
+        >
+          {coverUrl && !imageError ? (
+            <img
+              src={coverUrl.startsWith('/') ? coverUrl : `/${coverUrl}`}
+              alt={book.title}
+              loading="lazy"
+              onError={() => setImageError(true)}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--navy, #0a2472)',
+                fontWeight: 800,
+                fontSize: '0.85rem',
+                letterSpacing: '0.5px',
+                textTransform: 'uppercase',
+              }}
+            >
+              No Cover
+            </div>
+          )}
+        </Link>
 
-        {/* Wishlist Heart Button */}
+        {/* Wishlist Heart Button - outside <a> link */}
         <button
           onClick={handleHeartClick}
           type="button"
+          data-fav-toggle
+          data-book-id={book.id}
           aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           aria-pressed={isWishlisted}
           style={{
@@ -178,10 +191,10 @@ export const BookCard: React.FC<BookCardProps> = ({
             New
           </span>
         )}
-      </Link>
+      </div>
 
       {/* Meta: Title & Author */}
-      <div style={{ marginTop: '8px', marginBottom: '8px', flex: '0 0 auto' }}>
+      <div style={{ marginTop: '8px', marginBottom: '8px', flex: '0 0 auto', minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
         <Link
           to={`/library/${book.id}`}
           title={book.title}
@@ -194,6 +207,7 @@ export const BookCard: React.FC<BookCardProps> = ({
             textOverflow: 'ellipsis',
             overflow: 'hidden',
             textDecoration: 'none',
+            minWidth: 0,
           }}
         >
           {book.title}
@@ -207,97 +221,54 @@ export const BookCard: React.FC<BookCardProps> = ({
             textOverflow: 'ellipsis',
             overflow: 'hidden',
             marginTop: '2px',
+            minWidth: 0,
           }}
         >
           {book.author || 'Unknown Author'}
         </div>
       </div>
 
-      {/* Bottom Action Row (margin-top: auto ensures alignment) */}
-      <div
-        style={{
-          marginTop: 'auto',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '6px',
-          paddingTop: '6px',
-        }}
-      >
+      {/* Card footer (replace the current bottom row: stacked layout) */}
+      <div className="book-card__footer">
         {!isAvailable ? (
-          <span
-            style={{
-              width: '100%',
-              textAlign: 'center',
-              backgroundColor: '#f1f5f9',
-              color: '#64748b',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              padding: '6px 8px',
-              borderRadius: '6px',
-            }}
-          >
+          <span className="book-card__status book-card__status--unavailable">
             Unavailable
           </span>
         ) : isAlreadyLoaned ? (
-          <span
-            style={{
-              width: '100%',
-              textAlign: 'center',
-              backgroundColor: '#fef3c7',
-              color: '#92400e',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              padding: '6px 8px',
-              borderRadius: '6px',
-            }}
-          >
-            Requested
-          </span>
+          <>
+            <span className="book-card__status">
+              Available: {book.available_copies ?? 0}
+            </span>
+            <button
+              type="button"
+              disabled
+              className="book-card__action"
+              title="Already in your active requests or loans"
+            >
+              Active Request
+            </button>
+          </>
         ) : (
           <>
-            <span
-              style={{
-                backgroundColor: 'var(--navy, #0a2472)',
-                color: '#ffffff',
-                fontSize: '0.7rem',
-                fontWeight: 700,
-                padding: '3px 8px',
-                borderRadius: '12px',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Available: {book.available_copies}
+            <span className="book-card__status">
+              Available: {book.available_copies ?? 0}
             </span>
 
             <button
               onClick={handleAddClick}
               type="button"
+              className={`book-card__action ${inCart ? 'book-card__action--added' : 'book-card__action--add'}`}
               aria-label={inCart ? `Remove ${book.title} from cart` : `Add ${book.title} to cart`}
-              style={{
-                padding: '7px 14px',
-                minHeight: '34px',
-                borderRadius: '8px',
-                border: 'none',
-                backgroundColor: inCart ? '#059669' : 'var(--maroon, #7b1230)',
-                color: '#ffffff',
-                fontSize: '0.8rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                transition: 'background-color 0.15s ease',
-              }}
+              aria-pressed={inCart}
             >
               {inCart ? (
                 <>
-                  <Check size={14} />
+                  <Check size={14} strokeWidth={2.5} style={{ flexShrink: 0 }} />
                   <span>Added</span>
                 </>
               ) : (
                 <>
-                  <Plus size={14} />
+                  <Plus size={14} strokeWidth={2.5} style={{ flexShrink: 0 }} />
                   <span>Add</span>
                 </>
               )}

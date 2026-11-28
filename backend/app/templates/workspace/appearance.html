@@ -278,26 +278,25 @@
       </div>
 
       <div class="font-grid" role="radiogroup" aria-label="Typography">
-        <!-- Inter Card (Default) -->
-        <div class="font-card {% if current_font == 'inter' %}selected{% endif %}"
-             data-font-val="inter"
+        <!-- Fraunces + Nunito Card (Default) -->
+        <div class="font-card {% if current_font == 'fraunces_nunito' or not current_font %}selected{% endif %}"
+             data-font-val="fraunces_nunito"
              tabindex="0"
              role="radio"
-             aria-checked="{{ 'true' if current_font == 'inter' else 'false' }}">
+             aria-checked="{{ 'true' if current_font == 'fraunces_nunito' or not current_font else 'false' }}">
           <div class="card-status-badge">
             <svg class="bb-icon" aria-hidden="true" focusable="false"><use href="#i-check"/></svg>
           </div>
-          <div class="font-specimen" style="font-family: 'Inter', sans-serif;">
+          <div class="font-specimen" style="font-family: var(--font-heading);">
             <div class="font-big-aa">Aa</div>
             <div class="font-sample-weights">
-              <span style="font-weight: 400;">400 Regular</span> · 
-              <span style="font-weight: 600;">600 SemiBold</span> · 
-              <span style="font-weight: 700;">700 Bold</span>
+              <span style="font-family: var(--font-heading); font-weight: 700;">Fraunces 700</span> · 
+              <span style="font-family: var(--font-body); font-weight: 400;">Nunito 400</span>
             </div>
           </div>
           <div class="card-info">
-            <h3 class="font-name" style="font-family: 'Inter', sans-serif;">Inter <span class="tag-default">Default</span></h3>
-            <p class="font-desc">'Inter', sans-serif · Modern, legible grotesque crafted specifically for computer screens.</p>
+            <h3 class="font-name" style="font-family: var(--font-heading);">Fraunces &amp; Nunito <span class="tag-default">Default</span></h3>
+            <p class="font-desc">Fraunces serif headings + Nunito rounded sans-serif body &amp; UI components.</p>
           </div>
         </div>
 
@@ -443,9 +442,11 @@
   };
 
   var fontFamilies = {
-    inter: "'Inter', sans-serif",
-    playfair: "'Playfair Display', serif",
-    poppins: "'Poppins', sans-serif"
+    fraunces_nunito: "var(--font-body)",
+    love_ya_like_a_sister: "var(--font-body)",
+    inter: "var(--font-main)",
+    playfair: "var(--font-main)",
+    poppins: "var(--font-main)"
   };
 
   // WCAG 2.1 Contrast Calculation
@@ -667,7 +668,7 @@
       e.preventDefault();
       actionInput.value = 'reset';
       themeInput.value = 'maroon';
-      fontInput.value = 'inter';
+      fontInput.value = 'fraunces_nunito';
       pickerP.value = '#7a1230';
       pickerBg.value = '#f7f8fc';
       pickerCard.value = '#ffffff';
