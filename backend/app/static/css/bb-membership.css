@@ -19,7 +19,7 @@
   padding: 24px 0 48px;
   background-color: var(--surface-body, #fdfbf7);
   color: var(--ink, #111827);
-  font-family: 'Inter', var(--font-body, sans-serif);
+  font-family: var(--font-main);
 }
 
 .bb-mem-container {
@@ -31,7 +31,7 @@
 
 .bb-membership-title {
   margin: 0 0 16px 0;
-  font-family: var(--font-family, 'Inter', sans-serif);
+  font-family: var(--font-main);
   font-size: clamp(1.5rem, 2.5vw, 2rem);
   font-weight: 700;
   line-height: 1.2;

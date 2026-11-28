@@ -115,7 +115,7 @@ export const MembershipPage: React.FC = () => {
         <h1
           style={{
             margin: '0 0 16px 0',
-            fontFamily: "var(--font-family, 'Inter', sans-serif)",
+            fontFamily: 'var(--font-main)',
             fontSize: 'clamp(1.5rem, 2.5vw, 2rem)',
             fontWeight: 700,
             lineHeight: 1.2,

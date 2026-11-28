@@ -6,7 +6,7 @@
 .bb-visit-page {
   background-color: var(--surface-body, #f8fafc);
   color: var(--color-text, #061446);
-  font-family: var(--font-family, 'Inter', sans-serif) !important;
+  font-family: var(--font-main) !important;
   min-height: 60vh;
 }
 
@@ -46,7 +46,7 @@
 }
 
 .bb-visit-col-heading {
-  font-family: var(--font-family, 'Inter', sans-serif) !important;
+  font-family: var(--font-main) !important;
   font-size: 1.6rem;
   font-weight: 700;
   color: var(--navy, #061446);
@@ -106,7 +106,7 @@
 }
 
 .bb-visit-card-title {
-  font-family: var(--font-family, 'Inter', sans-serif) !important;
+  font-family: var(--font-main) !important;
   font-size: 1.125rem;
   font-weight: 700;
   color: var(--navy, #061446);
@@ -221,7 +221,7 @@
   font-size: 0.95rem;
   background: #ffffff;
   color: var(--color-text, #061446);
-  font-family: var(--font-family, 'Inter', sans-serif) !important;
+  font-family: var(--font-main) !important;
   font-weight: 500 !important;
   box-sizing: border-box;
   transition: border-color var(--transition-fast, 0.15s ease), box-shadow var(--transition-fast, 0.15s ease);
@@ -344,7 +344,7 @@
 }
 
 .bb-visit-fallback-title {
-  font-family: var(--font-family, 'Inter', sans-serif) !important;
+  font-family: var(--font-main) !important;
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--navy, #061446);
@@ -467,7 +467,7 @@
 }
 
 .bb-visit-tour-title {
-  font-family: var(--font-family, 'Inter', sans-serif) !important;
+  font-family: var(--font-main) !important;
   font-size: clamp(1.75rem, 3vw, 2.25rem);
   font-weight: 700;
   color: var(--navy, #061446);

@@ -24,7 +24,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type }) => {
   const info = META[type] || META.terms;
 
   return (
-    <main style={{ maxWidth: '840px', margin: '40px auto 60px', padding: '0 20px', fontFamily: 'var(--font-family, Inter, sans-serif)' }}>
+    <main style={{ maxWidth: '840px', margin: '40px auto 60px', padding: '0 20px', fontFamily: 'var(--font-main)' }}>
       <nav style={{ marginBottom: '20px', fontSize: '0.875rem' }}>
         <Link to="/" style={{ color: 'var(--navy-light, #0a2472)', textDecoration: 'none' }}>Home</Link>
         <span style={{ margin: '0 8px', color: '#94a3b8' }}>/</span>

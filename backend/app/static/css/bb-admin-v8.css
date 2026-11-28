@@ -10,7 +10,7 @@ body.folio-admin {
   padding-top: 0 !important;
   background-color: var(--tint-lavender, #f5f6fa) !important;
   color: var(--ink, #111827) !important;
-  font-family: var(--font-body, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif) !important;
+  font-family: var(--font-main) !important;
   font-size: calc(15px * var(--bb-scale, 1.08)) !important;
   line-height: 1.6 !important;
   -webkit-font-smoothing: antialiased;
@@ -23,7 +23,7 @@ body.folio-admin * {
 
 /* Headings in Admin */
 body.folio-admin :is(h1, h2, h3, h4, h5, h6) {
-  font-family: var(--font-heading, 'Hind', Inter, sans-serif) !important;
+  font-family: var(--font-main) !important;
   color: var(--navy, #061446) !important;
   font-weight: 700 !important;
   letter-spacing: -0.01em !important;
@@ -585,7 +585,7 @@ body.folio-admin textarea {
   border-radius: 10px !important;
   padding: 10px 14px !important;
   font-size: 15px !important;
-  font-family: var(--font-body, 'Inter', sans-serif) !important;
+  font-family: var(--font-main) !important;
   color: var(--ink, #111827) !important;
   background-color: #ffffff !important;
   min-height: 42px;

@@ -34,7 +34,7 @@
   display: inline-block;
   background: #eef2fb;
   color: #061446;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-main);
   font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
@@ -45,7 +45,7 @@
 }
 
 .bb-media-title {
-  font-family: 'Hind', sans-serif;
+  font-family: var(--font-main);
   font-size: 2.25rem;
   font-weight: 700;
   color: #061446;
@@ -58,7 +58,7 @@
 }
 
 .bb-media-subtitle {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-main);
   font-size: 1rem;
   color: #475569;
   max-width: 480px;
@@ -121,7 +121,7 @@
 
 .bb-newspaper-vol {
   color: #740f28;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-main);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -129,7 +129,7 @@
 }
 
 .bb-newspaper-heading {
-  font-family: 'Hind', sans-serif;
+  font-family: var(--font-main);
   font-size: 1.6rem;
   font-weight: 700;
   color: #061446;
@@ -144,7 +144,7 @@
 }
 
 .bb-newspaper-desc {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-main);
   font-size: 0.95rem;
   line-height: 1.65;
   color: #334155;
@@ -187,7 +187,7 @@
 .bb-btn-primary-maroon {
   background: #740f28;
   color: #ffffff !important;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-main);
   font-size: 14px;
   font-weight: 600;
   padding: 10px 18px;
@@ -220,7 +220,7 @@
 .bb-btn-outline {
   background: transparent;
   color: #061446;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-main);
   font-size: 14px;
   font-weight: 600;
   padding: 10px 18px;
@@ -283,7 +283,7 @@
   gap: 10px;
   width: 100%;
   padding: 8px 12px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-main);
   font-size: 13px;
   font-weight: 500;
   color: #061446;
@@ -342,7 +342,7 @@
 }
 
 .bb-magazine-card-title {
-  font-family: 'Hind', sans-serif;
+  font-family: var(--font-main);
   font-size: 1.25rem;
   font-weight: 700;
   color: #061446;
@@ -358,7 +358,7 @@
 .bb-mag-badge {
   background: #740f28;
   color: #ffffff;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-main);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -444,7 +444,7 @@
 }
 
 .bb-magazine-cta-title {
-  font-family: 'Hind', sans-serif;
+  font-family: var(--font-main);
   font-size: 1.75rem;
   font-weight: 700;
   color: #061446;
@@ -452,7 +452,7 @@
 }
 
 .bb-magazine-cta-desc {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-main);
   font-size: 1rem;
   line-height: 1.6;
   color: #475569;
@@ -498,7 +498,7 @@
 
 .bb-podcast-label {
   color: #740f28;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-main);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -506,7 +506,7 @@
 }
 
 .bb-podcast-title {
-  font-family: 'Hind', sans-serif;
+  font-family: var(--font-main);
   font-size: 1.15rem;
   font-weight: 700;
   color: #061446;
@@ -547,7 +547,7 @@
   right: 24px;
   background: #061446;
   color: #ffffff;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-main);
   font-size: 14px;
   font-weight: 600;
   padding: 12px 20px;

@@ -74,13 +74,13 @@
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
 
   /* Typography Fonts */
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-heading: 'Hind', Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: var(--font-main);
+  --font-heading: var(--font-main);
 
   /* Typography Scale and Weights */
-  --bb-scale: 1.08;
-  --bb-weight-body: 700;
-  --bb-weight-strong: 800;
+  --bb-scale: 1;
+  --bb-weight-body: 400;
+  --bb-weight-strong: 700;
 }
 
 /* Demo Site Notice Banner */
@@ -88,7 +88,7 @@
   background: #fff3cd;
   color: #664d03;
   border-bottom: 1px solid #ffe69c;
-  font-family: var(--font-body, 'Inter', sans-serif);
+  font-family: var(--font-main);
   font-size: 13px;
   font-weight: 600;
   padding: 6px 16px;

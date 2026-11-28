@@ -126,16 +126,10 @@
 
 /* --- 2. Fonts on :root via [data-font] --- */
 :root,
-[data-font="inter"] {
-  --ft: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-[data-font="playfair"] {
-  --ft: 'Playfair Display', Georgia, 'Times New Roman', serif;
-}
-
+[data-font="inter"],
+[data-font="playfair"],
 [data-font="poppins"] {
-  --ft: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ft: var(--font-main);
 }
 
 /* --- 3. Global CSS Refactoring to use Variables --- */

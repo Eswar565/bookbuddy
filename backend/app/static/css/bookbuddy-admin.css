@@ -1,8 +1,8 @@
 /* Book Buddy 12: quiet, full-width back-office interface. */
 :root{--primaryColor:#7A1636;--secondaryColor:#7A1636;--line:#e3e9ed;--muted:#637585;--ink:#2A1A20;--accent:#7A1636}
 *{box-sizing:border-box}
-body{background:#f4f7f9!important;color:#1a3544!important;font:14px/1.65 'Inter',system-ui,-apple-system,'Segoe UI',Arial,sans-serif!important}
-h1,h2,h3,h4,h5,h6{font-family:'Lora','Inter',system-ui,sans-serif!important;color:#7A1636;letter-spacing:-.025em}
+body{background:#f4f7f9!important;color:#1a3544!important;font:14px/1.65 var(--font-main)!important}
+h1,h2,h3,h4,h5,h6{font-family:var(--font-main)!important;color:#7A1636;letter-spacing:-.01em}
 .workspace{grid-template-columns:clamp(245px,19vw,286px) minmax(0,1fr)!important;width:100%;background:#f4f7f9}
 .sidebar{border:0!important;border-right:1px solid #e3e9ed!important;background:#fff!important;padding:28px 16px!important;box-shadow:none!important}
 .sidebar>a,.sidebar details a,.sidebar summary{border:0!important;border-radius:9px!important;padding:10px 14px!important;color:#364d5b!important;font-weight:600;font-size:calc(13px * var(--bb-scale))!important;line-height:1.55}
