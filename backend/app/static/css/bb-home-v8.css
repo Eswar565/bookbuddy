@@ -1589,7 +1589,7 @@ body.bookbuddy-modern.folio :is(.surface-dark, .bb8-footer) a:not([class*="btn"]
 }
 
 .bb8-borrow-title {
-  font-family: var(--font-heading, "Playfair Display", Georgia, serif);
+  font-family: var(--font-main);
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--navy, #0b1f6b);
@@ -1627,7 +1627,7 @@ body.bookbuddy-modern.folio :is(.surface-dark, .bb8-footer) a:not([class*="btn"]
 }
 
 .bb8-borrow-block-title {
-  font-family: var(--font-heading, "Playfair Display", Georgia, serif);
+  font-family: var(--font-main);
   font-size: 1.45rem;
   font-weight: 700;
   color: var(--navy, #0b1f6b);
@@ -1690,7 +1690,7 @@ body.bookbuddy-modern.folio :is(.surface-dark, .bb8-footer) a:not([class*="btn"]
 }
 
 .bb8-borrow-card-title {
-  font-family: var(--font-heading, "Playfair Display", Georgia, serif);
+  font-family: var(--font-main);
   font-size: 1.4rem;
   font-weight: 700;
   color: var(--navy, #0b1f6b);

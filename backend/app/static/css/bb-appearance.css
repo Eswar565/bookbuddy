@@ -1,3 +1,4 @@
+html { font-synthesis: none !important; -webkit-font-synthesis: none !important; }
 /* ============================================================
    Book Buddy - Site-Wide Appearance: Themes & Fonts
    ============================================================ */
@@ -128,6 +129,7 @@
 :root,
 [data-font="inter"],
 [data-font="playfair"],
+[data-font="love_ya_like_a_sister"],
 [data-font="poppins"] {
   --ft: var(--font-main);
 }

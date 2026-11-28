@@ -33,9 +33,9 @@ body:has(.workspace) :is(button,a,input,select,textarea,summary):focus-visible{o
 .bb30-bulk{max-width:1250px;margin:auto;display:grid;gap:20px}
 .bb30-bulk-intro{display:flex;justify-content:space-between;gap:22px;align-items:center}
 .bb30-bulk-intro>div{max-width:800px}.bb30-bulk-intro h2{font-size:clamp(calc(23px * var(--bb-scale)),2.2vw,calc(31px * var(--bb-scale)))!important;margin:5px 0 10px!important}
-.bb30-kicker,.bb30-step{font-size:calc(11px * var(--bb-scale));letter-spacing:.12em;color:var(--bb30-blue);font-weight:800}
+.bb30-kicker,.bb30-step{font-size:calc(11px * var(--bb-scale));letter-spacing:.12em;color:var(--bb30-blue);font-weight: 400}
 .bb30-filter{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:16px 20px;border:1px solid var(--bb30-border);background:#fff;border-radius:13px}
-.bb30-filter label{margin:0}.bb30-filter select{max-width:320px;min-width:230px;margin:0}.bb30-count{color:#35465c;font-weight:700;margin-left:auto}
+.bb30-filter label{margin:0}.bb30-filter select{max-width:320px;min-width:230px;margin:0}.bb30-count{color:#35465c;font-weight: 400;margin-left:auto}
 .bb30-bulk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
 .admin-content .bb30-box{padding:clamp(20px,2.5vw,29px)!important;background:#fff;border:1px solid var(--bb30-border)!important;border-radius:15px!important;min-width:0}
 .bb30-box h3{font-size:calc(20px * var(--bb-scale))!important;margin:9px 0 13px!important}.bb30-box p{max-width:790px;line-height:1.7}
